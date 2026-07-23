@@ -1,0 +1,6 @@
+# Normalize line endings so the CPU-only environment (CRLF) and compute host don't churn diffs.
+* text=auto eol=lf
+*.png binary
+*.bin binary
+*.parquet binary
+*.memmap binary

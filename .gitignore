@@ -1,0 +1,24 @@
+# Big intermediates live in data/ (compute host only) — never committed.
+/data/
+!/data/.gitkeep
+
+# Model / HF caches, memmaps
+*.memmap
+*.safetensors
+.cache/
+hf_cache/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+.ipynb_checkpoints/
+
+# artifacts/ IS committed (small: region-series parquet, map export, forecast JSON,
+# validation report). Only exclude anything accidentally large that lands there.
+/artifacts/*.memmap
+/artifacts/embeddings*
