@@ -1,0 +1,532 @@
+{
+  "synthetic": false,
+  "n": 149994,
+  "bbox": [
+    -5.929306983947754,
+    -1.6884636878967285,
+    13.549713134765625,
+    12.590993881225586
+  ],
+  "year0": 2007,
+  "year1": 2026,
+  "noise_color": "#3a3a3a",
+  "clusters": [
+    {
+      "id": 0,
+      "label": "pose, depth, scene",
+      "trend": "steady",
+      "color": "#e55757",
+      "cx": 5.673,
+      "cy": 10.276
+    },
+    {
+      "id": 1,
+      "label": "object, detection, tracking",
+      "trend": "declining",
+      "color": "#e56457",
+      "cx": 6.301,
+      "cy": 10.304
+    },
+    {
+      "id": 2,
+      "label": "generation, diffusion, generative",
+      "trend": "emerging",
+      "color": "#e57157",
+      "cx": 4.999,
+      "cy": 10.772
+    },
+    {
+      "id": 3,
+      "label": "visual, video, image",
+      "trend": "steady",
+      "color": "#e57f57",
+      "cx": 4.67,
+      "cy": 10.511
+    },
+    {
+      "id": 4,
+      "label": "speech, audio, speaker",
+      "trend": "declining",
+      "color": "#e58c57",
+      "cx": 3.264,
+      "cy": 11.554
+    },
+    {
+      "id": 5,
+      "label": "neural, learning, networks",
+      "trend": "steady",
+      "color": "#e59957",
+      "cx": 3.508,
+      "cy": 7.978
+    },
+    {
+      "id": 6,
+      "label": "neural, spiking, networks",
+      "trend": "steady",
+      "color": "#e5a757",
+      "cx": 7.038,
+      "cy": 4.437
+    },
+    {
+      "id": 7,
+      "label": "eeg, brain, data",
+      "trend": "declining",
+      "color": "#e5b457",
+      "cx": 5.688,
+      "cy": 8.944
+    },
+    {
+      "id": 8,
+      "label": "segmentation, medical, images",
+      "trend": "declining",
+      "color": "#e5c157",
+      "cx": 8.065,
+      "cy": 10.816
+    },
+    {
+      "id": 9,
+      "label": "image, images, video",
+      "trend": "declining",
+      "color": "#e5cf57",
+      "cx": 6.492,
+      "cy": 10.856
+    },
+    {
+      "id": 10,
+      "label": "graph, recommendation, user",
+      "trend": "declining",
+      "color": "#e5dc57",
+      "cx": 2.376,
+      "cy": 7.583
+    },
+    {
+      "id": 11,
+      "label": "language, models, llms",
+      "trend": "emerging",
+      "color": "#e1e557",
+      "cx": 3.483,
+      "cy": 8.148
+    },
+    {
+      "id": 12,
+      "label": "language, llms, models",
+      "trend": "steady",
+      "color": "#d3e557",
+      "cx": 3.184,
+      "cy": 9.373
+    },
+    {
+      "id": 13,
+      "label": "social, research, media",
+      "trend": "declining",
+      "color": "#c6e557",
+      "cx": 4.448,
+      "cy": 7.002
+    },
+    {
+      "id": 14,
+      "label": "students, human, design",
+      "trend": "emerging",
+      "color": "#b9e557",
+      "cx": 4.454,
+      "cy": 8.928
+    },
+    {
+      "id": 15,
+      "label": "systems, safety, agents",
+      "trend": "emerging",
+      "color": "#abe557",
+      "cx": 5.743,
+      "cy": 7.226
+    },
+    {
+      "id": 16,
+      "label": "code, software, reasoning",
+      "trend": "emerging",
+      "color": "#9ee557",
+      "cx": 5.677,
+      "cy": 5.296
+    },
+    {
+      "id": 17,
+      "label": "logic, automata, semantics",
+      "trend": "steady",
+      "color": "#91e557",
+      "cx": 4.882,
+      "cy": 6.801
+    },
+    {
+      "id": 18,
+      "label": "query, data, queries",
+      "trend": "steady",
+      "color": "#83e557",
+      "cx": 4.171,
+      "cy": 7.015
+    },
+    {
+      "id": 19,
+      "label": "channel, wireless, communication",
+      "trend": "steady",
+      "color": "#76e557",
+      "cx": 8.51,
+      "cy": 7.189
+    },
+    {
+      "id": 20,
+      "label": "power, grid, energy",
+      "trend": "steady",
+      "color": "#68e557",
+      "cx": 6.408,
+      "cy": 6.529
+    },
+    {
+      "id": 21,
+      "label": "network, wireless, networks",
+      "trend": "declining",
+      "color": "#5be557",
+      "cx": 7.423,
+      "cy": 7.067
+    },
+    {
+      "id": 22,
+      "label": "adversarial, attacks, attack",
+      "trend": "declining",
+      "color": "#57e560",
+      "cx": 8.558,
+      "cy": 0.89
+    },
+    {
+      "id": 23,
+      "label": "privacy, federated, learning",
+      "trend": "declining",
+      "color": "#57e56d",
+      "cx": 7.866,
+      "cy": 0.341
+    },
+    {
+      "id": 24,
+      "label": "performance, memory, computing",
+      "trend": "emerging",
+      "color": "#57e57a",
+      "cx": 7.054,
+      "cy": 3.645
+    },
+    {
+      "id": 25,
+      "label": "security, blockchain, attacks",
+      "trend": "emerging",
+      "color": "#57e588",
+      "cx": 8.142,
+      "cy": 1.471
+    },
+    {
+      "id": 26,
+      "label": "reinforcement, learning, policy",
+      "trend": "emerging",
+      "color": "#57e595",
+      "cx": 5.51,
+      "cy": 8.979
+    },
+    {
+      "id": 27,
+      "label": "robot, robots, robotic",
+      "trend": "steady",
+      "color": "#57e5a2",
+      "cx": 6.484,
+      "cy": 8.993
+    },
+    {
+      "id": 28,
+      "label": "control, systems, problem",
+      "trend": "steady",
+      "color": "#57e5b0",
+      "cx": 6.514,
+      "cy": 7.35
+    },
+    {
+      "id": 29,
+      "label": "networks, random, network",
+      "trend": "steady",
+      "color": "#57e5bd",
+      "cx": 4.552,
+      "cy": 3.973
+    },
+    {
+      "id": 30,
+      "label": "problem, algorithm, algorithms",
+      "trend": "steady",
+      "color": "#57e5ca",
+      "cx": 5.063,
+      "cy": 5.105
+    },
+    {
+      "id": 31,
+      "label": "causal, treatment, data",
+      "trend": "steady",
+      "color": "#57e5d8",
+      "cx": 3.855,
+      "cy": 6.261
+    },
+    {
+      "id": 32,
+      "label": "clinical, medical, data",
+      "trend": "emerging",
+      "color": "#57e5e5",
+      "cx": 3.533,
+      "cy": 7.207
+    },
+    {
+      "id": 33,
+      "label": "learning, data, convergence",
+      "trend": "emerging",
+      "color": "#57d8e5",
+      "cx": 4.011,
+      "cy": 6.087
+    },
+    {
+      "id": 34,
+      "label": "data, forecasting, series",
+      "trend": "steady",
+      "color": "#57cae5",
+      "cx": 4.858,
+      "cy": 6.074
+    },
+    {
+      "id": 35,
+      "label": "simulations, mass, star",
+      "trend": "steady",
+      "color": "#57bde5",
+      "cx": -2.171,
+      "cy": 6.026
+    },
+    {
+      "id": 36,
+      "label": "gravitational, galaxy, cosmological",
+      "trend": "steady",
+      "color": "#57b0e5",
+      "cx": 1.317,
+      "cy": 4.361
+    },
+    {
+      "id": 37,
+      "label": "galaxies, stars, stellar",
+      "trend": "declining",
+      "color": "#57a2e5",
+      "cx": -3.477,
+      "cy": 7.328
+    },
+    {
+      "id": 38,
+      "label": "solar, observations, x-ray",
+      "trend": "declining",
+      "color": "#5795e5",
+      "cx": -3.197,
+      "cy": 6.144
+    },
+    {
+      "id": 39,
+      "label": "theory, gauge, theories",
+      "trend": "steady",
+      "color": "#5788e5",
+      "cx": 1.204,
+      "cy": 1.979
+    },
+    {
+      "id": 40,
+      "label": "black, gravity, hole",
+      "trend": "declining",
+      "color": "#577ae5",
+      "cx": 0.606,
+      "cy": 3.245
+    },
+    {
+      "id": 41,
+      "label": "curvature, manifolds, manifold",
+      "trend": "steady",
+      "color": "#576de5",
+      "cx": 3.489,
+      "cy": 1.255
+    },
+    {
+      "id": 42,
+      "label": "equation, solutions, equations",
+      "trend": "declining",
+      "color": "#5760e5",
+      "cx": 5.268,
+      "cy": 2.622
+    },
+    {
+      "id": 43,
+      "label": "spaces, functions, mathbb",
+      "trend": "steady",
+      "color": "#5b57e5",
+      "cx": 4.56,
+      "cy": 1.848
+    },
+    {
+      "id": 44,
+      "label": "algebras, algebra, group",
+      "trend": "steady",
+      "color": "#6857e5",
+      "cx": 3.103,
+      "cy": -0.251
+    },
+    {
+      "id": 45,
+      "label": "graphs, graph, vertices",
+      "trend": "steady",
+      "color": "#7657e5",
+      "cx": 5.231,
+      "cy": -0.863
+    },
+    {
+      "id": 46,
+      "label": "mathbb, codes, groups",
+      "trend": "steady",
+      "color": "#8357e5",
+      "cx": 4.443,
+      "cy": 0.066
+    },
+    {
+      "id": 47,
+      "label": "laser, beam, plasma",
+      "trend": "declining",
+      "color": "#9157e5",
+      "cx": 9.781,
+      "cy": 4.721
+    },
+    {
+      "id": 48,
+      "label": "optical, graphene, surface",
+      "trend": "declining",
+      "color": "#9e57e5",
+      "cx": 11.377,
+      "cy": 4.934
+    },
+    {
+      "id": 49,
+      "label": "topological, spin, magnetic",
+      "trend": "declining",
+      "color": "#ab57e5",
+      "cx": 11.43,
+      "cy": 3.442
+    },
+    {
+      "id": 50,
+      "label": "magnetic, spin, temperature",
+      "trend": "declining",
+      "color": "#b957e5",
+      "cx": 12.395,
+      "cy": 3.636
+    },
+    {
+      "id": 51,
+      "label": "sparse, signal, reconstruction",
+      "trend": "steady",
+      "color": "#c657e5",
+      "cx": 5.884,
+      "cy": 6.824
+    },
+    {
+      "id": 52,
+      "label": "method, numerical, neural",
+      "trend": "steady",
+      "color": "#d357e5",
+      "cx": 6.839,
+      "cy": 5.112
+    },
+    {
+      "id": 53,
+      "label": "dynamics, simulations, flow",
+      "trend": "steady",
+      "color": "#e157e5",
+      "cx": 8.317,
+      "cy": 4.221
+    },
+    {
+      "id": 54,
+      "label": "equations, flow, equation",
+      "trend": "declining",
+      "color": "#e557dc",
+      "cx": 6.591,
+      "cy": 3.414
+    },
+    {
+      "id": 55,
+      "label": "stochastic, dynamics, model",
+      "trend": "steady",
+      "color": "#e557cf",
+      "cx": 5.889,
+      "cy": 4.306
+    },
+    {
+      "id": 56,
+      "label": "detector, collisions, gev",
+      "trend": "declining",
+      "color": "#e557c1",
+      "cx": -2.101,
+      "cy": 2.86
+    },
+    {
+      "id": 57,
+      "label": "dark, neutrino, matter",
+      "trend": "declining",
+      "color": "#e557b4",
+      "cx": -1.36,
+      "cy": 3.258
+    },
+    {
+      "id": 58,
+      "label": "qcd, bar, quark",
+      "trend": "declining",
+      "color": "#e557a7",
+      "cx": -0.91,
+      "cy": 2.023
+    },
+    {
+      "id": 59,
+      "label": "quantum, optical, photon",
+      "trend": "steady",
+      "color": "#e55799",
+      "cx": 10.285,
+      "cy": 4.976
+    },
+    {
+      "id": 60,
+      "label": "quantum, states, entanglement",
+      "trend": "steady",
+      "color": "#e5578c",
+      "cx": 8.594,
+      "cy": 4.994
+    },
+    {
+      "id": 61,
+      "label": "quantum, states, phase",
+      "trend": "steady",
+      "color": "#e5577f",
+      "cx": 8.66,
+      "cy": 3.468
+    },
+    {
+      "id": 62,
+      "label": "collisions, nuclear, matter",
+      "trend": "declining",
+      "color": "#e55771",
+      "cx": 1.795,
+      "cy": 2.11
+    },
+    {
+      "id": 63,
+      "label": "nuclear, nuclei, calculations",
+      "trend": "declining",
+      "color": "#e55764",
+      "cx": 9.612,
+      "cy": 3.207
+    }
+  ],
+  "files": {
+    "points": "points.bin",
+    "cluster": "cluster.bin",
+    "year": "year.bin"
+  }
+}

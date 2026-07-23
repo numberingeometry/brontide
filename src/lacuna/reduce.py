@@ -146,6 +146,60 @@ def run_pca(sample: int | None = None,
 def run_umap(sample: int | None = None,
              pca_memmap: Path = config.PCA_MEMMAP,
              out: Path = config.UMAP_MEMMAP) -> Path:
-    """UMAP ``PCA_DIM``→2, sample-fit + transform-rest. Display only. Returns memmap."""
-    # TODO: umap.UMAP(n_components=2).fit(sample of PCA); .transform(all) in chunks.
-    raise NotImplementedError("reduce.run_umap")
+    """UMAP ``PCA_DIM``→2, sample-fit + transform-rest. Display only. Returns memmap.
+
+    Display-only (the metric space is PCA-50; this is just the map). On this 16 GB
+    box the ~7.4 GB spectral-init peak is the pipeline's RAM ceiling AND a silent-
+    failure hotspot (umap catches ArpackError and quietly returns a random layout),
+    so init="random" is used deliberately — lower, predictable RAM; UMAP's SGD
+    recovers structure regardless for a static v1 map. Fit on a super-region-
+    stratified ``UMAP_FIT_SAMPLE``; ``transform`` the rest in chunks.
+    """
+    import umap
+
+    meta = json.loads((pca_memmap.with_suffix(pca_memmap.suffix + ".meta.json")).read_text())
+    n = int(meta["n"]) if sample is None else min(sample, int(meta["n"]))
+    pca = np.memmap(pca_memmap, dtype=np.float32, mode="r", shape=(int(meta["n"]), config.PCA_DIM))
+
+    # super-region-stratified fit sample (proportional; structural fidelity for the map)
+    labels = np.load(config.ARTIFACTS_DIR / "region_labels.i16.npy").astype(np.int32)[:n]
+    super_of_region = np.load(config.ARTIFACTS_DIR / "super_region.i16.npy").astype(np.int32)
+    paper_super = super_of_region[labels]
+    rng = np.random.default_rng(0)
+    n_fit = min(config.UMAP_FIT_SAMPLE, n)
+    picks = []
+    for s in range(config.N_SUPERREGIONS):
+        idx = np.where(paper_super == s)[0]
+        if idx.size == 0:
+            continue
+        take = max(1, round(n_fit * idx.size / n))
+        picks.append(rng.choice(idx, min(take, idx.size), replace=False))
+    fit_idx = np.sort(np.concatenate(picks))
+    x_fit = np.asarray(pca[fit_idx], dtype=np.float32)
+
+    t0 = time.perf_counter()
+    reducer = umap.UMAP(n_components=2, n_neighbors=15, min_dist=0.1,
+                        metric="euclidean", init="random", low_memory=True, verbose=True)
+    reducer.fit(x_fit)
+    fit_s = time.perf_counter() - t0
+
+    tmp = out.with_suffix(out.suffix + ".tmp")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    outmm = np.memmap(tmp, dtype=np.float32, mode="w+", shape=(n, 2))
+    CH = 100_000
+    for lo in range(0, n, CH):
+        hi = min(lo + CH, n)
+        outmm[lo:hi] = reducer.transform(np.asarray(pca[lo:hi], dtype=np.float32)).astype(np.float32)
+    outmm.flush()
+    del outmm
+    os.replace(tmp, out)
+
+    (out.with_suffix(out.suffix + ".meta.json")).write_text(json.dumps({
+        "n": int(n), "dim": 2, "dtype": "float32", "init": "random",
+        "fit_sample": int(fit_idx.size), "stratified_by": "super_region",
+        "expected_bytes": int(n) * 2 * 4,
+    }, indent=2))
+    print(f"\nreduce.run_umap[{config.resolve_sample(sample)}] -> {out}\n"
+          f"  shape/dtype : ({n:,}, 2) float32   fit_sample={fit_idx.size:,} (stratified)\n"
+          f"  timing      : fit {fit_s:.0f}s, total {time.perf_counter() - t0:.0f}s")
+    return out
