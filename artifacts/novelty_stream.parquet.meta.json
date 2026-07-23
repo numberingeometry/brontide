@@ -1,0 +1,9 @@
+{
+  "cutoff_T0": "2026-06",
+  "leak_status": "display_only_vs_final_map",
+  "tau": 6.674938569309068,
+  "novelty_fit_quantile": 0.99,
+  "n_months": 234,
+  "rows": 15210,
+  "note": "run A: centroids see all data -> novelty vs final frozen map; show leading-edge, not 2007->2026 curve"
+}

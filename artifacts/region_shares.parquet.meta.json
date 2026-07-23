@@ -1,0 +1,16 @@
+{
+  "cutoff_T0": "2026-06",
+  "n_months": 234,
+  "months": "2007-01..2026-06",
+  "K": 1024,
+  "kappa": 3.147960961354892,
+  "add_alpha": 1.0,
+  "weight_w_min": 0.8578667821002736,
+  "weight_w_median": 0.9879456804879256,
+  "weight_w_max": 0.9985672512651458,
+  "trailing12m_count_min": 19.0,
+  "trailing12m_median": 258.0,
+  "eb_shrink_target": "super_region_per_region_mean",
+  "eb_shrink_weight": "region_trailing12m",
+  "eb_kappa_estimator": "dirichlet_multinomial_mom"
+}
