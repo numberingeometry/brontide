@@ -1,0 +1,1666 @@
+{
+  "0": {
+    "terms": [
+      "pose",
+      "depth",
+      "scene",
+      "reconstruction",
+      "rendering",
+      "estimation",
+      "images",
+      "image",
+      "scenes",
+      "methods",
+      "shape",
+      "camera",
+      "human",
+      "novel",
+      "object"
+    ],
+    "sample_titles": [
+      "3D Gaussian Splatting: Survey, Technologies, Challenges, and Opportunities",
+      "Superpoint Gaussian Splatting for Real-Time High-Fidelity Dynamic Scene Reconstruction",
+      "Attention-based 3D Object Reconstruction from a Single Image",
+      "Unbiased 4D: Monocular 4D Reconstruction with a Neural Deformation Model"
+    ],
+    "n_papers": 21347
+  },
+  "1": {
+    "terms": [
+      "object",
+      "detection",
+      "tracking",
+      "point",
+      "lidar",
+      "dataset",
+      "objects",
+      "feature",
+      "segmentation",
+      "images",
+      "features",
+      "camera",
+      "methods",
+      "semantic",
+      "performance"
+    ],
+    "sample_titles": [
+      "The NEOLIX Open Dataset for Autonomous Driving",
+      "Distortion-Adaptive Grape Bunch Counting for Omnidirectional Images",
+      "TP-MVCC: Tri-plane Multi-view Fusion Model for Silkie Chicken Counting",
+      "Tackling Clutter in Radar Data -- Label Generation and Detection Using PointNet++"
+    ],
+    "n_papers": 24543
+  },
+  "2": {
+    "terms": [
+      "generation",
+      "diffusion",
+      "generative",
+      "image",
+      "models",
+      "video",
+      "latent",
+      "images",
+      "training",
+      "style",
+      "editing",
+      "model",
+      "motion",
+      "quality",
+      "propose"
+    ],
+    "sample_titles": [
+      "Benefiting Deep Latent Variable Models via Learning the Prior and Removing Latent Regularization",
+      "Manifold Preserving Guided Diffusion",
+      "MADI: Masking-Augmented Diffusion with Inference-Time Scaling for Visual Editing",
+      "HelloMeme: Integrating Spatial Knitting Attentions to Embed High-Level and Fidelity-Rich Conditions in Diffusion Models"
+    ],
+    "n_papers": 20036
+  },
+  "3": {
+    "terms": [
+      "visual",
+      "video",
+      "image",
+      "recognition",
+      "models",
+      "images",
+      "semantic",
+      "learning",
+      "segmentation",
+      "multimodal",
+      "tasks",
+      "dataset",
+      "performance",
+      "datasets",
+      "propose"
+    ],
+    "sample_titles": [
+      "Revisiting Image Manipulation Localization under Realistic Manipulation Scenarios",
+      "Alterbute: Editing Intrinsic Attributes of Objects in Images",
+      "Describing Differences in Image Sets with Natural Language",
+      "Targeted Therapy in Data Removal: Object Unlearning Based on Scene Graphs"
+    ],
+    "n_papers": 51752
+  },
+  "4": {
+    "terms": [
+      "speech",
+      "audio",
+      "speaker",
+      "recognition",
+      "asr",
+      "music",
+      "emotion",
+      "voice",
+      "acoustic",
+      "models",
+      "model",
+      "training",
+      "performance",
+      "language",
+      "dataset"
+    ],
+    "sample_titles": [
+      "The ACM Multimedia 2022 Computational Paralinguistics Challenge: Vocalisations, Stuttering, Activity, & Mosquitoes",
+      "Speech Representation Learning Revisited: The Necessity of Separate Learnable Parameters and Robust Data Augmentation",
+      "Simple and Effective Unsupervised Speech Synthesis",
+      "Exploring Speech Foundation Models for Speaker Diarization in Child-Adult Dyadic Interactions"
+    ],
+    "n_papers": 27297
+  },
+  "5": {
+    "terms": [
+      "neural",
+      "learning",
+      "networks",
+      "training",
+      "deep",
+      "network",
+      "performance",
+      "models",
+      "data",
+      "model",
+      "tasks",
+      "methods",
+      "classification",
+      "domain",
+      "propose"
+    ],
+    "sample_titles": [
+      "Primal-Attention: Self-attention through Asymmetric Kernel SVD in Primal Representation",
+      "Inverse distance weighting attention",
+      "Dive into Deep Learning",
+      "MUSE: Feature Self-Distillation with Mutual Information and Self-Information"
+    ],
+    "n_papers": 36418
+  },
+  "6": {
+    "terms": [
+      "neural",
+      "spiking",
+      "networks",
+      "neurons",
+      "hardware",
+      "neuromorphic",
+      "memory",
+      "network",
+      "snns",
+      "neuron",
+      "learning",
+      "synaptic",
+      "computing",
+      "design",
+      "spike"
+    ],
+    "sample_titles": [
+      "A Lightweight Architecture for Real-Time Neuronal-Spike Classification",
+      "A Survey of Neuromorphic Computing and Neural Networks in Hardware",
+      "Machine Learning with Chaotic Strange Attractors",
+      "From Clean Room to Machine Room: Commissioning of the First-Generation BrainScaleS Wafer-Scale Neuromorphic System"
+    ],
+    "n_papers": 17460
+  },
+  "7": {
+    "terms": [
+      "eeg",
+      "brain",
+      "data",
+      "image",
+      "classification",
+      "signals",
+      "using",
+      "proposed",
+      "ecg",
+      "recognition",
+      "method",
+      "based",
+      "learning",
+      "features",
+      "images"
+    ],
+    "sample_titles": [
+      "Proceedings of the 37th Annual Workshop of the Austrian Association for Pattern Recognition (\\\"OAGM/AAPR), 2013",
+      "EasiCS: the objective and fine-grained classification method of cervical spondylosis dysfunction",
+      "Topological Data Analysis Assisted Automated Sleep Stage Scoring Using Airflow Signals",
+      "Proceedings of The 39th Annual Workshop of the Austrian Association for Pattern Recognition (OAGM), 2015"
+    ],
+    "n_papers": 22716
+  },
+  "8": {
+    "terms": [
+      "segmentation",
+      "medical",
+      "images",
+      "image",
+      "mri",
+      "learning",
+      "deep",
+      "clinical",
+      "imaging",
+      "diagnosis",
+      "brain",
+      "classification",
+      "dataset",
+      "data",
+      "cancer"
+    ],
+    "sample_titles": [
+      "Medical Imaging with Deep Learning: MIDL 2020 -- Short Paper Track",
+      "Masked Image Modeling Advances 3D Medical Image Analysis",
+      "Residual Connection Networks in Medical Image Processing: Exploration of ResUnet++ Model Driven by Human Computer Interaction",
+      "Unpaired Translation of Chest X-ray Images for Lung Opacity Diagnosis via Adaptive Activation Masks and Cross-Domain Alignment"
+    ],
+    "n_papers": 28641
+  },
+  "9": {
+    "terms": [
+      "image",
+      "images",
+      "video",
+      "quality",
+      "methods",
+      "super-resolution",
+      "segmentation",
+      "network",
+      "deep",
+      "detection",
+      "compression",
+      "performance",
+      "learning",
+      "remote",
+      "restoration"
+    ],
+    "sample_titles": [
+      "STEREOFOG -- Computational DeFogging via Image-to-Image Translation on a real-world Dataset",
+      "LoViF 2026 Challenge on Real-World All-in-One Image Restoration: Methods and Results",
+      "PAC-FNO: Parallel-Structured All-Component Fourier Neural Operators for Recognizing Low-Quality Images",
+      "SD-PSFNet: Sequential and Dynamic Point Spread Function Network for Image Deraining"
+    ],
+    "n_papers": 19397
+  },
+  "10": {
+    "terms": [
+      "graph",
+      "recommendation",
+      "user",
+      "recommender",
+      "node",
+      "gnns",
+      "learning",
+      "graphs",
+      "networks",
+      "items",
+      "users",
+      "item",
+      "neural",
+      "information",
+      "datasets"
+    ],
+    "sample_titles": [
+      "MixDec Sampling: A Soft Link-based Sampling Method of Graph Neural Network for Recommendation",
+      "XWalk: Random Walk Based Candidate Retrieval for Product Search",
+      "DimensionRank: Personal Neural Representations for Personalized General Search",
+      "Improving Sequential Recommendation with Attribute-augmented Graph Neural Networks"
+    ],
+    "n_papers": 17415
+  },
+  "11": {
+    "terms": [
+      "language",
+      "models",
+      "llms",
+      "training",
+      "model",
+      "llm",
+      "tasks",
+      "translation",
+      "large",
+      "performance",
+      "fine-tuning",
+      "inference",
+      "data",
+      "attention",
+      "text"
+    ],
+    "sample_titles": [
+      "On Retrieval Augmentation and the Limitations of Language Model Training",
+      "SLED: Self Logits Evolution Decoding for Improving Factuality in Large Language Models",
+      "Branch-Train-Merge: Embarrassingly Parallel Training of Expert Language Models",
+      "The Devil in Linear Transformer"
+    ],
+    "n_papers": 32246
+  },
+  "12": {
+    "terms": [
+      "language",
+      "llms",
+      "models",
+      "knowledge",
+      "text",
+      "evaluation",
+      "retrieval",
+      "task",
+      "dataset",
+      "reasoning",
+      "large",
+      "tasks",
+      "model",
+      "human",
+      "information"
+    ],
+    "sample_titles": [
+      "AutoSurvey: Large Language Models Can Automatically Write Surveys",
+      "Investigating Layer Importance in Large Language Models",
+      "ImmigrationQA: A Source-Grounded Dataset and Small-Model Adaptation for U.S. Immigration Law",
+      "How not to Lie with a Benchmark: Rearranging NLP Leaderboards"
+    ],
+    "n_papers": 61980
+  },
+  "13": {
+    "terms": [
+      "social",
+      "research",
+      "media",
+      "users",
+      "twitter",
+      "online",
+      "data",
+      "scientific",
+      "citation",
+      "science",
+      "analysis",
+      "study",
+      "news",
+      "information",
+      "impact"
+    ],
+    "sample_titles": [
+      "Meta-research on COVID-19: An overview of the early trends",
+      "Statistics at a Crossroads; Who is for the Challenge?",
+      "Causes of Misleading Statistics and Research Results Irreproducibility: A Concise Review",
+      "Shifting 'AI Policy' Preprints and Citation Trends in the U.S., U.K and E.U., and South Korea (2015-2024)"
+    ],
+    "n_papers": 22787
+  },
+  "14": {
+    "terms": [
+      "students",
+      "human",
+      "design",
+      "research",
+      "user",
+      "intelligence",
+      "participants",
+      "users",
+      "learning",
+      "cognitive",
+      "social",
+      "education",
+      "artificial",
+      "study",
+      "systems"
+    ],
+    "sample_titles": [
+      "Like a Researcher Stating Broader Impact For the Very First Time",
+      "The MAIEI Learning Community Report",
+      "Looking Back, Moving Forward: A First-Person Perspective Of How Past Artificial Intelligence Encounters Shape Today's Creative Practice",
+      "Anvendelse av kunstig intelligens (KI) i Norge i norsk offentlig sektor 2024"
+    ],
+    "n_papers": 34335
+  },
+  "15": {
+    "terms": [
+      "systems",
+      "safety",
+      "agents",
+      "autonomous",
+      "agent",
+      "verification",
+      "control",
+      "multi-agent",
+      "formal",
+      "framework",
+      "software",
+      "logic",
+      "approach",
+      "paper",
+      "testing"
+    ],
+    "sample_titles": [
+      "Liability, Ethics, and Culture-Aware Behavior Specification using Rulebooks",
+      "Proceedings Fourth International Workshop on Formal Methods for Autonomous Systems (FMAS) and Fourth International Workshop on Automated and verifiable Software sYstem DEvelopment (ASYDE)",
+      "Towards a safe MLOps Process for the Continuous Development and Safety Assurance of ML-based Systems in the Railway Domain",
+      "APIA: An Architecture for Policy-Aware Intentional Agents"
+    ],
+    "n_papers": 9976
+  },
+  "16": {
+    "terms": [
+      "code",
+      "software",
+      "reasoning",
+      "llms",
+      "language",
+      "models",
+      "llm",
+      "agents",
+      "tasks",
+      "generation",
+      "test",
+      "program",
+      "development",
+      "large",
+      "developers"
+    ],
+    "sample_titles": [
+      "Good Benchmarks",
+      "REDO: Execution-Free Runtime Error Detection for COding Agents",
+      "Aligning Academia with Industry: An Empirical Study of Industrial Needs and Academic Capabilities in AI-Driven Software Engineering",
+      "Feature-Factory: Automating Software Feature Integration Using Generative AI"
+    ],
+    "n_papers": 29768
+  },
+  "17": {
+    "terms": [
+      "logic",
+      "automata",
+      "semantics",
+      "proof",
+      "logics",
+      "languages",
+      "theory",
+      "calculus",
+      "complexity",
+      "finite",
+      "programs",
+      "set",
+      "language",
+      "prove",
+      "problem"
+    ],
+    "sample_titles": [
+      "Multi-type Display Calculus for Dynamic Epistemic Logic",
+      "On a question of Krajewski's",
+      "The Variable Hierarchy for the Games mu-Calculus",
+      "Proceedings Tenth International Workshop on Fixed Points in Computer Science"
+    ],
+    "n_papers": 25221
+  },
+  "18": {
+    "terms": [
+      "query",
+      "data",
+      "queries",
+      "graph",
+      "database",
+      "algorithm",
+      "logic",
+      "algorithms",
+      "problem",
+      "time",
+      "paper",
+      "knowledge",
+      "graphs",
+      "databases",
+      "web"
+    ],
+    "sample_titles": [
+      "Errata Note: Discovering Order Dependencies through Order Compatibility",
+      "Database Theory in Action: Yannakakis' Algorithm",
+      "Naughton's Wisconsin Bibliography: A Brief Guide",
+      "Witness Generation for JSON Schema"
+    ],
+    "n_papers": 17527
+  },
+  "19": {
+    "terms": [
+      "channel",
+      "wireless",
+      "communication",
+      "mimo",
+      "proposed",
+      "power",
+      "performance",
+      "interference",
+      "beamforming",
+      "networks",
+      "transmission",
+      "channels",
+      "network",
+      "rate",
+      "scheme"
+    ],
+    "sample_titles": [
+      "Accumulative Iterative Codes Based on Feedback",
+      "6G Wireless Communication Systems: Applications, Requirements, Technologies, Challenges, and Research Directions",
+      "A Comprehensive Survey of 6G Wireless Communications",
+      "Scalable Design for RIS-Assisted Multi-User Downlink System Empowered by RSMA under Partial CSI"
+    ],
+    "n_papers": 48131
+  },
+  "20": {
+    "terms": [
+      "power",
+      "grid",
+      "energy",
+      "renewable",
+      "electricity",
+      "battery",
+      "control",
+      "voltage",
+      "demand",
+      "charging",
+      "proposed",
+      "load",
+      "storage",
+      "systems",
+      "optimal"
+    ],
+    "sample_titles": [
+      "Grid-Aware Flexibility Operation of Behind-the-Meter Assets: A review of Objectives and Constraints",
+      "Flattening the Duck Curve: A Case for Distributed Decision Making",
+      "Netload Range Cost Curves for a Transmission-Aware Distribution System Planning under DER Growth Uncertainty",
+      "Data-driven Power Flow Linearization: Theory"
+    ],
+    "n_papers": 14049
+  },
+  "21": {
+    "terms": [
+      "network",
+      "wireless",
+      "networks",
+      "service",
+      "iot",
+      "mobile",
+      "computing",
+      "nodes",
+      "scheduling",
+      "routing",
+      "traffic",
+      "communication",
+      "caching",
+      "resource",
+      "delay"
+    ],
+    "sample_titles": [
+      "Analysis of a trunk reservation policy in the framework of fog computing",
+      "Sittin'On the Dock of the (WiFi) Bay: On the Frame Aggregation under IEEE 802.11 DCF",
+      "A study of research trends and issues in wireless ad hoc networks",
+      "The Age of Information: Real-Time Status Updating by Multiple Sources"
+    ],
+    "n_papers": 15303
+  },
+  "22": {
+    "terms": [
+      "adversarial",
+      "attacks",
+      "attack",
+      "robustness",
+      "backdoor",
+      "training",
+      "image",
+      "face",
+      "detection",
+      "images",
+      "defense",
+      "models",
+      "deep",
+      "examples",
+      "perturbations"
+    ],
+    "sample_titles": [
+      "Discerning the Chaos: Detecting Adversarial Perturbations while Disentangling Intentional from Unintentional Noises",
+      "Unrestricted Adversarial Samples Based on Non-semantic Feature Clusters Substitution",
+      "Invisible Backdoor Attacks on Deep Neural Networks via Steganography and Regularization",
+      "Searching for the Essence of Adversarial Perturbations"
+    ],
+    "n_papers": 11746
+  },
+  "23": {
+    "terms": [
+      "privacy",
+      "federated",
+      "learning",
+      "data",
+      "clients",
+      "private",
+      "training",
+      "client",
+      "model",
+      "privacy-preserving",
+      "attacks",
+      "differentially",
+      "differential",
+      "server",
+      "local"
+    ],
+    "sample_titles": [
+      "sqSGD: Locally Private and Communication Efficient Federated Learning",
+      "Confined Gradient Descent: Privacy-preserving Optimization for Federated Learning",
+      "Communication-Efficient and Privacy-Adaptable Mechanism -- a Federated Learning Scheme with Convergence Analysis",
+      "Masked Random Noise for Communication Efficient Federated Learning"
+    ],
+    "n_papers": 14256
+  },
+  "24": {
+    "terms": [
+      "performance",
+      "memory",
+      "computing",
+      "data",
+      "cloud",
+      "gpu",
+      "applications",
+      "parallel",
+      "workloads",
+      "hpc",
+      "network",
+      "scheduling",
+      "hardware",
+      "distributed",
+      "execution"
+    ],
+    "sample_titles": [
+      "Demonstrating a Pre-Exascale, Cost-Effective Multi-Cloud Environment for Scientific Computing",
+      "Cloud Programming Simplified: A Berkeley View on Serverless Computing",
+      "Model-based optimization of MPDATA on Intel Xeon Phi through load imbalancing",
+      "Performance evaluation of scheduling tasks in many-core systems utilizing processes and threads"
+    ],
+    "n_papers": 18581
+  },
+  "25": {
+    "terms": [
+      "security",
+      "blockchain",
+      "attacks",
+      "privacy",
+      "attack",
+      "data",
+      "malware",
+      "secure",
+      "detection",
+      "iot",
+      "protocol",
+      "vulnerabilities",
+      "smart",
+      "network",
+      "users"
+    ],
+    "sample_titles": [
+      "Secure and Trustworthy Computing 2.0 Vision Statement",
+      "Holistic Privacy and Usability of a Cryptocurrency Wallet",
+      "SoK: On the Security of Non-Fungible Tokens",
+      "GCVE: A Decentralized Model for Vulnerability Identification, Publication, and Operational Enrichment"
+    ],
+    "n_papers": 29684
+  },
+  "26": {
+    "terms": [
+      "reinforcement",
+      "learning",
+      "policy",
+      "agents",
+      "reward",
+      "agent",
+      "tasks",
+      "planning",
+      "policies",
+      "environments",
+      "task",
+      "action",
+      "training",
+      "reasoning",
+      "robot"
+    ],
+    "sample_titles": [
+      "Policy Optimization with Sparse Global Contrastive Explanations",
+      "Learning Behavioral Soft Constraints from Demonstrations",
+      "Dual Goal Representations",
+      "SafeDreamer: Safe Reinforcement Learning with World Models"
+    ],
+    "n_papers": 34383
+  },
+  "27": {
+    "terms": [
+      "robot",
+      "robots",
+      "robotic",
+      "manipulation",
+      "control",
+      "tactile",
+      "learning",
+      "grasping",
+      "motion",
+      "locomotion",
+      "grasp",
+      "tasks",
+      "object",
+      "contact",
+      "objects"
+    ],
+    "sample_titles": [
+      "Robots of the Lost Arc: Self-Supervised Learning to Dynamically Manipulate Fixed-Endpoint Cables",
+      "Data-driven Methods Applied to Soft Robot Modeling and Control: A Review",
+      "Robot Grasping and Manipulation: A Prospective",
+      "A Survey of Robot Manipulation in Contact"
+    ],
+    "n_papers": 17083
+  },
+  "28": {
+    "terms": [
+      "control",
+      "systems",
+      "problem",
+      "proposed",
+      "algorithm",
+      "vehicles",
+      "optimal",
+      "controller",
+      "optimization",
+      "vehicle",
+      "planning",
+      "traffic",
+      "paper",
+      "approach",
+      "autonomous"
+    ],
+    "sample_titles": [
+      "Tube-Based Safety for Anticipative Tracking in Multi-Agent Systems",
+      "State-Robust Observability Measures for Sensor Selection in Nonlinear Dynamic Systems",
+      "Reinforcement Learning for Docking Maneuvers with Prescribed Performance",
+      "Distributed linear programming with event-triggered communication"
+    ],
+    "n_papers": 51789
+  },
+  "29": {
+    "terms": [
+      "networks",
+      "random",
+      "network",
+      "graphs",
+      "graph",
+      "percolation",
+      "nodes",
+      "community",
+      "social",
+      "degree",
+      "vertices",
+      "model",
+      "communities",
+      "node",
+      "edges"
+    ],
+    "sample_titles": [
+      "A parametric approach to information filtering in complex networks: The P\\'olya filter",
+      "Random graphs with clustering",
+      "Closure coefficients in scale-free complex networks",
+      "Multilevel compression of random walks on networks reveals hierarchical organization in large integrated systems"
+    ],
+    "n_papers": 26688
+  },
+  "30": {
+    "terms": [
+      "problem",
+      "algorithm",
+      "algorithms",
+      "log",
+      "problems",
+      "optimal",
+      "games",
+      "time",
+      "approximation",
+      "regret",
+      "set",
+      "number",
+      "bound",
+      "graph",
+      "complexity"
+    ],
+    "sample_titles": [
+      "A convergence technique for the game i-Mark",
+      "Fine-Grained Buy-Many Mechanisms Are Not Much Better Than Bundling",
+      "Bidding combinatorial games",
+      "Prior-Free Clock Auctions for Bidders with Interdependent Values"
+    ],
+    "n_papers": 46291
+  },
+  "31": {
+    "terms": [
+      "causal",
+      "treatment",
+      "data",
+      "inference",
+      "regression",
+      "effects",
+      "estimation",
+      "bayesian",
+      "methods",
+      "model",
+      "covariates",
+      "models",
+      "effect",
+      "variables",
+      "studies"
+    ],
+    "sample_titles": [
+      "Combining experimental and observational data through a power likelihood",
+      "Default Bayesian analysis for multi-way tables: a data-augmentation approach",
+      "Stable discovery of interpretable subgroups via calibration in causal studies",
+      "Marginal Causal Effect Estimation with Continuous Instrumental Variables"
+    ],
+    "n_papers": 25482
+  },
+  "32": {
+    "terms": [
+      "clinical",
+      "medical",
+      "data",
+      "models",
+      "protein",
+      "prediction",
+      "health",
+      "language",
+      "patient",
+      "learning",
+      "drug",
+      "molecular",
+      "llms",
+      "patients",
+      "model"
+    ],
+    "sample_titles": [
+      "Identifying and Characterising Response in Clinical Trials: Development and Validation of a Machine Learning Approach in Colorectal Cancer",
+      "Indication Finding: a novel use case for representation learning",
+      "TwinWeaver: An LLM-Based Foundation Model Framework for Pan-Cancer Digital Twins",
+      "A collection of the accepted abstracts for the Machine Learning for Health (ML4H) symposium 2021"
+    ],
+    "n_papers": 24454
+  },
+  "33": {
+    "terms": [
+      "learning",
+      "data",
+      "convergence",
+      "regression",
+      "algorithm",
+      "optimization",
+      "methods",
+      "gradient",
+      "fairness",
+      "algorithms",
+      "method",
+      "problems",
+      "clustering",
+      "convex",
+      "problem"
+    ],
+    "sample_titles": [
+      "Introduction to Machine Learning",
+      "Strengthened Information-theoretic Bounds on the Generalization Error",
+      "An Entropy-Based Model for Hierarchical Learning",
+      "Nonlinear Sufficient Dimension Reduction for Distribution-on-Distribution Regression"
+    ],
+    "n_papers": 39844
+  },
+  "34": {
+    "terms": [
+      "data",
+      "forecasting",
+      "series",
+      "model",
+      "time",
+      "models",
+      "optimization",
+      "bayesian",
+      "methods",
+      "method",
+      "approach",
+      "distribution",
+      "proposed",
+      "market",
+      "using"
+    ],
+    "sample_titles": [
+      "On the Convergence of Credit Risk in Current Consumer Automobile Loans",
+      "Accounting for Secondary Uncertainty: Efficient Computation of Portfolio Risk Measures on Multi and Many Core Architectures",
+      "Operational Research: Methods and Applications",
+      "A Conversation with Mike West"
+    ],
+    "n_papers": 62379
+  },
+  "35": {
+    "terms": [
+      "simulations",
+      "mass",
+      "star",
+      "formation",
+      "gas",
+      "accretion",
+      "magnetic",
+      "galaxies",
+      "stars",
+      "stellar",
+      "galaxy",
+      "evolution",
+      "disk",
+      "black",
+      "emission"
+    ],
+    "sample_titles": [
+      "Fermi Bubbles as a Result of Star Capture in the Galactic Center",
+      "Supernovae in colliding-wind binaries: observational signatures in the first year",
+      "Relativistic astrospheres of gamma-ray binaries: modeling of non-thermal processes",
+      "Tidal forces from the wake of dynamical friction: warps, lopsidedness and kinematic misalignment"
+    ],
+    "n_papers": 48948
+  },
+  "36": {
+    "terms": [
+      "gravitational",
+      "galaxy",
+      "cosmological",
+      "lensing",
+      "cmb",
+      "dark",
+      "redshift",
+      "cosmic",
+      "galaxies",
+      "mass",
+      "black",
+      "data",
+      "gravitational-wave",
+      "matter",
+      "binary"
+    ],
+    "sample_titles": [
+      "Figure of Merit for Dark Energy Constraints from Current Observational Data",
+      "Dark energy properties from large future galaxy surveys",
+      "Model Selection with Strong-lensing Systems",
+      "Primordial Black Hole interpretation of the sub-solar merger event S251112cm"
+    ],
+    "n_papers": 33615
+  },
+  "37": {
+    "terms": [
+      "galaxies",
+      "stars",
+      "stellar",
+      "star",
+      "galaxy",
+      "mass",
+      "emission",
+      "observations",
+      "formation",
+      "gas",
+      "dust",
+      "cluster",
+      "sample",
+      "survey",
+      "disk"
+    ],
+    "sample_titles": [
+      "SiO maser emission from red supergiants across the Galaxy: I. Targets in massive star clusters",
+      "Low-mass protostars and dense cores in different evolutionary stages in IRAS 00213+6530",
+      "Clash of Titans: a MUSE dynamical study of the extreme cluster merger SPT-CL J0307-6225",
+      "UOCS-VIII. UV Study of the open cluster NGC 2506 using ASTROSAT"
+    ],
+    "n_papers": 102319
+  },
+  "38": {
+    "terms": [
+      "solar",
+      "observations",
+      "x-ray",
+      "emission",
+      "radio",
+      "magnetic",
+      "flux",
+      "observed",
+      "gamma-ray",
+      "telescope",
+      "field",
+      "energy",
+      "sources",
+      "source",
+      "coronal"
+    ],
+    "sample_titles": [
+      "ASTRO-H White Paper - Introduction",
+      "Searching for TeV emission from LHAASO J0341+5258 with VERITAS and HAWC",
+      "Hadronic Scenario for Galactic PeVatron LHAASO J1912+1014u Supported by Fermi-LAT $\\gamma$-ray Data and FUGIN CO Data",
+      "Toward Identifying the Unassociated Gamma-ray Source 1FGL J1311.7-3429 with X-ray and Optical Observations"
+    ],
+    "n_papers": 77982
+  },
+  "39": {
+    "terms": [
+      "theory",
+      "gauge",
+      "theories",
+      "gravity",
+      "black",
+      "field",
+      "string",
+      "ads",
+      "conformal",
+      "spacetime",
+      "quantum",
+      "scalar",
+      "symmetry",
+      "holographic",
+      "hole"
+    ],
+    "sample_titles": [
+      "Complex Saddles and Euclidean Wormholes in the Lorentzian Path Integral",
+      "The coupling of Non-linear Supersymmetry to Supergravity",
+      "The braneology of 3D dualities",
+      "A Lagrangian for self-dual strings"
+    ],
+    "n_papers": 68723
+  },
+  "40": {
+    "terms": [
+      "black",
+      "gravity",
+      "hole",
+      "dark",
+      "cosmological",
+      "gravitational",
+      "scalar",
+      "matter",
+      "universe",
+      "field",
+      "holes",
+      "inflation",
+      "spacetime",
+      "energy",
+      "theory"
+    ],
+    "sample_titles": [
+      "Cosmology of a Friedmann-Lama\\^itre-Robertson-Walker 3-brane, Late-Time Cosmic Acceleration, and the Cosmic Coincidence",
+      "Mimicking general relativity in the solar system",
+      "Review on $f(Q)$ Gravity",
+      "Fractional dark energy"
+    ],
+    "n_papers": 73142
+  },
+  "41": {
+    "terms": [
+      "curvature",
+      "manifolds",
+      "manifold",
+      "space",
+      "group",
+      "riemannian",
+      "prove",
+      "mathbb",
+      "metric",
+      "groups",
+      "spaces",
+      "lie",
+      "algebra",
+      "compact",
+      "hyperbolic"
+    ],
+    "sample_titles": [
+      "Topological Obstructions to the Existence of Compact Shrinking Ricci Solitons in Dimension Four",
+      "On the origin of Hilbert Geometry",
+      "A Review of Alexander Isaev's Spherical Tube Hypersurfaces",
+      "Geometric complex analysis: an exposition"
+    ],
+    "n_papers": 71707
+  },
+  "42": {
+    "terms": [
+      "equation",
+      "solutions",
+      "equations",
+      "boundary",
+      "problem",
+      "nonlinear",
+      "omega",
+      "mathbb",
+      "schr",
+      "prove",
+      "solution",
+      "existence",
+      "operator",
+      "regularity",
+      "estimates"
+    ],
+    "sample_titles": [
+      "Nonlinear elliptic equations and intrinsic potentials of Wolff type",
+      "The 2D Gray-Scott system of equations: constructive proofs of existence of localized stationary patterns",
+      "A Laplace transform approach to linear equations with infinitely many derivatives and zeta-nonlocal field equations",
+      "Continuity of infinitely degenerate weak solutions via the trace method"
+    ],
+    "n_papers": 51400
+  },
+  "43": {
+    "terms": [
+      "spaces",
+      "functions",
+      "mathbb",
+      "operators",
+      "space",
+      "operator",
+      "function",
+      "mathcal",
+      "infty",
+      "prove",
+      "polynomials",
+      "theorem",
+      "banach",
+      "random",
+      "matrices"
+    ],
+    "sample_titles": [
+      "A dozen integrals: Russell-style",
+      "Dunkl positive definite functions",
+      "Notes of functional analysis",
+      "Non-commutative Callebaut inequality"
+    ],
+    "n_papers": 79483
+  },
+  "44": {
+    "terms": [
+      "algebras",
+      "algebra",
+      "group",
+      "mathbb",
+      "category",
+      "groups",
+      "mathcal",
+      "prove",
+      "cohomology",
+      "modules",
+      "lie",
+      "varieties",
+      "finite",
+      "algebraic",
+      "projective"
+    ],
+    "sample_titles": [
+      "L2-invisibility of symmetric operad groups",
+      "Exercises in the birational geometry of algebraic varieties",
+      "Cluster structures on simple complex Lie groups and the Belavin-Drinfeld classification",
+      "On extensions of the Torelli map"
+    ],
+    "n_papers": 125954
+  },
+  "45": {
+    "terms": [
+      "graphs",
+      "graph",
+      "vertices",
+      "vertex",
+      "number",
+      "edges",
+      "set",
+      "connected",
+      "coloring",
+      "edge",
+      "problem",
+      "minimum",
+      "conjecture",
+      "degree",
+      "maximum"
+    ],
+    "sample_titles": [
+      "On the Linear Cycle Cover Conjecture of Gy\\'arf\\'as and S\\'ark\\\"ozy",
+      "Separating Path Systems for the Complete Graph",
+      "The basis number of 1-planar graphs",
+      "The Well-Covered Dimension of Products of Graphs"
+    ],
+    "n_papers": 30152
+  },
+  "46": {
+    "terms": [
+      "mathbb",
+      "codes",
+      "groups",
+      "group",
+      "polynomials",
+      "number",
+      "finite",
+      "conjecture",
+      "prime",
+      "prove",
+      "numbers",
+      "let",
+      "functions",
+      "polynomial",
+      "integers"
+    ],
+    "sample_titles": [
+      "On two Kuznetsov's conjectures",
+      "New Open Problems Related to Old Conjectures by Helleseth",
+      "Group elements whose character values are roots of unity",
+      "On an estimate on G\\\"otzky's domain"
+    ],
+    "n_papers": 72035
+  },
+  "47": {
+    "terms": [
+      "laser",
+      "beam",
+      "plasma",
+      "electron",
+      "pulse",
+      "energy",
+      "high",
+      "ion",
+      "pulses",
+      "accelerator",
+      "radiation",
+      "temperature",
+      "beams",
+      "using",
+      "field"
+    ],
+    "sample_titles": [
+      "Guest Editorial: Overview of the Special Issue and a Dialog on Starshades",
+      "An optimized online filter stack spectrometer",
+      "Critical Need for a National Initiative in Low Temperature Plasma Research",
+      "Vacuum System"
+    ],
+    "n_papers": 22958
+  },
+  "48": {
+    "terms": [
+      "optical",
+      "graphene",
+      "surface",
+      "materials",
+      "light",
+      "photonic",
+      "electron",
+      "devices",
+      "properties",
+      "high",
+      "electronic",
+      "silicon",
+      "imaging",
+      "quantum",
+      "using"
+    ],
+    "sample_titles": [
+      "Tutorial: Magnetic resonance with nitrogen-vacancy centers in diamond---microwave engineering, materials science, and magnetometry",
+      "Anisotropic Thermal Conductivity of Exfoliated Black Phosphorus",
+      "Near-field terahertz probes with room-temperature nanodetectors for subwavelength resolution imaging",
+      "Purcell enhancement and spin spectroscopy of silicon vacancy centers in silicon carbide using an ultra-small mode-volume plasmonic cavity"
+    ],
+    "n_papers": 80027
+  },
+  "49": {
+    "terms": [
+      "topological",
+      "spin",
+      "magnetic",
+      "phase",
+      "quantum",
+      "states",
+      "graphene",
+      "hall",
+      "field",
+      "lattice",
+      "superconducting",
+      "transition",
+      "state",
+      "effect",
+      "charge"
+    ],
+    "sample_titles": [
+      "Topological Transitions in a Model for Proximity Induced Superconductivity",
+      "Nonlinear Hall effect in Rashba systems with hexagonal warping",
+      "Momentum-Space AC Josephson Effect and Intervalley Coherence in Multilayer Graphene",
+      "Nanoscale defects as probes of time reversal symmetry breaking"
+    ],
+    "n_papers": 77626
+  },
+  "50": {
+    "terms": [
+      "magnetic",
+      "spin",
+      "temperature",
+      "phase",
+      "electronic",
+      "transition",
+      "superconducting",
+      "materials",
+      "magnetization",
+      "properties",
+      "structure",
+      "superconductivity",
+      "field",
+      "films",
+      "effect"
+    ],
+    "sample_titles": [
+      "Magnon Condensation in a Dense Nitrogen-Vacancy Spin Ensemble",
+      "Complex Dirac-like Electronic Structure in Atomic Site Ordered Rh3In3.4Ge3.6",
+      "From narrow-gap and semimagnetic semiconductors to spintronics and topological matter: a life with spins",
+      "Anomalous Nernst effect in Co thin films under laser irradiation"
+    ],
+    "n_papers": 67188
+  },
+  "51": {
+    "terms": [
+      "sparse",
+      "signal",
+      "reconstruction",
+      "algorithm",
+      "method",
+      "matrix",
+      "recovery",
+      "data",
+      "imaging",
+      "noise",
+      "problem",
+      "signals",
+      "proposed",
+      "image",
+      "sensing"
+    ],
+    "sample_titles": [
+      "Proceedings of the third \"international Traveling Workshop on Interactions between Sparse models and Technology\" (iTWIST'16)",
+      "Information theory, Signal Analysis and Inverse Problem",
+      "A First Course in Sparse Optimization",
+      "Dynamic Thresholding Algorithm with Memory for Linear Inverse Problems"
+    ],
+    "n_papers": 23595
+  },
+  "52": {
+    "terms": [
+      "method",
+      "numerical",
+      "neural",
+      "element",
+      "equations",
+      "problems",
+      "methods",
+      "model",
+      "finite",
+      "flow",
+      "boundary",
+      "mesh",
+      "using",
+      "computational",
+      "approach"
+    ],
+    "sample_titles": [
+      "A nodal integration scheme for meshfree Galerkin methods using the virtual element decomposition",
+      "Hybrid high-order methods. A primer with application to solid mechanics",
+      "A Partition of Unity Method for Divergence-free or Curl-free Radial Basis Function Approximation",
+      "A GenEO Domain Decomposition method for Saddle Point problems"
+    ],
+    "n_papers": 32307
+  },
+  "53": {
+    "terms": [
+      "dynamics",
+      "simulations",
+      "flow",
+      "particles",
+      "molecular",
+      "liquid",
+      "water",
+      "surface",
+      "fluid",
+      "model",
+      "particle",
+      "materials",
+      "shear",
+      "phase",
+      "force"
+    ],
+    "sample_titles": [
+      "A review of active matter reviews",
+      "Characterization of partial wetting by CMAS droplets using multiphase many-body dissipative particle dynamics and data-driven discovery based on PINNs",
+      "Anomalous Front Broadening During Spontaneous Imbibition in a Matrix with Elongated Pores",
+      "Effective two-dimensional model does not account for geometry sensing by self-organized proteins patterns - Supplementary document"
+    ],
+    "n_papers": 58753
+  },
+  "54": {
+    "terms": [
+      "equations",
+      "flow",
+      "equation",
+      "solutions",
+      "numerical",
+      "fluid",
+      "turbulence",
+      "boundary",
+      "solution",
+      "flows",
+      "velocity",
+      "navier-stokes",
+      "waves",
+      "nonlinear",
+      "method"
+    ],
+    "sample_titles": [
+      "Enhanced dissipation by advection and applications to PDEs",
+      "Waves over Curved Bottom: The Method of Composite Conformal Mapping",
+      "Stability of Confined Vortex Sheets",
+      "Prandtl Equations and Related Boundary Layer Equations"
+    ],
+    "n_papers": 51908
+  },
+  "55": {
+    "terms": [
+      "stochastic",
+      "dynamics",
+      "model",
+      "time",
+      "process",
+      "processes",
+      "random",
+      "equation",
+      "equations",
+      "systems",
+      "population",
+      "diffusion",
+      "brownian",
+      "limit",
+      "study"
+    ],
+    "sample_titles": [
+      "A simple method to calculate first-passage time densities of non-smooth processes",
+      "Parabolic Anderson model in a dynamic random environment: random conductances",
+      "Wright-Fisher construction of the two-parameter Poisson-Dirichlet diffusion",
+      "Absolute negative mobility in a one-dimensional overdamped system driven by active fluctuations"
+    ],
+    "n_papers": 84115
+  },
+  "56": {
+    "terms": [
+      "detector",
+      "collisions",
+      "gev",
+      "production",
+      "tev",
+      "experiment",
+      "sqrt",
+      "decay",
+      "measurements",
+      "lhc",
+      "measurement",
+      "decays",
+      "neutrino",
+      "energy",
+      "measured"
+    ],
+    "sample_titles": [
+      "Micro-Pattern Gas Detectors for Charged-Particle Tracking and Muon Detection",
+      "Technical Design Study for the PANDA Time Projection Chamber",
+      "Experiment summary",
+      "A theory vade mecum for PSI experiments"
+    ],
+    "n_papers": 36347
+  },
+  "57": {
+    "terms": [
+      "dark",
+      "neutrino",
+      "matter",
+      "higgs",
+      "mass",
+      "neutrinos",
+      "masses",
+      "mixing",
+      "lepton",
+      "model",
+      "standard",
+      "flavor",
+      "lhc",
+      "decay",
+      "gev"
+    ],
+    "sample_titles": [
+      "Lepton dark matter portal in the inert Zee model",
+      "Impact of conversion-driven processes on singlet-doublet Majorana dark matter relic",
+      "Higgs in Space!",
+      "Supersymmetry with Dark Matter is still natural"
+    ],
+    "n_papers": 27808
+  },
+  "58": {
+    "terms": [
+      "qcd",
+      "bar",
+      "quark",
+      "production",
+      "lhc",
+      "decays",
+      "decay",
+      "higgs",
+      "mass",
+      "lattice",
+      "corrections",
+      "meson",
+      "chiral",
+      "gamma",
+      "scattering"
+    ],
+    "sample_titles": [
+      "Nature of $X(2370)$",
+      "Addendum: New approach to the resummation of logarithms in Higgs-boson decays to a vector quarkonium plus a photon [Phys. Rev. D 95, 054018 (2017)]",
+      "Backward pion-nucleon scattering",
+      "Exclusive $c\\to s,d$ semileptonic decays of ground-state spin-1/2 doubly charmed baryons"
+    ],
+    "n_papers": 61704
+  },
+  "59": {
+    "terms": [
+      "quantum",
+      "optical",
+      "photon",
+      "states",
+      "frequency",
+      "qubit",
+      "entanglement",
+      "cavity",
+      "qubits",
+      "photons",
+      "noise",
+      "state",
+      "laser",
+      "coherent",
+      "measurement"
+    ],
+    "sample_titles": [
+      "Entanglement filter with Rydberg atoms",
+      "Generation of single and two-mode multiphoton states in waveguide QED",
+      "Continuous-variable quantum computing in the quantum optical frequency comb",
+      "Heisenberg-scaling measurement of the single-photon Kerr non-linearity using mixed states"
+    ],
+    "n_papers": 35808
+  },
+  "60": {
+    "terms": [
+      "quantum",
+      "states",
+      "entanglement",
+      "classical",
+      "state",
+      "qubits",
+      "circuits",
+      "measurement",
+      "circuit",
+      "qubit",
+      "gates",
+      "information",
+      "entangled",
+      "algorithm",
+      "measurements"
+    ],
+    "sample_titles": [
+      "Increasing complexity with quantum physics",
+      "Early days following Grover's quantum search algorithm",
+      "Primitive Nonclassical Structures of the $N$-qubit Pauli Group",
+      "Hybrid continuous-discrete-variable quantum computing: a guide to utility"
+    ],
+    "n_papers": 66206
+  },
+  "61": {
+    "terms": [
+      "quantum",
+      "states",
+      "phase",
+      "dynamics",
+      "systems",
+      "state",
+      "field",
+      "theory",
+      "lattice",
+      "spin",
+      "entanglement",
+      "energy",
+      "equation",
+      "model",
+      "many-body"
+    ],
+    "sample_titles": [
+      "Classical and Quantum Properties of the Spin-Boson Dicke Model: Chaos, Localization, and Scarring",
+      "Generation of Werner-like stationary states of two qubits in a thermal reservoir",
+      "Phoretic Active Matter",
+      "Nonlinear Landau levels in the almost-bosonic anyon gas"
+    ],
+    "n_papers": 94223
+  },
+  "62": {
+    "terms": [
+      "collisions",
+      "nuclear",
+      "matter",
+      "quark",
+      "qcd",
+      "heavy-ion",
+      "neutron",
+      "heavy",
+      "energy",
+      "density",
+      "chiral",
+      "plasma",
+      "rhic",
+      "relativistic",
+      "temperature"
+    ],
+    "sample_titles": [
+      "Many-Body Physics: Collective fermionic excitations in quark-gluon plasmas and cold atom systems",
+      "Exploring hybrid star matter at NICA and FAIR",
+      "Proton to pion ratio at RHIC from dynamical quark recombination",
+      "PNJL model at zero temperature: three-flavor case"
+    ],
+    "n_papers": 18519
+  },
+  "63": {
+    "terms": [
+      "nuclear",
+      "nuclei",
+      "calculations",
+      "states",
+      "energy",
+      "energies",
+      "molecules",
+      "atoms",
+      "state",
+      "quantum",
+      "reaction",
+      "experimental",
+      "molecular",
+      "atomic",
+      "laser"
+    ],
+    "sample_titles": [
+      "A multi-channel model for an {\\alpha} plus $^6$He nucleus cluster",
+      "Quantum theory of isomeric excitation of $^{229}$Th in strong laser fields",
+      "An effective two-body model for spectra of clusters of ${}^2$H, ${}^3$H, ${}^3$He, and $^4$He with $^4$He, and $^2$H-$^4$He scattering",
+      "Forging the link between nuclear reactions and nuclear structure"
+    ],
+    "n_papers": 30435
+  }
+}

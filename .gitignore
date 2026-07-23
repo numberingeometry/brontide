@@ -22,6 +22,11 @@ dist/
 # validation report). Only exclude anything accidentally large that lands there.
 /artifacts/*.memmap
 /artifacts/embeddings*
+# Per-paper region labels (~5.4 MB) co-locate with the small region artifacts so
+# series/export find them via one regions_dir, but they're a compute host-only intermediate,
+# not a scored artifact (super_region.i16 IS scored and stays committed). CPU-only environment
+# pre-approved this belt-and-suspenders ignore in implementation review.
+region_labels.i16.npy
 
 # local editor configuration (device-local; never push to the remote)
 .claude/
