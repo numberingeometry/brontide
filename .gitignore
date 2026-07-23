@@ -22,3 +22,7 @@ dist/
 # validation report). Only exclude anything accidentally large that lands there.
 /artifacts/*.memmap
 /artifacts/embeddings*
+
+# local editor configuration (device-local; never push to the remote)
+.claude/
+*_LINK.md
