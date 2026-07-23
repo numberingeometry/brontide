@@ -41,11 +41,18 @@ def _pca_n(pca_memmap: Path) -> int:
 def run(sample: int | None = None,
         pca_memmap: Path = config.PCA_MEMMAP,
         fit_mask: np.ndarray | None = None,
+        k: int = config.N_REGIONS,
         out_dir: Path = config.ARTIFACTS_DIR) -> Path:
-    """Fit K=1024 microclusters + Ward tree. ``fit_mask`` restricts the fit set
+    """Fit K microclusters + Ward tree. ``fit_mask`` restricts the fit set
     (papers <= T0) for validation; unmasked papers are assigned nearest-centroid.
 
-    Writes: ``labels`` (region id per paper), ``centroids`` (1024×50),
+    ``k`` defaults to the FROZEN ``config.N_REGIONS`` (1024) — the pre-registered
+    value used by the production and scored-validation runs. The K∈{256,4096}
+    granularity-sensitivity check (v1 plan top-risk #5) passes an explicit ``k`` to a
+    LABELLED robustness ``out_dir`` (e.g. ``artifacts/robustness/k256/``); it never
+    overwrites the scored artifacts, so the frozen constant is untouched.
+
+    Writes: ``labels`` (region id per paper), ``centroids`` (k×50),
     ``linkage`` (scipy Ward Z), ``super_region`` (region→super map at the 64 cut).
     Returns the artifacts subdir.
     """
@@ -56,7 +63,7 @@ def run(sample: int | None = None,
     pca = np.memmap(pca_memmap, dtype=np.float32, mode="r", shape=(n, config.PCA_DIM))
     x = np.asarray(pca)                         # 541 MB resident copy
 
-    km = MiniBatchKMeans(n_clusters=config.N_REGIONS, batch_size=_KM_BATCH,
+    km = MiniBatchKMeans(n_clusters=k, batch_size=_KM_BATCH,
                          n_init=3, max_iter=100, random_state=0)
     if fit_mask is not None:
         assert fit_mask.shape[0] == n, f"fit_mask len {fit_mask.shape[0]} != N {n}"
@@ -64,14 +71,14 @@ def run(sample: int | None = None,
     else:
         km.fit(x)
     labels = km.predict(x).astype(np.int16)     # ... but assign ALL papers nearest-centroid
-    centroids = km.cluster_centers_.astype(np.float32)   # (1024, 50)
+    centroids = km.cluster_centers_.astype(np.float32)   # (k, 50)
 
-    # Ward linkage on the 1024 centroids; cut to N_SUPERREGIONS. fcluster returns
-    # 1..K, so subtract 1 for 0-based super ids (frees 255 as the map noise sentinel).
+    # Ward linkage on the k centroids; cut to N_SUPERREGIONS. fcluster returns
+    # 1..super, so subtract 1 for 0-based super ids (frees 255 as the map noise sentinel).
     z = ward(centroids)
     super_of_region = (fcluster(z, t=config.N_SUPERREGIONS, criterion="maxclust") - 1).astype(np.int16)
 
-    region_sizes = np.bincount(labels, minlength=config.N_REGIONS)
+    region_sizes = np.bincount(labels, minlength=k)
     super_sizes = np.bincount(super_of_region[labels], minlength=config.N_SUPERREGIONS)
 
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -80,7 +87,7 @@ def run(sample: int | None = None,
     np.save(out_dir / "linkage.f64.npy", z)
     np.save(out_dir / "super_region.i16.npy", super_of_region)  # region -> super
     (out_dir / "regions_summary.json").write_text(json.dumps({
-        "n_papers": int(n), "k_regions": config.N_REGIONS, "n_super": config.N_SUPERREGIONS,
+        "n_papers": int(n), "k_regions": k, "n_super": config.N_SUPERREGIONS,
         "fit_on": "all" if fit_mask is None else int(fit_mask.sum()),
         "region_size_min": int(region_sizes.min()), "region_size_max": int(region_sizes.max()),
         "region_size_mean": float(region_sizes.mean()), "region_size_median": float(np.median(region_sizes)),
@@ -92,7 +99,7 @@ def run(sample: int | None = None,
 
     print(f"\nregions.run[{config.resolve_sample(sample)}] -> {out_dir}\n"
           f"  papers   : {n:,}\n"
-          f"  regions  : K={config.N_REGIONS}, empty={int((region_sizes == 0).sum())}, "
+          f"  regions  : K={k}, empty={int((region_sizes == 0).sum())}, "
           f"size min/med/max = {region_sizes.min()}/{int(np.median(region_sizes))}/{region_sizes.max()}\n"
           f"  super    : {config.N_SUPERREGIONS}, "
           f"size min/med/max = {super_sizes.min()}/{int(np.median(super_sizes))}/{super_sizes.max()}\n"

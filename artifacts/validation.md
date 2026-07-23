@@ -44,6 +44,24 @@ Klavans, Boyack & Murdick (PLOS ONE 2020) + CSET/ETO Map of Science — deployed
 
 ---
 
+## Clarification — 2026-07-23 (disambiguation of frozen intent; NOT a threshold change; Results still empty)
+
+No frozen threshold moves (K=1024, 64 supers, cutoffs 2017-12/2020-12/2022-12, ĝ 1.5 / 0.75, TOP_N=50, eligibility 20, add-α 1.0, saturating band, horizon 24m, negative criterion ≥2/3 — all intact). The items below pin ambiguous wording and register two previously-unregistered nuisance knobs, **before any scoring commit**, so the scoring run has zero free choices. Independently derived and adversarially verified.
+
+1. **EB shrinkage target (Target §, Forecast §).** "Shrunk toward super-region share" = toward the super's *per-region share level* **P_S/n_S** (n_S = frozen # of micro-regions in that super, from the 64-cut map; same ~1/1024 scale as the region share) — **not** the raw super total P_S (~1/64, ~16× larger), which breaks scale and *inverts* the emerging/declining ranking. "Weight ∝ region size" = **w_r = n_r/(n_r+κ)** with n_r the region's **trailing-12m** count fixed per origin (not the raw monthly count, which drives w→0 and collapses ĝ to the super-region ranking). Identical semantics for the v1 point-forecast shrink toward the 64 super-regions.
+
+2. **κ (EB shrinkage strength) — a fitted nuisance parameter, not a threshold.** κ is empirical-Bayes **estimated**, never hardcoded (config.py holds no κ by design). Estimator, pinned: symmetric **Dirichlet-Multinomial concentration by method-of-moments**, a **single global pool** across the 64 supers, over within-super counts on the trailing-12m window. Bound by the lookahead control — refit on **≤ (fold-train-end)** data at every rolling-origin CV fold and every validation cutoff, so no future data enters model selection or the scored ĝ. Not on the accepted-leakage list (it is masked, like PCA/k-means). v1.5, disclosed/deferred: per-super κ_S shrunk toward the global κ.
+
+3. **Novelty threshold — registered.** The previously-"calibrated" threshold is **NOVELTY_FIT_QUANTILE = 0.99** of the *fit-set* nearest-centroid distance distribution (dimensionless; leak status = fit set's). Masked run: centroids + quantile from ≤T0 → leak-free, reported per window. Production run: vs the final frozen map → **display-only** (same status as UMAP-on-all-data); not scored and **not** added to the accepted-leakage list.
+
+4. **PCA solver.** "PCA 768→50" is computed by exact streaming **centered-covariance + eigh** (deterministic, batch-order invariant), replacing IncrementalPCA (an order-dependent approximation). Same mathematical object (verified to match full PCA exactly); measured top-50 EVR ≈ 0.688 — a reported diagnostic, never a scored threshold. Determinism is load-bearing for the refit-per-cutoff harness.
+
+5. **Data window — trailing partial month dropped.** The production series ends at **CORPUS_END** = last complete calendar month (a data-window marker mirroring CORPUS_START, not a scored threshold); the partial current month is excluded because its **raw** count would deflate the eligibility floor (shares are ~completeness-invariant; the floor is a raw count). The December validation cutoffs (T0+24m all past) are unaffected. Invariant: CORPUS_END ≥ latest cutoff T0+24m.
+
+6. **Lookahead control — extended.** The frozen control ("PCA + k-means fit ≤T0; later papers nearest-centroid; forecasts from ≤T0") now explicitly also binds **κ and the novelty quantile τ** to ≤T0 (both are fit-set statistics). Realized-side scoring uses the **same ≤T0 κ** as the forecast side (symmetric stabilization). Leak-safety requires the masked run to read/write **cutoff-scoped paths**, never the production all-data memmaps/centroids. The eligibility floor is a **raw** trailing-12m count.
+
+---
+
 ## Results
 
 _(appended by `validate.run()` at scoring time — mid-August. Empty until then.)_
