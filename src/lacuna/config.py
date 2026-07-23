@@ -28,6 +28,13 @@ EMBED_DIM = 768
 EMBED_MAX_TOKENS = 256
 EMBED_BATCH = 128                          # host GPU; tune to VRAM
 CORPUS_START = "2007-01"                   # first monthly bin
+CORPUS_END = "2026-06"                     # last COMPLETE monthly bin = production forecast origin T0.
+# A data-window marker (mirror of CORPUS_START), NOT a scored threshold: the trailing
+# partial month is dropped because its RAW count would deflate the eligibility floor
+# (shares themselves are ~completeness-invariant). Bump per production run. INVARIANT:
+# must stay >= the latest VALIDATION_CUTOFFS T0 + 24m (>= 2024-12), so the scored
+# December cutoffs are never truncated. Applied via the production run's T0 origin, NOT
+# a global month-filter inside series (the scored masked harness shares that code path).
 
 # --- geometry ---------------------------------------------------------------
 PCA_DIM = 50                               # clustering/metric space (NOT umap — avoids manifold distortion)
@@ -37,9 +44,27 @@ N_SUPERREGIONS = 64                        # Ward-linkage cut for map display + 
 
 # --- series -----------------------------------------------------------------
 ADD_ALPHA = 1.0                            # add-alpha smoothing before any log/logit (zero months defined)
-# Empirical-Bayes: each region-share shrunk toward its super-region share,
-# shrinkage weight from region size. Region set is FROZEN per forecast origin.
+# Empirical-Bayes region-share smoothing (disambiguated 2026-07-23 — see
+# artifacts/validation.md). Each micro-region's monthly share p_r is shrunk toward
+# its super-region's PER-REGION share level P_S / n_S (n_S = frozen # of micro-regions
+# in that super, from the 64-cut map) — NOT the raw super total P_S, which is ~16x
+# larger, breaks scale, and inverts the emerging/declining ranking. Weight
+# w_r = n_r / (n_r + kappa) with n_r the region's TRAILING-12m count fixed per origin
+# (NOT the raw monthly count ~11 — that drives w->0 every month and collapses g-hat to
+# the super-region ranking). kappa is EMPIRICAL-BAYES ESTIMATED, never a hardcoded
+# value (that is why no kappa constant lives here) — refit on <= T0 data per origin.
+# Region set FROZEN per forecast origin.
+EB_SHRINK_TARGET = "super_region_per_region_mean"   # prior mean m_r = P_S / n_S (scale-consistent with p_r)
+EB_SHRINK_WEIGHT = "region_trailing12m"             # w_r = n_r/(n_r+kappa), n_r = trailing-12m count, per-origin fixed
+EB_KAPPA_ESTIMATOR = "dirichlet_multinomial_mom"    # symmetric-DM concentration, method-of-moments, single global pool
+EB_KAPPA_REFIT = "per_forecast_origin_leq_T0"       # refit on <= (fold-train-end) data; NEVER a frozen number
 ACTIVITY_FLOOR_TRAILING12M = 20            # REPORTING filter only (small regions stay in the universe)
+# Novelty stream: a paper is "novel" when its nearest-centroid distance exceeds the
+# NOVELTY_FIT_QUANTILE quantile of the FIT-SET's nearest-centroid distances (registered
+# 2026-07-23; was an unregistered "calibrated threshold"). Dimensionless, so its leak
+# status = the fit set's: leak-free in the masked run (centroids + quantile from <= T0),
+# "novelty vs the final frozen map" (display-only, like UMAP) in the unmasked run.
+NOVELTY_FIT_QUANTILE = 0.99
 
 # --- forecast ---------------------------------------------------------------
 HORIZON_MONTHS = 24
@@ -56,7 +81,7 @@ BASELINE_MODEL = "SmoothedMomentum"        # trailing-12m vs prior-12m share gro
 TOP_N = 50
 G_EMERGING = 1.5                           # emerging = top-50 by g-hat with g-hat >= 1.5
 G_DECLINING = 0.75                         # declining = bottom-50 with g-hat <= 0.75 (share decline, not saturation)
-ELIGIBILITY_FLOOR = 20                     # >= 20 papers in trailing 12m at T0
+ELIGIBILITY_FLOOR = 20                     # >= 20 RAW papers in trailing 12m at T0 (raw count, not smoothed/add-alpha)
 SATURATING_GROWTH_24M = 1.3                # flattening-after-growth: trailing-24m growth >= 1.3 ...
 SATURATING_G_BAND = (0.9, 1.1)             # ... AND 0.9 <= g-hat <= 1.1
 

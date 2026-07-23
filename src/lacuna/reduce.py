@@ -2,8 +2,9 @@
 
 Two independent reductions:
 
-- **Metric space (clustering):** IncrementalPCA 768→50 on the full corpus. This
-  is what regions/series operate on — NOT UMAP, which would distort the metric.
+- **Metric space (clustering):** exact PCA 768→50 (streamed centered-covariance +
+  ``eigh``) on the full corpus. This is what regions/series operate on — NOT UMAP,
+  which would distort the metric.
 - **Display space (map only):** UMAP 50→2, fit on a ``UMAP_FIT_SAMPLE`` stratified
   sample and ``transform`` the rest (caps RAM on 2.6M). v1 ships one static map;
   Aligned/parametric UMAP for temporal stability is deferred.
@@ -15,12 +16,13 @@ import os
 import time
 from pathlib import Path
 
+import numpy as np
+
 from . import config
 
 # Rows per streamed batch. Sequential over the memmap, so this only bounds the
-# transient float32/float64 working set, not resident memory: 50k x 768 x 4 B =
-# ~150 MB, which IncrementalPCA upcasts to float64 internally (~300 MB) plus its
-# SVD workspace. Comfortable on this 16 GB box.
+# transient float64 working set, not resident memory: a 50k x 768 float64 chunk is
+# ~300 MB; the accumulated 768 x 768 Gram is ~4.7 MB. Comfortable on this 16 GB box.
 _PCA_CHUNK = 50_000
 
 
@@ -32,11 +34,28 @@ def _embed_rows(embed_memmap: Path) -> int:
 
 def run_pca(sample: int | None = None,
             embed_memmap: Path = config.EMBED_MEMMAP,
+            fit_mask: np.ndarray | None = None,
             out: Path = config.PCA_MEMMAP) -> Path:
-    """IncrementalPCA 768→``PCA_DIM``, streamed in batches. Returns float32 memmap."""
-    import numpy as np
-    from sklearn.decomposition import IncrementalPCA
+    """Exact streaming PCA 768→``PCA_DIM``. Returns a float32 (N, PCA_DIM) memmap.
 
+    Solver (CPU-only environment-directed 2026-07-23, replaces IncrementalPCA — see the
+    validation.md clarification): accumulate the row count, first moment Σx and
+    second moment Σxxᵀ in float64 over the *fit set* in streamed batches, form the
+    centered covariance ``C = Σxxᵀ/n_fit − μμᵀ`` (μ = Σx/n_fit), and take the top
+    ``PCA_DIM`` eigenvectors via ``eigh``. This is EXACT (not IncrementalPCA's
+    order-dependent streaming approximation), DETERMINISTIC (batch-order invariant —
+    load-bearing for the refit-per-cutoff validation), and faster; d=768 ≪ N makes
+    the 768×768 covariance trivial. A fixed sign convention (each component's
+    max-abs loading forced positive) keeps raw coordinates reproducible across runs.
+    NB: ``eigh``/GEMM here are the LAPACK/BLAS calls the host's MKL_THREADING_LAYER=TBB
+    fix protects — launch via ``conda run -n brontide``, never a hard interpreter path.
+
+    ``fit_mask`` (bool, length = processed N) restricts the fit set to papers
+    ``<= T0`` for the masked validation run — the mean AND covariance are both
+    accumulated on the masked rows only, then ALL rows are centered by the fit-set
+    mean and projected. ``None`` = fit on all (production run A). Mirrors
+    ``regions.run``'s fit_mask; the pre-registered lookahead control requires it.
+    """
     # R3 — refuse a --sample run against the default output path: it would
     # truncate a completed full PCA (mode="w+") to (sample, 50).
     if sample is not None and out == config.PCA_MEMMAP:
@@ -52,36 +71,64 @@ def run_pca(sample: int | None = None,
     # exactly 0.0 (finite), so nothing would error; this is the only guard.
     if sample is None and emb_rows != n:
         raise RuntimeError(f"embed incomplete: sidecar n_done={emb_rows}, expected {n}")
+    if fit_mask is not None and fit_mask.shape[0] != n:
+        raise RuntimeError(f"fit_mask len {fit_mask.shape[0]} != processed N {n}")
 
     emb = np.memmap(embed_memmap, dtype=np.float16, mode="r", shape=(emb_rows, config.EMBED_DIM))
 
-    ipca = IncrementalPCA(n_components=config.PCA_DIM)
+    # --- fit: exact centered covariance over the (optionally masked) fit set ----
+    d = config.EMBED_DIM
+    n_fit = 0
+    s = np.zeros(d, dtype=np.float64)             # Σx over the fit set
+    gram = np.zeros((d, d), dtype=np.float64)     # Σxxᵀ over the fit set
     t0 = time.perf_counter()
     for lo in range(0, n, _PCA_CHUNK):
         hi = min(lo + _PCA_CHUNK, n)
-        if hi - lo < config.PCA_DIM:               # IncrementalPCA needs batch >= n_components
-            break                                  # tiny trailing remainder: skip fit, still transformed below
-        ipca.partial_fit(np.asarray(emb[lo:hi], dtype=np.float32))
+        xb = np.asarray(emb[lo:hi], dtype=np.float64)
+        if fit_mask is not None:
+            xb = xb[fit_mask[lo:hi]]
+        if xb.shape[0] == 0:
+            continue
+        n_fit += xb.shape[0]
+        s += xb.sum(axis=0)
+        gram += xb.T @ xb
+    if n_fit <= config.PCA_DIM:
+        raise RuntimeError(f"fit set too small: {n_fit} rows <= PCA_DIM {config.PCA_DIM}")
+    mu = s / n_fit
+    cov = gram / n_fit - np.outer(mu, mu)
+    cov = (cov + cov.T) * 0.5                      # symmetrize against fp drift
+    evals, evecs = np.linalg.eigh(cov)            # ascending eigenvalues
+    order = np.argsort(evals)[::-1][:config.PCA_DIM]
+    comps = evecs[:, order].copy()                # (768, PCA_DIM), principal axes
+    top_evals = evals[order]
+    for j in range(comps.shape[1]):               # deterministic sign convention
+        if comps[np.argmax(np.abs(comps[:, j])), j] < 0.0:
+            comps[:, j] = -comps[:, j]
+    total_var = float(evals.sum())                # trace(C) = total variance
+    evr = top_evals / total_var
     fit_s = time.perf_counter() - t0
 
-    # Transform to a temp file, then atomically replace, so an interrupted
-    # transform never leaves a truncated pca50 that a consumer would mis-join.
+    # Transform ALL rows (centered by the fit-set mean) to a temp file, then
+    # atomically replace, so an interrupted transform never leaves a truncated
+    # pca50 that a consumer would mis-join.
     tmp = out.with_suffix(out.suffix + ".tmp")
     out.parent.mkdir(parents=True, exist_ok=True)
     outmm = np.memmap(tmp, dtype=np.float32, mode="w+", shape=(n, config.PCA_DIM))
     for lo in range(0, n, _PCA_CHUNK):
         hi = min(lo + _PCA_CHUNK, n)
-        outmm[lo:hi] = ipca.transform(np.asarray(emb[lo:hi], dtype=np.float32)).astype(np.float32)
+        xb = np.asarray(emb[lo:hi], dtype=np.float64)
+        outmm[lo:hi] = ((xb - mu) @ comps).astype(np.float32)
     outmm.flush()
     del outmm
     os.replace(tmp, out)
 
-    evr = ipca.explained_variance_ratio_
     total_s = time.perf_counter() - t0
+    fit_desc = "all" if fit_mask is None else f"{n_fit:,}"
     # R4 — headerless memmap: record N/dim so consumers can assert on join width.
     (out.with_suffix(out.suffix + ".meta.json")).write_text(json.dumps({
         "n": int(n), "dim": config.PCA_DIM, "dtype": "float32",
-        "source_rows": int(emb_rows), "method": "IncrementalPCA",
+        "source_rows": int(emb_rows), "method": "exact-cov-eigh",
+        "fit_on": "all" if fit_mask is None else int(n_fit),
         "explained_variance_ratio_top10": [float(x) for x in evr[:10]],
         "total_explained": float(evr.sum()),
         "expected_bytes": int(n) * config.PCA_DIM * 4,
@@ -90,6 +137,7 @@ def run_pca(sample: int | None = None,
     print(f"\nreduce.run_pca[{config.resolve_sample(sample)}] -> {out}\n"
           f"  shape/dtype : ({n:,}, {config.PCA_DIM}) float32\n"
           f"  size        : {out.stat().st_size / 1e6:.1f} MB\n"
+          f"  fit_on      : {fit_desc} rows (exact cov eigh, deterministic)\n"
           f"  EVR[0]      : {evr[0]:.4f}   top-{config.PCA_DIM} total: {evr.sum():.4f}\n"
           f"  timing      : fit {fit_s:.0f}s, total {total_s:.0f}s")
     return out
