@@ -1,0 +1,46 @@
+{
+  "cutoff_T0": "2020-12",
+  "horizon": 24,
+  "models": [
+    "SmoothedMomentum",
+    "Naive",
+    "SeasonalNaive",
+    "AutoETS",
+    "AutoARIMA",
+    "AutoTheta"
+  ],
+  "selected_model": "SmoothedMomentum",
+  "cv_summary": [
+    {
+      "model": "SmoothedMomentum",
+      "spearman": 0.29714298087583146,
+      "mase": 0.6667859276769772
+    },
+    {
+      "model": "SeasonalNaive",
+      "spearman": 0.20296822473356696,
+      "mase": 0.8294380425242759
+    },
+    {
+      "model": "AutoETS",
+      "spearman": 0.11845101722873899,
+      "mase": 0.8075950886075169
+    },
+    {
+      "model": "AutoTheta",
+      "spearman": 0.06730120062495529,
+      "mase": 0.8118724883252753
+    },
+    {
+      "model": "AutoARIMA",
+      "spearman": 0.05244536111508476,
+      "mase": 0.8119734337845639
+    },
+    {
+      "model": "Naive",
+      "spearman": 0.038627015011444096,
+      "mase": 0.7946335715771062
+    }
+  ],
+  "statsforecast": true
+}

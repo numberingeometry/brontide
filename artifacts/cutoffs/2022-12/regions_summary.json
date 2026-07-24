@@ -1,0 +1,15 @@
+{
+  "n_papers": 2705992,
+  "k_regions": 1024,
+  "n_super": 64,
+  "fit_on": 1784871,
+  "region_size_min": 782,
+  "region_size_max": 11171,
+  "region_size_mean": 2642.5703125,
+  "region_size_median": 2455.0,
+  "empty_regions": 0,
+  "super_size_min": 10985,
+  "super_size_max": 122089,
+  "super_size_median": 34921.0,
+  "km_inertia": 45852160.0
+}

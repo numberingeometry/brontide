@@ -1,0 +1,18 @@
+{
+  "cutoff_T0": "2022-12",
+  "score_through": "2024-12",
+  "n_le_t0": 192,
+  "n_months": 216,
+  "months": "2007-01..2024-12",
+  "K": 1024,
+  "kappa": 7.241153798599442,
+  "add_alpha": 1.0,
+  "weight_w_min": 0.6236632234015757,
+  "weight_w_median": 0.9564418699393047,
+  "weight_w_max": 0.9916695686036544,
+  "trailing12m_count_min": 12.0,
+  "trailing12m_median": 159.0,
+  "eb_shrink_target": "super_region_per_region_mean",
+  "eb_shrink_weight": "region_trailing12m",
+  "eb_kappa_estimator": "dirichlet_multinomial_mom"
+}

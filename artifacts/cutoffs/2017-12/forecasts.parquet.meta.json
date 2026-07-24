@@ -1,0 +1,31 @@
+{
+  "cutoff_T0": "2017-12",
+  "horizon": 24,
+  "models": [
+    "SmoothedMomentum",
+    "Naive",
+    "SeasonalNaive",
+    "AutoETS",
+    "AutoARIMA",
+    "AutoTheta"
+  ],
+  "selected_model": "AutoETS",
+  "cv_summary": [
+    {
+      "model": "AutoETS",
+      "spearman": 0.17772425523925325,
+      "mase": 0.7981141838321782
+    },
+    {
+      "model": "AutoTheta",
+      "spearman": 0.13424798331217364,
+      "mase": 0.8112030044047658
+    },
+    {
+      "model": "AutoARIMA",
+      "spearman": 0.11783624595433086,
+      "mase": 0.8005801895681864
+    }
+  ],
+  "statsforecast": true
+}

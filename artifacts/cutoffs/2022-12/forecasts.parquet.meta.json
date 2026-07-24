@@ -1,0 +1,46 @@
+{
+  "cutoff_T0": "2022-12",
+  "horizon": 24,
+  "models": [
+    "SmoothedMomentum",
+    "Naive",
+    "SeasonalNaive",
+    "AutoETS",
+    "AutoARIMA",
+    "AutoTheta"
+  ],
+  "selected_model": "SmoothedMomentum",
+  "cv_summary": [
+    {
+      "model": "SmoothedMomentum",
+      "spearman": 0.2659182514066709,
+      "mase": 0.6467713534243064
+    },
+    {
+      "model": "SeasonalNaive",
+      "spearman": 0.23700503510716922,
+      "mase": 0.7960520784749049
+    },
+    {
+      "model": "AutoETS",
+      "spearman": 0.12671007751591445,
+      "mase": 0.831336283791418
+    },
+    {
+      "model": "Naive",
+      "spearman": 0.08571246244903796,
+      "mase": 0.7775557393782973
+    },
+    {
+      "model": "AutoTheta",
+      "spearman": 0.03432045890404835,
+      "mase": 0.8168884422292098
+    },
+    {
+      "model": "AutoARIMA",
+      "spearman": 0.0046464565749946354,
+      "mase": 0.8184962071191367
+    }
+  ],
+  "statsforecast": true
+}
