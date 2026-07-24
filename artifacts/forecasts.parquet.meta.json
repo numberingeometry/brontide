@@ -1,0 +1,46 @@
+{
+  "cutoff_T0": "2026-06",
+  "horizon": 24,
+  "models": [
+    "SmoothedMomentum",
+    "Naive",
+    "SeasonalNaive",
+    "AutoETS",
+    "AutoARIMA",
+    "AutoTheta"
+  ],
+  "selected_model": "SmoothedMomentum",
+  "cv_summary": [
+    {
+      "model": "SmoothedMomentum",
+      "spearman": 0.3258560669390601,
+      "mase": 0.7047551522918692
+    },
+    {
+      "model": "SeasonalNaive",
+      "spearman": 0.3088136662032401,
+      "mase": 0.8123379905530077
+    },
+    {
+      "model": "Naive",
+      "spearman": 0.2146723147709391,
+      "mase": 0.7679606200598503
+    },
+    {
+      "model": "AutoETS",
+      "spearman": 0.1297552789276518,
+      "mase": 0.8404849242897997
+    },
+    {
+      "model": "AutoARIMA",
+      "spearman": 0.015329708063622058,
+      "mase": 0.8285085694114954
+    },
+    {
+      "model": "AutoTheta",
+      "spearman": -0.03199265688702524,
+      "mase": 0.8294185359581373
+    }
+  ],
+  "statsforecast": true
+}
