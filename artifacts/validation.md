@@ -64,4 +64,27 @@ No frozen threshold moves (K=1024, 64 supers, cutoffs 2017-12/2020-12/2022-12, �
 
 ## Results
 
-_(appended by `validate.run()` at scoring time — mid-August. Empty until then.)_
+_Scored 2026-07-23. Pre-registration content-hash (thresholds+clarification): `dea6cc0db2ae1e83`._
+
+| cutoff | model | precision@50 | Spearman | CSI |
+|---|---|---|---|---|
+| 2017-12 | AutoARIMA | 0.540 | 0.382 | 0.180 |
+| 2017-12 | AutoETS **(selected)** | 0.700 | 0.349 | 0.333 |
+| 2017-12 | AutoTheta | 0.340 | 0.349 | 0.020 |
+| 2017-12 | Naive | 0.020 | -0.069 | 0.011 |
+| 2017-12 | SeasonalNaive | 0.260 | 0.164 | 0.000 |
+| 2017-12 | SmoothedMomentum _(baseline)_ | 0.760 | 0.207 | 0.429 |
+| 2020-12 | AutoARIMA | 0.460 | 0.260 | 0.056 |
+| 2020-12 | AutoETS | 0.540 | 0.264 | 0.176 |
+| 2020-12 | AutoTheta | 0.360 | 0.274 | 0.000 |
+| 2020-12 | Naive | 0.160 | 0.116 | 0.047 |
+| 2020-12 | SeasonalNaive | 0.180 | 0.199 | 0.000 |
+| 2020-12 | SmoothedMomentum **(selected)** | 0.240 | -0.034 | 0.087 |
+| 2022-12 | AutoARIMA | 0.360 | 0.414 | 0.078 |
+| 2022-12 | AutoETS | 0.600 | 0.361 | 0.161 |
+| 2022-12 | AutoTheta | 0.380 | 0.467 | 0.000 |
+| 2022-12 | Naive | 0.140 | -0.064 | 0.053 |
+| 2022-12 | SeasonalNaive | 0.160 | 0.055 | 0.000 |
+| 2022-12 | SmoothedMomentum **(selected)** | 0.300 | -0.016 | 0.117 |
+
+**Negative criterion:** roster beat SmoothedMomentum on precision@50 in **0/3** cutoffs (need ≥2). Verdict: **region-level emergence is momentum-dominated at 24m**.
