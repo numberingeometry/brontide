@@ -115,6 +115,7 @@ def _estimate_kappa(trailing_counts: np.ndarray, super_of_region: np.ndarray) ->
 def run_shares(sample: int | None = None,
                cutoff: str | None = None,
                regions_dir: Path = config.ARTIFACTS_DIR,
+               score_through: str | None = None,
                out: Path = config.ARTIFACTS_DIR / "region_shares.parquet") -> Path:
     """(region × month) counts → EB-smoothed shares (long parquet). ~2 MB committed.
 
@@ -124,11 +125,17 @@ def run_shares(sample: int | None = None,
     (``region_labels``, ``super_region`` map, ``centroids``) — the source of the
     region set + n_S, so a masked validation origin points here at its own
     ``artifacts/cutoffs/<T0>/`` dir, never the production one.
+
+    ``score_through`` (validation only) extends the month window past T0 so the
+    realized (T0, T0+24m] shares are available for scoring — but κ and the
+    trailing-12m weight w_r stay anchored at **T0** (fit on ≤T0), so the realized
+    side is smoothed with the same, leak-free stabilization as the forecast side.
     """
     import pyarrow as pa
     import pyarrow.parquet as pq
 
     t0 = cutoff or config.CORPUS_END
+    t_end = score_through or t0                                 # realized side may extend past T0 (leak-safe)
     labels_all, super_of_region, n_s = _load_regions(regions_dir)
 
     months_all = pq.read_table(config.RAW_PARQUET, columns=["month"]).column("month").to_pylist()
@@ -138,11 +145,12 @@ def run_shares(sample: int | None = None,
     if len(months_all) != len(labels_all):
         raise RuntimeError(f"row-order invariant broken: {len(months_all)} months vs {len(labels_all)} labels")
 
-    midx, month_labels = _month_index(months_all, config.CORPUS_START, t0)   # papers month > T0 -> -1
+    midx, month_labels = _month_index(months_all, config.CORPUS_START, t_end)   # papers month > t_end -> -1
     keep = midx >= 0
     reg = labels_all[keep]
     mon = midx[keep]
     n_months = len(month_labels)
+    n_le_t0 = sum(ml <= t0 for ml in month_labels)             # T0 index within the window (== n_months unless scoring)
     K = config.N_REGIONS
 
     # (region x month) counts; monthly totals.
@@ -160,7 +168,8 @@ def run_shares(sample: int | None = None,
     m = (P_S / n_s[:, None])[super_of_region]                  # (K, n_months), broadcast super mean back to regions
 
     # trailing-12m count n_r at T0 (last 12 months ending at T0 inclusive), fixed per origin.
-    trail = C[:, max(0, n_months - 12):n_months].sum(axis=1)   # (K,)
+    # Anchored at n_le_t0 (NOT the window end) so score_through never leaks post-T0 data into w_r/kappa.
+    trail = C[:, max(0, n_le_t0 - 12):n_le_t0].sum(axis=1)     # (K,)
     kappa = _estimate_kappa(trail, super_of_region)
     w = trail / (trail + kappa)                                # (K,) FIXED across months
 
@@ -181,7 +190,8 @@ def run_shares(sample: int | None = None,
 
     # metadata: kappa + weight distribution (the grain-trap tell)
     (out.with_suffix(out.suffix + ".meta.json")).write_text(_json_dump({
-        "cutoff_T0": t0, "n_months": n_months, "months": f"{month_labels[0]}..{month_labels[-1]}",
+        "cutoff_T0": t0, "score_through": t_end, "n_le_t0": n_le_t0,
+        "n_months": n_months, "months": f"{month_labels[0]}..{month_labels[-1]}",
         "K": K, "kappa": float(kappa), "add_alpha": a,
         "weight_w_min": float(w.min()), "weight_w_median": float(np.median(w)), "weight_w_max": float(w.max()),
         "trailing12m_count_min": float(trail.min()), "trailing12m_median": float(np.median(trail)),
@@ -199,12 +209,16 @@ def run_shares(sample: int | None = None,
 def run_novelty(sample: int | None = None,
                 cutoff: str | None = None,
                 regions_dir: Path = config.ARTIFACTS_DIR,
+                pca_memmap: Path = config.PCA_MEMMAP,
                 out: Path = config.ARTIFACTS_DIR / "novelty_stream.parquet") -> Path:
     """Per-month new-topic influx: fraction beyond the fit-set distance quantile.
 
-    ``cutoff``/``regions_dir`` as in ``run_shares``. The distance threshold is
-    ``NOVELTY_FIT_QUANTILE`` of the FIT-SET nearest-centroid distances, so it inherits
-    the fit set's leak profile (leak-free <= T0 in run B; vs-final-map in run A).
+    ``cutoff``/``regions_dir`` as in ``run_shares``. ``pca_memmap`` is the PCA space
+    to measure distances in — validate points it at the cutoff-scoped ``<=T0`` PCA so
+    τ, the centroids, and the distances are all leak-free (never the production
+    all-data memmap). The distance threshold is ``NOVELTY_FIT_QUANTILE`` of the
+    FIT-SET nearest-centroid distances, inheriting the fit set's leak profile
+    (leak-free <= T0 in run B; vs-final-map in run A).
     """
     import pyarrow as pa
     import pyarrow.parquet as pq
@@ -213,9 +227,9 @@ def run_novelty(sample: int | None = None,
     labels_all, super_of_region, _ = _load_regions(regions_dir)
     centroids = np.load(regions_dir / "centroids.f32.npy").astype(np.float32)   # (K, 50)
 
-    pca_meta = json.loads((config.PCA_MEMMAP.with_suffix(config.PCA_MEMMAP.suffix + ".meta.json")).read_text())
+    pca_meta = json.loads((pca_memmap.with_suffix(pca_memmap.suffix + ".meta.json")).read_text())
     n_pca = int(pca_meta["n"])
-    pca = np.memmap(config.PCA_MEMMAP, dtype=np.float32, mode="r", shape=(n_pca, config.PCA_DIM))
+    pca = np.memmap(pca_memmap, dtype=np.float32, mode="r", shape=(n_pca, config.PCA_DIM))
 
     months_all = pq.read_table(config.RAW_PARQUET, columns=["month"]).column("month").to_pylist()
     if sample is not None:
