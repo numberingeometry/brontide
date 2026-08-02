@@ -1,6 +1,11 @@
 # Big intermediates live in data/ (compute host only) — never committed.
-/data/
+# NB: ignore the CONTENTS, not the dir itself — git never descends into an
+# ignored directory, so a negation inside one can never fire.
+/data/*
 !/data/.gitkeep
+# the shape-and-rebuild README IS tracked (repository setup, repository organization: an ignored dir
+# still documents what belongs in it and the command that rebuilds it).
+!/data/README.md
 
 # Model / HF caches, memmaps
 *.memmap
