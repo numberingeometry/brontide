@@ -6,7 +6,7 @@ lives here and is mirrored, dated, into ``artifacts/validation.md`` before the
 first scoring run (pre-registration discipline — see the v1 plan).
 
 "lacuna" is a placeholder name (final name deferred; candidate dossier in
-local workspace/projects/lacuna/2026-07-21-rename-vetting.md).
+local workspace/projects/lacuna/notes/lacuna/lacuna-2026-07-21-rename-vetting.md).
 """
 from __future__ import annotations
 

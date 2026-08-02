@@ -2,7 +2,7 @@
 
 Forecast the **temporal dynamics of the research frontier in embedding space**: which regions of the arXiv SPECTER2 embedding cloud are **emerging vs saturating**. This is the v2 of `arxiv-heatmap` — a résumé / tool build, headlined by a **pre-registered, multi-cutoff out-of-time harness against a smoothed-momentum baseline**.
 
-> **Name is a placeholder.** "lacuna" is the internal codename; the final name is chosen from the vetted dossier once the build takes shape (`local workspace/projects/lacuna/2026-07-21-rename-vetting.md`). Rename = one `gh repo rename` later.
+> **Name is a placeholder.** "lacuna" is the internal codename; the final name is chosen from the vetted dossier once the build takes shape (`local workspace/projects/lacuna/notes/lacuna/lacuna-2026-07-21-rename-vetting.md`). Rename = one `gh repo rename` later.
 
 ## Start here (60 seconds)
 
@@ -70,4 +70,4 @@ python scripts/run_ingest.py && python scripts/run_embed.py && ...
 - **Mid-September** — emergence briefs + forecast figure on the site; validation writeup in README; pick the final name; shared tooling bookkeeping (build stub via change-control + integrity checker).
 - Buffer to **Sep 30, 2026**.
 
-Full approved plan: `local workspace/projects/lacuna/2026-07-22-v1-plan.md`.
+Full approved plan: `local workspace/projects/lacuna/notes/lacuna/lacuna-2026-07-22-v1-plan.md`.
