@@ -8,7 +8,8 @@ Forecast the **temporal dynamics of the research frontier in embedding space**: 
 
 1. **[LEDGER.md](LEDGER.md)** — the claim ledger (generated; the pre-registered L1 validation rows live here). Hand-edited source: [`blueprint/claims.yaml`](blueprint/claims.yaml); gate: `python blueprint/check.py` (also fires as the pre-commit hook).
 2. **The work** — [`src/lacuna/`](src/lacuna/) (the 10 stages + `config.py`) · [`scripts/`](scripts/) (thin runners) · [`notes/`](notes/) (repo-claim evidence) · [`notebooks/`](notebooks/) (EDA only) · [`artifacts/`](artifacts/) (committed small outputs + the pre-registration record).
-3. **The local editor configuration** — [*_LINK.md](*_LINK.md) → the repository's lacuna hub (positioning dossier, v1 plan, rename vetting).
+3. **Decisions** — [`decisions/`](decisions/) (dated ADRs, immutable; index in its README).
+4. **The local editor configuration** — [*_LINK.md](*_LINK.md) → the repository's lacuna hub (positioning dossier, v1 plan, rename vetting).
 
 ## Positioning (honest — no "first/only" language)
 
