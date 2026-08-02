@@ -71,5 +71,3 @@ python scripts/run_ingest.py && python scripts/run_embed.py && ...
 - Buffer to **Sep 30, 2026**.
 
 Full approved plan: `local workspace/projects/lacuna/notes/lacuna/lacuna-2026-07-22-v1-plan.md`.
-
-<!-- n5-hook-verification-probe -->
