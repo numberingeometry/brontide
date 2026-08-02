@@ -4,6 +4,12 @@ Forecast the **temporal dynamics of the research frontier in embedding space**: 
 
 > **Name is a placeholder.** "lacuna" is the internal codename; the final name is chosen from the vetted dossier once the build takes shape (`local workspace/projects/lacuna/2026-07-21-rename-vetting.md`). Rename = one `gh repo rename` later.
 
+## Start here (60 seconds)
+
+1. **[LEDGER.md](LEDGER.md)** — the claim ledger (generated; the pre-registered L1 validation rows live here). Hand-edited source: [`blueprint/claims.yaml`](blueprint/claims.yaml); gate: `python blueprint/check.py` (also fires as the pre-commit hook).
+2. **The work** — [`src/lacuna/`](src/lacuna/) (the 10 stages + `config.py`) · [`scripts/`](scripts/) (thin runners) · [`notes/`](notes/) (repo-claim evidence) · [`notebooks/`](notebooks/) (EDA only) · [`artifacts/`](artifacts/) (committed small outputs + the pre-registration record).
+3. **The local editor configuration** — [*_LINK.md](*_LINK.md) → the repository's lacuna hub (positioning dossier, v1 plan, rename vetting).
+
 ## Positioning (honest — no "first/only" language)
 
 Large-scale research maps already exist — **Lacuna** (Weiss et al., 2026) charts 734K ML papers into 27K LLM-derived directions, and **CSET/ETO's Map of Science** clusters tens of millions of documents. Region-level growth forecasting with out-of-time evaluation was demonstrated by **Klavans, Boyack & Murdick (PLOS ONE 2020)**, whose model still powers the Map of Science's "extreme growth" predictions. This project claims **no new formulation**: it combines an all-arXiv embedding map with corpus-wide region-**share** time-series forecasts and holds them to a standard none of those systems apply — pre-registered, multi-cutoff out-of-time validation against a smoothed-momentum baseline. Cite K&B 2020 + CSET/ETO as direct predecessors everywhere; scale is not a claim (K&B is ~15× bigger).
