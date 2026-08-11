@@ -1,74 +1,155 @@
-# lacuna — research-frontier forecasting *(placeholder name)*
+# lacuna — forecasting the research frontier *(placeholder name)*
 
-Forecast the **temporal dynamics of the research frontier in embedding space**: which regions of the arXiv SPECTER2 embedding cloud are **emerging vs saturating**. This is the v2 of `arxiv-heatmap` — a résumé / tool build, headlined by a **pre-registered, multi-cutoff out-of-time harness against a smoothed-momentum baseline**.
+Which regions of the arXiv embedding cloud are **emerging**, and which are **saturating**? 2.7M papers → SPECTER2 embeddings → 1,024 microregions → 24-month share forecasts, held to a **pre-committed, multi-cutoff out-of-time harness** with a published negative result.
 
-> **Name is a placeholder.** "lacuna" is the internal codename; the final name is chosen from the vetted dossier once the build takes shape (`local workspace/projects/lacuna/notes/lacuna/lacuna-2026-07-21-rename-vetting.md`). Rename = one `gh repo rename` later.
+![The arXiv research frontier igniting, 2007–2026](figures/map-evolution.gif)
 
-## Start here (60 seconds)
+**2,705,992 papers · 2007-01 → 2026-06 · 234 months · 1,024 microregions → 64 Ward super-regions · 768→50 exact PCA · 24-month horizon · 3 masked cutoffs**
 
-1. **[LEDGER.md](LEDGER.md)** — the claim ledger (generated; the pre-registered L1 validation rows live here). Hand-edited source: [`blueprint/claims.yaml`](blueprint/claims.yaml); gate: `python blueprint/check.py` (also fires as the pre-commit hook).
-2. **The work** — [`src/lacuna/`](src/lacuna/) (the 10 stages + `config.py`) · [`scripts/`](scripts/) (thin runners) · [`notes/`](notes/) (repo-claim evidence) · [`notebooks/`](notebooks/) (EDA only) · [`artifacts/`](artifacts/) (committed small outputs + the pre-registration record).
-3. **Decisions** — [`decisions/`](decisions/) (dated ADRs, immutable; index in its README).
-4. **The local editor configuration** — [*_LINK.md](*_LINK.md) → the repository's lacuna hub (positioning dossier, v1 plan, rename vetting).
+`PyTorch` · `transformers` + `adapters` (SPECTER2 + proximity adapter) · `scikit-learn` (MiniBatchKMeans) · `NumPy`/`SciPy` (exact streamed-covariance PCA, Ward linkage) · `UMAP` · `statsforecast` (AutoETS / AutoARIMA / AutoTheta) · `pandas`/`pyarrow` · Python 3.11
 
-## Positioning (honest — no "first/only" language)
+---
 
-Large-scale research maps already exist — **Lacuna** (Weiss et al., 2026) charts 734K ML papers into 27K LLM-derived directions, and **CSET/ETO's Map of Science** clusters tens of millions of documents. Region-level growth forecasting with out-of-time evaluation was demonstrated by **Klavans, Boyack & Murdick (PLOS ONE 2020)**, whose model still powers the Map of Science's "extreme growth" predictions. This project claims **no new formulation**: it combines an all-arXiv embedding map with corpus-wide region-**share** time-series forecasts and holds them to a standard none of those systems apply — pre-registered, multi-cutoff out-of-time validation against a smoothed-momentum baseline. Cite K&B 2020 + CSET/ETO as direct predecessors everywhere; scale is not a claim (K&B is ~15× bigger).
+## Headline result — the criterion was not met
 
-## Pipeline (stage → where it runs)
+The go/no-go was frozen at repo scaffold on **2026-07-22**, before any data was touched, and scored on **2026-07-23**. It failed, and the failure is reported verbatim:
 
-| # | Stage | Module | Runs on | Output |
+> **Roster beat SmoothedMomentum on precision@50 in 0/3 cutoffs (need ≥2).
+> Verdict: region-level emergence is momentum-dominated at 24m.**
+
+![precision@50 by model and cutoff against the chance rate](figures/validation-precision.png)
+
+**But the verdict needs its scope note, and I found the reason myself before anyone read it.** At two of three cutoffs the cross-validation selected `SmoothedMomentum` — the baseline — so the test evaluated `0.240 > 0.240` and `0.300 > 0.300`, false by identity. At the third, an asymmetric minimum-train guard gave the baseline **zero CV folds**. Meanwhile a fixed AutoETS scored **0.613 mean precision@50** against a **0.101** chance rate, versus momentum's 0.433 with 3.5× the dispersion.
+
+So the null is about **model selection, not absent signal**: the harness selected on point accuracy (MASE + Spearman) and was scored on the top 5% of a ranking. Those are not the same loss. Every non-Naive model clears chance at every cutoff.
+
+The frozen sentence stands unedited. The full defect disclosure, the four defensible readings of that sentence (one of which flips the verdict to 2/3), the chance-rate arithmetic, and what the result does and does not license are in **[LIMITATIONS.md](LIMITATIONS.md)**.
+
+## Verify it yourself in two seconds
+
+Every published number regenerates from committed artifacts — no raw corpus, no GPU, no network:
+
+```sh
+git clone https://github.com/numberingeometry/lacuna && cd lacuna
+pip install -e .
+python scripts/verify_results.py
+```
+
+```
+re-scored 3 cutoffs from committed artifacts (2017-12, 2020-12, 2022-12)
+...
+negative criterion: 0/3 (need >=2) -> region-level emergence is momentum-dominated at 24m
+OK: all 18 published rows reproduce exactly.
+```
+
+The pre-registration ordering is checkable too — thresholds at `e42b1bd` (2026-07-22), results appended at `44594ea` (2026-07-23), with every intervening edit an addition:
+
+```sh
+git log --follow --format='%h %ad %s' --date=short -- artifacts/validation.md
+git diff --numstat e42b1bd 787d973 -- artifacts/validation.md   # 18 insertions, 0 deletions
+```
+
+## The interactive dashboard
+
+**[`dashboard.html`](dashboard.html)** — one self-contained file (no server, no CDN, no network). Scrub the year to watch the frontier fill in, hover for the region under the cursor, click any region for its share history and forecast, and sort all 64 super-regions by forecast growth.
+
+```sh
+python scripts/run_dashboard.py && open dashboard.html   # or just open the committed file
+```
+
+## What the map actually looks like
+
+![The arXiv frontier with the largest super-regions labelled](figures/frontier-map.png)
+
+Region names are LLM-generated from each super-region's c-TF-IDF terms and sample titles ([`name_regions.py`](src/lacuna/name_regions.py), output committed to [`artifacts/region_names.json`](artifacts/region_names.json) so nothing downstream needs an API key). They are **cosmetic**: names never enter the forecast, the emergence statistic, or the scored validation.
+
+The hierarchy is unsupervised all the way down — nothing told it that computation and the physical sciences are different:
+
+![Ward linkage over the 1,024 microregions](figures/region-hierarchy.png)
+
+## Forecast against ground truth
+
+At the 2020-12 cutoff, with everything after it masked — the cutoff where CV picked the baseline itself:
+
+![History, forecast band, and realized path for six super-regions](figures/forecast-vs-realized.png)
+
+And what the model says at the production origin (2026-06):
+
+![Super-regions ranked by forecast growth](figures/emerging-regions.png)
+
+## Pipeline
+
+| # | Stage | Module | Where | Output |
 |---|---|---|---|---|
-| 1 | Ingest | `ingest.py` | compute host (~1h) | `data/papers.parquet` (id, month, categories, title, abstract) |
-| 2 | Embed | `embed.py` | **compute host GPU (4–8h)** | float16 memmap `N×768` (SPECTER2 + proximity adapter) |
-| 3 | Reduce | `reduce.py` | compute host | IncrementalPCA 768→50 (metric); UMAP 50→2 (display only) |
-| 4 | Regions | `regions.py` | compute host (~30m) | KMeans **K=1024** microclusters + Ward tree → 64 super-regions |
+| 1 | Ingest | `ingest.py` | compute host (~1 h) | `data/papers.parquet` (id, month, categories, title, abstract) |
+| 2 | Embed | `embed.py` | **compute host GPU (~14 h measured)** | float16 memmap `N×768`, SPECTER2 + proximity adapter, resumable |
+| 3 | Reduce | `reduce.py` | compute host | exact PCA 768→50 (streamed centered covariance + `eigh`; deterministic, batch-order invariant); UMAP 50→2 for display only |
+| 4 | Regions | `regions.py` | compute host (~30 m) | MiniBatchKMeans **K=1024** + Ward tree → 64 super-regions |
 | 5 | Series | `series.py` | compute host | EB-smoothed region-**share** monthly series + novelty stream |
 | 6 | Forecast | `forecast.py` | compute host/CPU-only environment | statsforecast roster, 24m horizon, rolling-origin CV |
-| 7 | Emergence | `emergence.py` | CPU-only environment | rank by ĝ; emerging / declining / saturating (pre-registered) |
-| 8 | Validate | `validate.py` | CPU-only environment | 3 cutoffs, precision@50 + Spearman + CSI vs smoothed-momentum |
-| 9 | Labels | `labels.py` | compute host | c-TF-IDF top terms per super-region |
-| 10 | Export | `export_map.py`, `export_figs.py` | CPU-only environment | site's `map/data/*.bin` + per-region forecast JSON |
+| 7 | Emergence | `emergence.py` | CPU-only environment | rank by ĝ; emerging / declining / saturating |
+| 8 | Validate | `validate.py` | CPU-only environment | 3 cutoffs, precision@50 + Spearman + CSI vs the baseline |
+| 9 | Labels | `labels.py`, `name_regions.py` | CPU-only environment | c-TF-IDF terms, then LLM names per super-region |
+| 10 | Export | `export_map.py`, `export_figs.py`, `export_dashboard.py` | CPU-only environment | map binaries, 7 figures, dashboard |
 
-All numeric knobs are frozen in **`src/lacuna/config.py`** and mirrored, dated, into **`artifacts/validation.md`** (the pre-registration record) **before** any scoring run.
+Every numeric knob is frozen in **[`src/lacuna/config.py`](src/lacuna/config.py)** and mirrored, dated, into **[`artifacts/validation.md`](artifacts/validation.md)** *before* any scoring run. Determinism is load-bearing: the harness refits PCA, k-means, κ, and the novelty threshold at each cutoff on ≤T₀ data only, so an order-dependent solver would make the masked runs irreproducible.
 
-## Cross-device workflow (CPU-only environment ↔ compute host)
+### Three tiers of reproduction
 
-- **GitHub is the sync bus**, not OneDrive (this repo lives off OneDrive; OneDrive syncs files-not-commits and would silently diverge).
-- **CPU-only environment** (storage-limited): scaffold, module code, `--sample` smoke tests, exports, site integration, git orchestration.
-- **compute host** (GPU, ≥100 GB): the heavy stages 1–5 (+9). Reports SPECTER2 throughput after embed so we can trigger the S2-bulk fallback if needed.
-- **Only small `artifacts/` cross the wire** (region-series parquet ~2 MB, map export ~1–2 MB, forecast JSON, validation report). The 4 GB raw + 3.8 GB embeddings are gitignored — they live **only on the compute host**; the CPU-only environment works from committed artifacts.
-
-## Layout
-
-```
-src/lacuna/    ingest embed reduce regions series forecast emergence
-               validate labels export_map export_figs  + config.py
-scripts/       run_<stage>.py thin CLI wrappers  + smoke_test.py
-notebooks/     EDA / reports only
-data/          gitignored — big intermediates (compute host)
-artifacts/     committed small outputs + validation.md (pre-registration)
-```
-
-## Running
+| Tier | Command | Cost | Needs |
+|---|---|---|---|
+| Verify the headline | `python scripts/verify_results.py` | ~2 s | committed artifacts only |
+| Rebuild figures + dashboard | `python scripts/run_figs.py && python scripts/run_dashboard.py` | ~1 min | committed artifacts only |
+| Smoke-test the pipeline | `python scripts/smoke_test.py --sample 50000` | minutes | a corpus snapshot |
+| Full rebuild | `run_ingest → run_embed → … → run_export` | ~16 h, ~10 GB | GPU + corpus snapshot |
 
 ```sh
 conda env create -f environment.yml && conda activate lacuna
 pip install -e .
-
-# Every stage supports --sample N (CPU-only environment smoke test before the compute host full run):
-python scripts/run_ingest.py   --sample 50000
-python scripts/smoke_test.py   --sample 50000   # whole pipeline on a sample
-
-# compute host full run (no --sample):
-python scripts/run_ingest.py && python scripts/run_embed.py && ...
 ```
 
-## Milestones (~1–2 days/week; the quantum D′ paper keeps priority hours)
+Every stage takes `--sample N` so the whole chain can be smoke-tested before a full run. `data/` is gitignored and compute host-only; see [`data/README.md`](data/README.md) for what belongs there and how to rebuild it.
 
-- **End of July** — repo scaffolded + private remote *(done)*; ingest + embed on compute host; first real UMAP quick-look.
-- **Mid-August** — regions/series/forecast harness; **first out-of-time validation numbers** (double go/no-go: beat smoothed momentum? citable writeup or portfolio-only?); site map swapped to real data.
-- **Mid-September** — emergence briefs + forecast figure on the site; validation writeup in README; pick the final name; shared tooling bookkeeping (build stub via change-control + integrity checker).
-- Buffer to **Sep 30, 2026**.
+## Data and model provenance
 
-Full approved plan: `local workspace/projects/lacuna/notes/lacuna/lacuna-2026-07-22-v1-plan.md`.
+- **Corpus** — arXiv metadata (titles + abstracts), 2007-01 → 2026-06. arXiv metadata is distributed under CC0; the underlying papers remain under their authors' licenses and arXiv's Terms of Use. Check the licence stated on the snapshot you download before redistributing.
+- **Embeddings** — [`allenai/specter2_base`](https://huggingface.co/allenai/specter2_base) with the `allenai/specter2` proximity adapter (Singh et al., SciRepEval). Apache-2.0; see the model cards.
+- **What is committed here** — region-level *aggregates* (share series, forecasts, emergence ranks), a 149,994-point display sample of 2-D coordinates, and 256 sample titles for labelling. No abstracts and no per-paper records are redistributed.
+- Region names are LLM-generated; the exact prompt is in `name_regions.build_prompt`.
+
+## Status
+
+- Pipeline complete on the full corpus; all three cutoffs scored 2026-07-23.
+- Map export is real (149,994 sampled points, `synthetic: false`) and committed.
+- Figures, dashboard, and the reproduction script land 2026-08-11.
+- Open: the final name (this one is a placeholder — see below), a test suite, CI.
+- **Not built:** the agentic grader and the persistent-homology layer that earlier drafts described. Neither exists in `src/`; both were dropped rather than quietly carried.
+
+Next, pre-registered separately before any scoring: novelty-stream incremental skill, and 80% interval coverage / PIT for the three auto-models. Both signals are already computed at all three cutoffs and have never been scored — a clean pre-registration is still available there.
+
+## Prior art
+
+Large-scale research maps already exist. **Klavans, Boyack & Murdick** (PLOS ONE 2020) and the deployed **CSET/ETO Map of Science** own scale and deployment — 38–43M documents, ~15× the corpus here — and **PreScience v2** (arXiv:2602.20459v2, Ai2 + UChicago) defines the share-change target publicly. This project claims **no new formulation** and no priority; scale is not a claim. What it adds is the pre-committed multi-cutoff out-of-time harness and an honest null.
+
+Full comparison, the PreScience v1/v2 version trap, and the honest scoping of the word "pre-registered" are in **[RELATED-WORK.md](RELATED-WORK.md)**.
+
+> **The name is a placeholder.** "lacuna" is an internal codename and collides with arXiv:2606.26246 (Mila), an unrelated static research map. The final name is picked from a vetted dossier once the build settles; a rename is one `gh repo rename`.
+
+## Layout
+
+```
+src/lacuna/    ingest embed reduce regions series forecast emergence validate
+               labels name_regions export_map export_figs export_dashboard  + config.py
+scripts/       run_<stage>.py thin runners · verify_results.py · smoke_test.py
+artifacts/     committed outputs + validation.md (the pre-registration record)
+figures/       generated — regenerate with scripts/run_figs.py
+decisions/     dated ADRs, immutable (index in decisions/README.md)
+blueprint/     claims.yaml → LEDGER.md, plus the check.py gate
+data/          gitignored — big intermediates, compute host only
+```
+
+`LEDGER.md` is generated from [`blueprint/claims.yaml`](blueprint/claims.yaml); `python blueprint/check.py` is the gate.
+
+## License
+
+MIT — see [LICENSE](LICENSE).

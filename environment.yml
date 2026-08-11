@@ -17,7 +17,7 @@ dependencies:
   - numpy
   - pandas
   - pyarrow            # parquet
-  - scikit-learn       # IncrementalPCA, MiniBatchKMeans
+  - scikit-learn       # MiniBatchKMeans (PCA is exact, in numpy/scipy)
   - scipy              # Ward linkage / dendrogram
   - matplotlib
   - tqdm

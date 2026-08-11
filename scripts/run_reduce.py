@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Stage 3 runner — IncrementalPCA 768->50 (metric) + UMAP 50->2 (display)."""
+"""Stage 3 runner — exact PCA 768->50 (metric) + UMAP 50->2 (display).
+
+Streamed centered covariance + ``eigh``: deterministic and batch-order invariant, which the
+refit-per-cutoff validation harness depends on.
+"""
 from lacuna import cli, reduce
 
 if __name__ == "__main__":

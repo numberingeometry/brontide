@@ -14,7 +14,7 @@ opened: 2026-08-01
 |---|---|---|---|
 | `papers.parquet` | one row per arXiv paper: id, month, categories, title, abstract | ~4 GB | `python scripts/run_ingest.py` |
 | `embeddings/*.f16.memmap` | SPECTER2 embeddings, `N×768` float16 | ~3.8 GB | `python scripts/run_embed.py` (GPU) |
-| `reduced/` | IncrementalPCA 768→50 (metric) + UMAP 2-D (display only) | ~1 GB | `python scripts/run_reduce.py` |
+| `reduced/` | exact PCA 768→50 (metric) + UMAP 2-D (display only) | ~1 GB | `python scripts/run_reduce.py` |
 | `regions/` | KMeans K=1024 microclusters + Ward tree | small | `python scripts/run_regions.py` |
 
 ## Rebuild
