@@ -4,7 +4,7 @@
 Needs no raw data, no GPU and no network: everything is read out of ``artifacts/``.
 Takes about a minute, most of it the 20-frame GIF.
 """
-from lacuna import cli, export_figs
+from brontide import cli, export_figs
 
 if __name__ == "__main__":
     cli.parse_sample(__doc__)

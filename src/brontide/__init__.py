@@ -1,4 +1,4 @@
-"""lacuna — research-frontier forecasting over the arXiv embedding cloud.
+"""brontide — research-frontier forecasting over the arXiv embedding cloud.
 
 Placeholder name (final name deferred). v2 of arxiv-heatmap: forecast which
 regions of the SPECTER2 embedding cloud are emerging vs saturating, headlined

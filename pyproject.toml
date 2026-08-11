@@ -3,14 +3,14 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "lacuna"
+name = "brontide"
 version = "0.0.0"
-description = "Research-frontier forecasting over the arXiv embedding cloud (placeholder name)."
+description = "Research-frontier forecasting over the arXiv embedding cloud."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 # Runtime deps are declared in environment.yml (conda-first for CUDA/torch on the compute host).
-# This file exists so `pip install -e .` makes `import lacuna` work in that env.
+# This file exists so `pip install -e .` makes `import brontide` work in that env.
 dependencies = []
 
 [tool.setuptools.packages.find]

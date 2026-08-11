@@ -88,3 +88,14 @@ _Scored 2026-07-23. Pre-registration content-hash (thresholds+clarification): `d
 | 2022-12 | SmoothedMomentum **(selected)** | 0.300 | -0.016 | 0.117 |
 
 **Negative criterion:** roster beat SmoothedMomentum on precision@50 in **0/3** cutoffs (need ≥2). Verdict: **region-level emergence is momentum-dominated at 24m**.
+
+---
+
+## Note — 2026-08-11 (project renamed; no threshold or constant changed)
+
+The project was renamed from its internal codename *lacuna* to **brontide**, and the Python
+package moved `src/lacuna/` → `src/brontide/`. The pre-registration text above is **not edited**:
+it is hashed and any change would invalidate `dea6cc0db2ae1e83`. So its reference to
+`src/lacuna/config.py` in the Target section now reads as `src/brontide/config.py` — a pure path
+rename. No frozen constant, threshold, cutoff, or decision rule moved, and the scored results are
+untouched.

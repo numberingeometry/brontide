@@ -4,7 +4,7 @@
 Runs every stage end-to-end on a small sample so interface/shape bugs surface on
 the CPU-only environment, not 6 hours into a host embed. Default sample = 50k.
 """
-from lacuna import (cli, embed, emergence, export_dashboard, export_figs, export_map,
+from brontide import (cli, embed, emergence, export_dashboard, export_figs, export_map,
                     forecast, ingest, labels, reduce, regions, series, validate)
 
 STAGES = [

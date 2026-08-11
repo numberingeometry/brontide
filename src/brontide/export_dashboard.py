@@ -54,7 +54,7 @@ def _payload(n_points: int, rng_seed: int = 0) -> dict:
 _HTML = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>lacuna — research frontier dashboard</title>
+<title>brontide — research frontier dashboard</title>
 <style>
 :root{--bg:#0d1117;--panel:#161b22;--line:#232a34;--ink:#e6edf3;--ink2:#9aa4b2;--ink3:#6b7280;
 --blue:#3987e5;--orange:#d95926;--aqua:#199e70;}

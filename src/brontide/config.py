@@ -1,11 +1,10 @@
-"""Frozen configuration for the lacuna pipeline.
+"""Frozen configuration for the brontide pipeline.
 
 Single source of truth for paths, dimensions, and the **pre-registered**
 modeling + emergence constants. Anything the validation harness scores against
 lives here and is mirrored, dated, into ``artifacts/validation.md`` before the
 first scoring run (pre-registration discipline — see the v1 plan).
 
-"lacuna" is a placeholder name; the final name is deferred (see the README).
 """
 from __future__ import annotations
 
@@ -100,6 +99,8 @@ MAP_DOWNSAMPLE = 150_000                     # proportional per micro-region, mi
 MAP_BUDGET_MB = 5.0                          # transferred before first zoom (DevTools check)
 
 # Site repo (sibling under [configured directory] — export_map.py writes here directly.
+# The site slug is still the old codename; renaming it is a site-side follow-up
+# (see decisions/2026-08-11-renamed-to-brontide.md), so this path tracks reality, not the new name.
 SITE_MAP_DATA_DIR = (REPO_ROOT.parent / "numberingeometry.github.io"
                      / "projects" / "lacuna" / "map" / "data")
 
