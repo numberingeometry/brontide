@@ -5,8 +5,7 @@ modeling + emergence constants. Anything the validation harness scores against
 lives here and is mirrored, dated, into ``artifacts/validation.md`` before the
 first scoring run (pre-registration discipline — see the v1 plan).
 
-"lacuna" is a placeholder name (final name deferred; candidate dossier in
-local workspace/projects/lacuna/notes/lacuna/lacuna-2026-07-21-rename-vetting.md).
+"lacuna" is a placeholder name; the final name is deferred (see the README).
 """
 from __future__ import annotations
 
