@@ -22,7 +22,7 @@ What PreScience does *not* do on the topic-trend task: it runs zero statistical 
 |---|---|---|
 | **Ofer, Kaufman & Linial**, *Heliyon* 2023 (arXiv:2305.04133) | Identical share target (topic pubs / total PubMed pubs), 125 topics, 40 years, 5-year horizon, step-forward temporal CV, lag baseline. Levels: lag $R^2 \approx 0.97$. **% change: lag $R^2 \approx 0.004$ vs best model $\approx 0.45$** | Hand-picked topic list, annual resolution, single domain, no multi-cutoff, no pre-registration, no embedding regions |
 | **Abolfadl et al.**, arXiv:2606.27394 | Same pipeline shape: SPECTER → AutoCluster → per-cluster ARIMA/STL/Prophet/LSTM, 127,820 abstracts, RMSE 36.76 | Absolute counts rather than shares, one 80/20 split, one narrow domain, 49 topics, one-step-ahead, no momentum baseline, no precision@k |
-| **"Lacuna"**, arXiv:2606.26246 (Mila) | Static LLM-built research map of 734K ML papers | No forecasting. **Name collision only** — unrelated to this repo's working codename |
+| **"Lacuna"**, arXiv:2606.26246 (Mila) | Static LLM-built research map of 734K ML papers | No forecasting. **Name collision only** — unrelated to this project, which was renamed away from that codename |
 | Impact4Cast, Science4Cast, FOS, ScienceMeter, Proof of Time, ForeSci, CUSP, SciPaths, SciImpact | Link prediction over concept pairs; idea-judgment, event, or paper-level forecasting | None forecasts a quantity at topic or region level |
 
 Ofer et al. cuts both ways and is worth stating: their %-change result implies momentum *should* be beatable on a growth target, which makes the null reported here more interesting, not less.

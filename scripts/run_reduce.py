@@ -4,7 +4,7 @@
 Streamed centered covariance + ``eigh``: deterministic and batch-order invariant, which the
 refit-per-cutoff validation harness depends on.
 """
-from lacuna import cli, reduce
+from brontide import cli, reduce
 
 if __name__ == "__main__":
     sample = cli.parse_sample(__doc__)

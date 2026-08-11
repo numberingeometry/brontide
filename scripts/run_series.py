@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Stage 5 runner — EB-smoothed region shares + novelty stream."""
-from lacuna import cli, series
+from brontide import cli, series
 
 if __name__ == "__main__":
     sample = cli.parse_sample(__doc__)

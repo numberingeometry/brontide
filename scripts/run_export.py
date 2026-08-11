@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Stage 10 runner — write the site's map binaries + per-region forecast JSON."""
-from lacuna import cli, export_figs, export_map
+from brontide import cli, export_figs, export_map
 
 if __name__ == "__main__":
     cli.parse_sample(__doc__)

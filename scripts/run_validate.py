@@ -4,7 +4,7 @@
 Pre-registration gate: artifacts/validation.md thresholds must already be
 committed (dated) BEFORE this scoring run.
 """
-from lacuna import cli, validate
+from brontide import cli, validate
 
 if __name__ == "__main__":
     cli.parse_sample(__doc__)  # validate always runs full-history per cutoff; --sample is a no-op smoke flag

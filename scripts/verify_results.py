@@ -19,7 +19,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from lacuna import config, validate  # noqa: E402
+from brontide import config, validate  # noqa: E402
 
 
 def rebuild() -> tuple[dict, list[str]]:

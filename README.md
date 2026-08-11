@@ -1,4 +1,6 @@
-# lacuna — forecasting the research frontier *(placeholder name)*
+# brontide — forecasting the research frontier
+
+> *brontide* (n.) — the low rumble of thunder from a storm still beyond the horizon.
 
 Which regions of the arXiv embedding cloud are **emerging**, and which are **saturating**? 2.7M papers → SPECTER2 embeddings → 1,024 microregions → 24-month share forecasts, held to a **pre-committed, multi-cutoff out-of-time harness** with a published negative result.
 
@@ -30,7 +32,7 @@ The frozen sentence stands unedited. The full defect disclosure, the four defens
 Every published number regenerates from committed artifacts — no raw corpus, no GPU, no network:
 
 ```sh
-git clone https://github.com/numberingeometry/lacuna && cd lacuna
+git clone https://github.com/numberingeometry/brontide && cd brontide
 pip install -e .
 python scripts/verify_results.py
 ```
@@ -61,7 +63,7 @@ python scripts/run_dashboard.py && open dashboard.html   # or just open the comm
 
 ![The arXiv frontier with the largest super-regions labelled](figures/frontier-map.png)
 
-Region names are LLM-generated from each super-region's c-TF-IDF terms and sample titles ([`name_regions.py`](src/lacuna/name_regions.py), output committed to [`artifacts/region_names.json`](artifacts/region_names.json) so nothing downstream needs an API key). They are **cosmetic**: names never enter the forecast, the emergence statistic, or the scored validation.
+Region names are LLM-generated from each super-region's c-TF-IDF terms and sample titles ([`name_regions.py`](src/brontide/name_regions.py), output committed to [`artifacts/region_names.json`](artifacts/region_names.json) so nothing downstream needs an API key). They are **cosmetic**: names never enter the forecast, the emergence statistic, or the scored validation.
 
 The hierarchy is unsupervised all the way down — nothing told it that computation and the physical sciences are different:
 
@@ -92,7 +94,7 @@ And what the model says at the production origin (2026-06):
 | 9 | Labels | `labels.py`, `name_regions.py` | CPU-only environment | c-TF-IDF terms, then LLM names per super-region |
 | 10 | Export | `export_map.py`, `export_figs.py`, `export_dashboard.py` | CPU-only environment | map binaries, 7 figures, dashboard |
 
-Every numeric knob is frozen in **[`src/lacuna/config.py`](src/lacuna/config.py)** and mirrored, dated, into **[`artifacts/validation.md`](artifacts/validation.md)** *before* any scoring run. Determinism is load-bearing: the harness refits PCA, k-means, κ, and the novelty threshold at each cutoff on ≤T₀ data only, so an order-dependent solver would make the masked runs irreproducible.
+Every numeric knob is frozen in **[`src/brontide/config.py`](src/brontide/config.py)** and mirrored, dated, into **[`artifacts/validation.md`](artifacts/validation.md)** *before* any scoring run. Determinism is load-bearing: the harness refits PCA, k-means, κ, and the novelty threshold at each cutoff on ≤T₀ data only, so an order-dependent solver would make the masked runs irreproducible.
 
 ### Three tiers of reproduction
 
@@ -104,7 +106,7 @@ Every numeric knob is frozen in **[`src/lacuna/config.py`](src/lacuna/config.py)
 | Full rebuild | `run_ingest → run_embed → … → run_export` | ~16 h, ~10 GB | GPU + corpus snapshot |
 
 ```sh
-conda env create -f environment.yml && conda activate lacuna
+conda env create -f environment.yml && conda activate brontide
 pip install -e .
 ```
 
@@ -122,7 +124,7 @@ Every stage takes `--sample N` so the whole chain can be smoke-tested before a f
 - Pipeline complete on the full corpus; all three cutoffs scored 2026-07-23.
 - Map export is real (149,994 sampled points, `synthetic: false`) and committed.
 - Figures, dashboard, and the reproduction script land 2026-08-11.
-- Open: the final name (this one is a placeholder — see below), a test suite, CI.
+- Open: a test suite and CI. The name is settled (see below).
 - **Not built:** the agentic grader and the persistent-homology layer that earlier drafts described. Neither exists in `src/`; both were dropped rather than quietly carried.
 
 Next, pre-registered separately before any scoring: novelty-stream incremental skill, and 80% interval coverage / PIT for the three auto-models. Both signals are already computed at all three cutoffs and have never been scored — a clean pre-registration is still available there.
@@ -133,12 +135,12 @@ Large-scale research maps already exist. **Klavans, Boyack & Murdick** (PLOS ONE
 
 Full comparison, the PreScience v1/v2 version trap, and the honest scoping of the word "pre-registered" are in **[RELATED-WORK.md](RELATED-WORK.md)**.
 
-> **The name is a placeholder.** "lacuna" is an internal codename and collides with arXiv:2606.26246 (Mila), an unrelated static research map. The final name is picked from a vetted dossier once the build settles; a rename is one `gh repo rename`.
+> **Renamed 2026-08-11.** This project was developed under the internal codename *lacuna*, which collides with arXiv:2606.26246 (Mila) — an unrelated static research map. The name was chosen from a vetted candidate set; `brontide` is free on PyPI and unclaimed in ML. Commits before the rename refer to the old name.
 
 ## Layout
 
 ```
-src/lacuna/    ingest embed reduce regions series forecast emergence validate
+src/brontide/    ingest embed reduce regions series forecast emergence validate
                labels name_regions export_map export_figs export_dashboard  + config.py
 scripts/       run_<stage>.py thin runners · verify_results.py · smoke_test.py
 artifacts/     committed outputs + validation.md (the pre-registration record)
