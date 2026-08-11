@@ -6,4 +6,4 @@ if __name__ == "__main__":
     cli.parse_sample(__doc__)
     mp = export_map.run()
     figs = export_figs.run()
-    print(f"export -> map={mp} figs={figs}")
+    print(f"export -> map={mp}, {len(figs)} figures")
