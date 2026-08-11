@@ -4,8 +4,8 @@
 Runs every stage end-to-end on a small sample so interface/shape bugs surface on
 the CPU-only environment, not 6 hours into a host embed. Default sample = 50k.
 """
-from lacuna import (cli, embed, emergence, export_figs, export_map, forecast,
-                    ingest, labels, reduce, regions, series, validate)
+from lacuna import (cli, embed, emergence, export_dashboard, export_figs, export_map,
+                    forecast, ingest, labels, reduce, regions, series, validate)
 
 STAGES = [
     ("ingest", lambda s: ingest.run(sample=s)),
@@ -20,6 +20,7 @@ STAGES = [
     ("labels", lambda s: labels.run()),
     ("export_map", lambda s: export_map.run()),
     ("export_figs", lambda s: export_figs.run()),
+    ("export_dashboard", lambda s: export_dashboard.run()),
 ]
 
 if __name__ == "__main__":
