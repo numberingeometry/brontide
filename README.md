@@ -1,3 +1,5 @@
+<img src="assets/brontide-logo.svg" alt="" width="104" align="right">
+
 # brontide — forecasting the research frontier
 
 > *brontide* (n.) — the low rumble of thunder from a storm still beyond the horizon.

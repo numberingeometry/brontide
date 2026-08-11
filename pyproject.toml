@@ -4,14 +4,52 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "brontide"
-version = "0.0.0"
-description = "Research-frontier forecasting over the arXiv embedding cloud."
+version = "0.1.0"
+description = "Forecasting the research frontier: which regions of the arXiv embedding cloud are emerging vs saturating."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
-# Runtime deps are declared in environment.yml (conda-first for CUDA/torch on the compute host).
-# This file exists so `pip install -e .` makes `import brontide` work in that env.
-dependencies = []
+authors = [{ name = "Bobby Zhang" }]
+keywords = ["forecasting", "scientometrics", "embeddings", "time-series", "arxiv", "research-trends"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Scientific/Engineering :: Visualization",
+]
+
+# The default install covers everything that runs off committed artifacts: re-scoring the
+# published validation table, rebuilding the figures, and building the dashboard. The heavy
+# corpus-side stages (embed/reduce/forecast) are opt-in extras, because torch + transformers
+# should never be a mandatory dependency of `pip install brontide`.
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.0",
+    "pyarrow>=14",
+    "scipy>=1.11",
+    "matplotlib>=3.8",
+    "pillow>=10",
+]
+
+[project.optional-dependencies]
+pipeline = [
+    "scikit-learn>=1.3",
+    "statsforecast>=1.7",
+    "umap-learn>=0.5",
+    "torch>=2.0",
+    "transformers>=4.40",
+    "adapters>=0.2",
+]
+naming = ["anthropic>=0.40"]
+dev = ["ruff>=0.6", "pytest>=8"]
+
+[project.urls]
+Homepage = "https://github.com/numberingeometry/brontide"
+Repository = "https://github.com/numberingeometry/brontide"
+Issues = "https://github.com/numberingeometry/brontide/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]

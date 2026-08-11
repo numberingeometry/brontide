@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256"
+     role="img" aria-label="brontide — a storm beyond the horizon, heard before it is seen">
+  <title>brontide</title>
+  <defs>
+    <!-- hand-drawn wobble: displace every stroke by low-frequency noise -->
+    <filter id="rough" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.028" numOctaves="3" seed="11" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2"
+                         xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="roughSoft" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4" result="n2"/>
+      <feDisplacementMap in="SourceGraphic" in2="n2" scale="2.1"
+                         xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+
+  <rect width="256" height="256" rx="52" fill="#0d1117"/>
+
+  <g filter="url(#rough)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- the rumble: arcs travelling out from the storm, drawn as broken sketch strokes -->
+    <g stroke="#3987e5" stroke-width="5" opacity="0.85">
+      <path d="M74 118 A 62 62 0 0 1 92 74"/>
+      <path d="M182 118 A 62 62 0 0 0 164 74"/>
+    </g>
+    <g stroke="#3987e5" stroke-width="4.5" opacity="0.5">
+      <path d="M52 126 A 88 88 0 0 1 78 62"/>
+      <path d="M204 126 A 88 88 0 0 0 178 62"/>
+    </g>
+    <g stroke="#3987e5" stroke-width="4" opacity="0.26">
+      <path d="M32 134 A 114 114 0 0 1 64 52"/>
+      <path d="M224 134 A 114 114 0 0 0 192 52"/>
+    </g>
+
+    <!-- storm cloud, sitting low so the horizon cuts it: the storm is still beyond -->
+    <path d="M84 150
+             q-13 -2 -13 -15
+             q0 -13 14 -14
+             q1 -21 22 -21
+             q9 -14 26 -13
+             q19 1 25 17
+             q19 -1 22 16
+             q13 2 12 15
+             q-1 14 -15 15 Z"
+          fill="#e6edf3" stroke="#e6edf3" stroke-width="3"/>
+
+    <!-- the flash, seen only as a hint inside the cloud -->
+    <path d="M132 108 l-14 22 h13 l-8 20 20 -26 h-13 z"
+          fill="#eda100" stroke="#eda100" stroke-width="2.5"/>
+  </g>
+
+  <!-- horizon: the line the storm has not crossed yet -->
+  <g filter="url(#roughSoft)" stroke-linecap="round" fill="none">
+    <path d="M26 172 H230" stroke="#3987e5" stroke-width="7"/>
+    <path d="M52 192 H128" stroke="#3987e5" stroke-width="5" opacity="0.42"/>
+    <path d="M150 192 H206" stroke="#3987e5" stroke-width="5" opacity="0.42"/>
+    <path d="M76 210 H180" stroke="#3987e5" stroke-width="4.5" opacity="0.2"/>
+  </g>
+</svg>
