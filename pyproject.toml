@@ -4,9 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "brontide"
-version = "0.1.0"
+version = "0.1.1"
 description = "Forecasting the research frontier: which regions of the arXiv embedding cloud are emerging vs saturating."
-readme = "README.md"
+# PyPI renders the description in isolation, so relative paths break and raw <img>
+# tags are stripped. PYPI-README.md is generated from README.md with absolute URLs
+# by scripts/make_pypi_readme.py — regenerate it whenever README.md changes.
+readme = "PYPI-README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "Bobby Zhang" }]
