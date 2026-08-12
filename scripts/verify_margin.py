@@ -168,6 +168,22 @@ def main() -> int:
         fr, near = np.array([]), 0
         print("no membership flips at all over the replicates.")
 
+    # ---- (H3) the quantitative version: predict the flip COUNT from the band ----
+    # A candidate can only cross if it lies within roughly one perturbation width of the
+    # boundary value. The number of eligible regions in that band is therefore a parameter-
+    # free prediction of the per-replicate symmetric-difference size.
+    delta = float(np.median(dg_rel))
+    gb = float(gs[K_TOP - 1])
+    band = np.abs(np.nan_to_num(g0[eidx], nan=np.inf) - gb) < delta
+    predicted = int(band.sum())
+    observed = len(flip_ranks) / N_REP
+    print(f"\n(H3) parameter-free flip-count prediction")
+    print(f"   regions with |g - g_(50)| < median|delta g| = {delta:.5f} : {predicted}")
+    print(f"   observed membership changes per replicate            : {observed:.2f}")
+    ratio = observed / max(predicted, 1e-9)
+    print(f"   observed / predicted                                 : {ratio:.2f}")
+    h3 = 0.5 <= ratio <= 2.0
+
     h2 = len(flip_ranks) == 0 or (near / len(flip_ranks)) >= 0.8
     print("\n" + "=" * 74)
     if h2:
@@ -177,6 +193,8 @@ def main() -> int:
         print("   verdict is reproducible exactly when its boundary margin exceeds what the")
         print("   perturbation moves the statistic -- so the margin is the quantity that should")
         print("   be reported alongside the list.")
+        print(f"   (H3) {'CONFIRMED' if h3 else 'NOT CONFIRMED'}: the boundary-band count "
+              f"predicts the flip rate to within a factor {max(ratio,1/max(ratio,1e-9)):.2f}.")
     else:
         print("FAIL (H2): flips occur far from the boundary, so the margin story does not")
         print("   explain the immunity either. Both proposed mechanisms are now refuted; the")
@@ -193,6 +211,10 @@ def main() -> int:
         "flip_rank_max": int(fr.max()) if len(fr) else None,
         "frac_flips_within_10_of_boundary": float(near / len(fr)) if len(fr) else None,
         "H2_supported": bool(h2),
+        "H3_predicted_band_count": predicted,
+        "H3_observed_flips_per_replicate": observed,
+        "H3_observed_over_predicted": ratio,
+        "H3_supported": bool(h3),
         "status": "EXPLORATORY - second hypothesis after cancellation was refuted",
     }, indent=2))
     return 0
