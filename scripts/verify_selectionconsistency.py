@@ -817,50 +817,75 @@ def _spearman_vec(a: np.ndarray, b: np.ndarray) -> float:
 
 
 def block6_alignment_witness(b1) -> None:
-    hdr("BLOCK 6 -- PROP C: the deployed pair violates the alignment condition (Thm B)")
-    N, k = 1023, 50
-    truth = np.arange(N, dtype=np.float64)          # higher = better
-    top = set(range(N - k, N))
+    """PROP C, REPAIRED after adversarial verification.
 
-    # pi1: global order preserved, true top-k pushed to the very bottom
+    The FIRST version of this block scored precision@50 against the true top-50.
+    That is not what the instrument does. `validate.py:128` sets
+    `realized_pos = top_decile(realized_g, eligible)` -- the reference set is the
+    top DECILE, about 103 of 1023 eligible regions, which is why the published
+    chance rate is 0.101. Against the top-50 reference the witness was vacuous:
+    pi1's top-50 all land inside the true top decile, so it scored precision 1.000,
+    not 0.000, on the deployed functional.
+
+    The repaired witness pushes the true top-DECILE to the bottom instead. The
+    inversion survives with a smaller margin, and the numbers below are the ones
+    that describe the deployed pair.
+    """
+    hdr("BLOCK 6 -- PROP C (REPAIRED): the deployed pair violates alignment (Thm B)")
+    N, k, D = 1023, 50, 103                     # D = |top decile of eligible regions|
+    truth = np.arange(N, dtype=np.float64)
+    top_decile = set(range(N - D, N))           # the DEPLOYED reference set
+    top_k = set(range(N - k, N))                # the set the first version wrongly used
+
+    # pi1' : global order preserved, the true top-DECILE pushed to the bottom
     pi1 = np.empty(N, dtype=np.float64)
-    pi1[:N - k] = np.arange(k, N, dtype=np.float64)
-    pi1[N - k:] = np.arange(k, dtype=np.float64)
-    # pi2: true top-k exactly on top, everything below reversed
+    pi1[:N - D] = np.arange(D, N, dtype=np.float64)
+    pi1[N - D:] = np.arange(D, dtype=np.float64)
+    # pi2  : the true top-k on top, everything below reversed
     pi2 = np.empty(N, dtype=np.float64)
     pi2[N - k:] = np.arange(N - k, N, dtype=np.float64)
     pi2[:N - k] = np.arange(N - k - 1, -1, -1, dtype=np.float64)
 
-    out = {}
-    for nm, pi in (("pi1", pi1), ("pi2", pi2)):
+    res = {}
+    for nm, pi in (("pi1'", pi1), ("pi2", pi2)):
         sel = set(np.argsort(-pi)[:k].tolist())
-        out[nm] = (_spearman_vec(pi, truth), len(sel & top) / k)
-        print(f"  {nm}: spearman = {out[nm][0]:+.6f}   precision@{k} = {out[nm][1]:.3f}")
+        res[nm] = (_spearman_vec(pi, truth), len(sel & top_decile) / k, len(sel & top_k) / k)
+        print(f"  {nm}: spearman = {res[nm][0]:+.6f}   prec@{k} vs top-decile = {res[nm][1]:.3f}"
+              f"   (vs true top-{k}: {res[nm][2]:.3f})")
 
-    s1, p1 = out["pi1"]; s2, p2 = out["pi2"]
-    check("Prop C: the rank-correlation-preferred candidate is the precision-worst one",
-          s1 > s2 and p1 < p2,
-          f"spearman {s1:+.6f} > {s2:+.6f} while precision@{k} {p1:.3f} < {p2:.3f}")
-    check("Prop C: precision@k is exactly 0 vs exactly 1 -- the full spread",
-          near(p1, 0.0, 1e-12) and near(p2, 1.0, 1e-12))
-    check("Prop C: no non-decreasing phi can satisfy prec@k = phi(spearman) "
-          "=> Thm B's condition fails for the deployed pair", s1 > s2 and p1 < p2,
-          f"selection margin in rank correlation = {s1 - s2:.4f}")
-    # closed form of the pi1 displacement sum: k(N-k)N
-    rho1_exact = 1.0 - 6.0 * k * (N - k) / (N * N - 1)
-    check("Prop C: pi1's rank correlation matches the closed form 1 - 6k(N-k)/(N^2-1)",
+    s1, p1d, _ = res["pi1'"]; s2, p2d, _ = res["pi2"]
+    check("Prop C (repaired): against the DEPLOYED top-decile reference, the "
+          "rank-correlation-preferred candidate is still the precision-worst one",
+          s1 > s2 and p1d < p2d,
+          f"spearman {s1:+.6f} > {s2:+.6f} while prec@{k} {p1d:.3f} < {p2d:.3f}")
+    check("Prop C (repaired): precision@k is exactly 0 vs exactly 1 on the deployed reference",
+          near(p1d, 0.0, 1e-12) and near(p2d, 1.0, 1e-12))
+    rho1_exact = 1.0 - 6.0 * D * (N - D) / (N * N - 1)
+    check("Prop C (repaired): closed form 1 - 6D(N-D)/(N^2-1) with D = 103",
           near(s1, rho1_exact, 1e-9), f"computed {s1:.9f} vs closed form {rho1_exact:.9f}")
-    check("Prop C: the coarse bound 1 - 6k/N is a valid lower bound",
-          s1 >= 1.0 - 6.0 * k / N, f"{s1:.6f} >= {1.0 - 6.0 * k / N:.6f}")
-    check("Prop C supplies hypothesis (A3) of Theorem A, so the reachable "
-          "normalized regret for this pair is 1", True,
-          "selection-best is report-worst by construction")
+    check("Prop C (repaired): the selection margin is 1.1776, not the 1.4419 the "
+          "top-50-reference version reported",
+          near(s1 - s2, 1.1775621086823032, 1e-9), f"margin = {s1 - s2:.10f}")
+
+    # the retraction, kept as an executable check so the bad witness cannot come back.
+    # The ORIGINAL pi1 pushed only the true top-50 down; its replacement top-50 are
+    # true ranks 923-972, every one of which is inside the top decile (boundary 920),
+    # so on the DEPLOYED reference it scored 1.000 and separated nothing.
+    pi1_old = np.empty(N, dtype=np.float64)
+    pi1_old[:N - k] = np.arange(k, N, dtype=np.float64)
+    pi1_old[N - k:] = np.arange(k, dtype=np.float64)
+    sel_old = set(np.argsort(-pi1_old)[:k].tolist())
+    check("RETRACTION CHECK: the ORIGINAL witness (true top-50 pushed down) is VACUOUS "
+          "on the deployed reference -- it scores 1.000, not 0.000, against the top decile",
+          near(len(sel_old & top_decile) / k, 1.0, 1e-12),
+          f"original pi1: prec@{k} vs top-decile = {len(sel_old & top_decile) / k:.3f}, "
+          f"vs true top-{k} = {len(sel_old & top_k) / k:.3f}")
 
     # ---- Theorem E(i): sharpness of the factor 2 --------------------------- #
     hdr("BLOCK 6b -- THM E(i): the factor 2 in the margin condition is sharp")
     g = np.array([5.0, 4.0, 3.0, 2.0, 1.0])
     kk = 2
-    gap = g[kk - 1] - g[kk]                                   # g_(2) - g_(3) = 1.0
+    gap = g[kk - 1] - g[kk]
     eta_ok = gap / 2.0 - 1e-9
     eps_ok = np.zeros_like(g); eps_ok[kk - 1] = -eta_ok; eps_ok[kk] = +eta_ok
     eps_bad = np.zeros_like(g); eps_bad[kk - 1] = -(gap / 2.0 + 1e-9); eps_bad[kk] = +(gap / 2.0 + 1e-9)
@@ -871,26 +896,47 @@ def block6_alignment_witness(b1) -> None:
           "-- so the constant 2 cannot be improved",
           top_of(g + eps_bad) != top_of(g), f"2*max|eps| = {2*(gap/2+1e-9):.9f} > {gap}")
 
-    # ---- Corollary D1: break-even hit rate, feasibility at n = 3 ----------- #
-    hdr("BLOCK 6c -- COR D1: break-even hit rate, with its cost hypothesis")
+    # ---- Corollary D1: RETRACTED and replaced ------------------------------ #
+    hdr("BLOCK 6c -- COR D1 IS RETRACTED: the true break-even hit rate is 2/3, not 0.909")
+    import itertools
+    rows = parse_validation_table()
+    cuts = sorted({r["cutoff"] for r in rows})
+    mods = sorted({r["model"] for r in rows})
+    M = {(r["cutoff"], r["model"]): r["prec"] for r in rows}
+    n = len(cuts)
+    B = max(sum(M[(c, m)] for c in cuts) / n for m in mods)
+    per_max = {c: max(M[(c, m)] for m in mods) for c in cuts}
+    O = sum(per_max.values()) / n
     A, Lam = b1["A"], b1["Lam"]
-    n_orig = 3
-    h_obs = 0.0                       # the selector hit the per-origin argmax at 0 of 3 origins
-    cbar = Lam / (1.0 - h_obs)        # mean cost of a miss under the stated hypothesis
-    h_star = 1.0 - A / cbar
-    feasible = [i / n_orig for i in range(n_orig + 1)]
-    reachable = [h for h in feasible if h >= h_star - 1e-12]
-    print(f"  A = {A:.6f}   Lambda = {Lam:.6f}   A/Lambda = {A/Lam:.6f}")
-    print(f"  hypothesis: every miss costs the observed mean miss cost cbar = {cbar:.6f}")
-    print(f"  break-even hit rate h* = 1 - A/cbar = {h_star:.6f}")
-    print(f"  feasible hit rates at n=3: {feasible}   reachable: {reachable}")
-    check("Cor D1: break-even hit rate is 0.9091 under the stated cost hypothesis",
-          near(h_star, 0.9090909090909091, 1e-9), f"h* = {h_star:.10f}")
-    check("Cor D1: at n = 3 the ONLY feasible way to break even was h = 1 "
-          "(hit the per-origin oracle at every origin)",
-          reachable == [1.0], f"reachable hit rates = {reachable}")
-    check("Cor D1: A/Lambda = 1/11 -- the prize was one eleventh of the cost",
-          near(A / Lam, 1.0 / 11.0, 1e-9), f"A/Lambda = {A/Lam:.9f}")
+
+    best_by_h = {}
+    for combo in itertools.product(mods, repeat=n):
+        R = sum(M[(c, m)] for c, m in zip(cuts, combo)) / n
+        h = sum(1 for c, m in zip(cuts, combo) if M[(c, m)] == per_max[c]) / n
+        if h not in best_by_h or R > best_by_h[h][0]:
+            best_by_h[h] = (R, combo)
+    print(f"  best fixed B = {B:.6f}   per-origin oracle O = {O:.6f}   A = {A:.6f}  Lambda = {Lam:.6f}")
+    print(f"  exhaustive over all {len(mods)}^{n} = {len(mods)**n} selectors:")
+    for h in sorted(best_by_h):
+        R, combo = best_by_h[h]
+        print(f"    h = {h:.4f}   max achievable mean = {R:.6f}   breaks even = {R >= B - 1e-12}"
+              f"   via {combo}")
+    h_star_true = min(h for h, (R, _) in best_by_h.items() if R >= B - 1e-12)
+    h_star_naive = 1.0 - A / Lam
+    check("COR D1 RETRACTED: the naive break-even hit rate 1 - A/Lambda = 0.9091 is WRONG",
+          not near(h_star_true, h_star_naive, 1e-9),
+          f"naive says {h_star_naive:.4f}, exhaustive truth is {h_star_true:.4f}")
+    check("Replacement: break-even was reachable at h = 2/3, by the degenerate route of "
+          "always picking the best fixed model",
+          near(h_star_true, 2.0 / 3.0, 1e-9), f"h_min(break-even) = {h_star_true:.6f}")
+    check("The reason is structural: a constant selector that always picks the best fixed "
+          "model achieves exactly B, so break-even is always reachable at that model's own "
+          "per-origin hit rate",
+          near(best_by_h[h_star_true][0], B, 1e-12),
+          f"max achievable at h = 2/3 is {best_by_h[h_star_true][0]:.6f} = B exactly")
+    check("What survives: the selector that ran achieved h = 0 and lost 0.200 against B",
+          near(b1["R_sel"] - b1["R_bf"], -0.2, 1e-9),
+          f"realised - best fixed = {b1['R_sel'] - b1['R_bf']:.6f}")
 
 
 # --------------------------------------------------------------------------- #

@@ -137,10 +137,18 @@ def main() -> int:
 
     # ---------------- BLOCK 2 ---------------------------------------------- #
     hdr("BLOCK 2 -- THE ESTIMAND")
+    # the estimand uses the ADJUDICATED call where a third pass was required
+    ADJ = "adjudicated_mismatch"
+    ADJ_S = "adjudicated_has_selection"
+    for r in recs:
+        r.setdefault(ADJ, r["mismatch"])
+        r.setdefault(ADJ_S, r["has_selection"])
     conf = [r for r in recs if r["screen_on_full_text"] == "confirmed"]
     resolved_out = [r for r in recs if r["screen_on_full_text"] != "confirmed"]
-    sel = Counter(r["has_selection"] for r in conf)
-    call = Counter(r["mismatch"] for r in conf)
+    sel = Counter(r[ADJ_S] for r in conf)
+    call = Counter(r[ADJ] for r in conf)
+    n_adj = sum(1 for r in recs if r[ADJ] != r["mismatch"])
+    print(f"  adjudicated calls (coder1 overturned by the third pass): {n_adj}")
 
     n_mis = call.get("mismatch", 0)
     n_ali = call.get("aligned", 0)
@@ -181,12 +189,12 @@ def main() -> int:
     for r in ups:
         print(f"    {r['id']}: {r['upstream_selection'][:110]}")
 
-    unchk = [r for r in conf if r["mismatch"] == "no_reported_functional"]
+    unchk = [r for r in conf if r[ADJ] == "no_reported_functional"]
     print(f"\n  papers whose headline output is NEVER scored against any reference "
           f"(selection-consistency not checkable by a reader): {len(unchk)}  {[r['id'] for r in unchk]}")
-    undet = [r for r in conf if r["mismatch"] == "undetermined"]
+    undet = [r for r in conf if r[ADJ] == "undetermined"]
     print(f"  papers with a selection step whose criterion is never named: {len(undet)}  {[r['id'] for r in undet]}")
-    unst = [r for r in conf if r["has_selection"] == "unstated"]
+    unst = [r for r in conf if r[ADJ_S] == "unstated"]
     print(f"  papers reporting a chosen configuration with no stated basis: {len(unst)}  {[r['id'] for r in unst]}")
 
     n_no_eval = len(resolved_out) + len(unchk)
@@ -194,6 +202,18 @@ def main() -> int:
           f"against any reference: {n_no_eval}/{len(recs)}")
 
     # ---------------- BLOCK 3 ---------------------------------------------- #
+    scr_dis = coding.get("screen_disagreements_not_adjudicated", {})
+    if scr_dis:
+        alt = [r for r in conf if r["id"] not in scr_dis]
+        alt_call = Counter(r[ADJ] for r in alt)
+        am, aa = alt_call.get("mismatch", 0), alt_call.get("aligned", 0)
+        alo, ahi = wilson(am, am + aa) if (am + aa) else (float("nan"), float("nan"))
+        print(f"\n  SENSITIVITY -- the two coders read {len(scr_dis)} screen calls differently. "
+              f"Dropping every paper they disagreed about:")
+        print(f"    rate = {am}/{am+aa} = {(am/(am+aa) if am+aa else float('nan')):.4f}   "
+              f"Wilson 95% CI [{alo:.4f}, {ahi:.4f}]")
+        print("    the rate is unchanged at 0 under both readings; only the denominator moves.")
+
     hdr("BLOCK 3 -- INTER-CODER AGREEMENT")
     c2f = AUD / "coding_coder2.json"
     agree = None
@@ -203,6 +223,7 @@ def main() -> int:
               "artifacts/audit/coding_coder2.json missing")
     else:
         c2 = {r["id"]: r for r in json.loads(c2f.read_text(encoding="utf-8"))["records"]}
+        # agreement is computed on the ORIGINAL independent calls, never the adjudicated ones
         pairs = [(r["id"], r["mismatch"], c2[r["id"]]["mismatch"]) for r in recs if r["id"] in c2]
         a = [x[1] for x in pairs]
         b = [x[2] for x in pairs]

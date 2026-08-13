@@ -277,6 +277,60 @@ CODING = [
 ]
 
 
+
+# --------------------------------------------------------------------------- #
+# ADJUDICATION -- third pass, seeing BOTH coders' calls and the text, as the
+# pre-registration requires. Every entry records the reason. The adjudicated call
+# is the one the estimand uses.
+#
+# Coder 2 disagreed on 4 of 22 `mismatch` calls (raw agreement 0.818,
+# Cohen's kappa 0.723). It won 3 of the 4, because in each it had found a real
+# selection step coder 1 missed, or applied the frozen multiple-metrics tie-break
+# more faithfully. NOTE THE DIRECTION: every adjudication below moves a paper
+# INTO the rate denominator as `aligned`, which tightens the interval around a
+# rate of zero. It therefore strengthens the negative result rather than
+# rescuing the original claim, which is the uncomfortable direction.
+# --------------------------------------------------------------------------- #
+ADJUDICATION = {
+ "1907.09395": dict(
+   coder1="n/a", coder2="aligned", adjudicated="aligned", has_selection="yes",
+   reason="Coder 2 found a selection step coder 1 missed: an explicit sweep over the number of "
+          "grandparents (10-200) with N=20 kept. It also correctly observed that the epoch counts "
+          "100/500/1000 are all reported with no winner picked, so those are NOT a selection. The "
+          "sweep's criterion is unnamed but every plausible candidate (AUCROC, accuracy) is in the "
+          "reported set, so the frozen multiple-metrics rule gives `aligned`."),
+ "1911.02890": dict(
+   coder1="n/a", coder2="undetermined", adjudicated="undetermined", has_selection="yes",
+   reason="Coder 2 is right that a choice was made (embedding dimension 8, vocabulary 500) rather "
+          "than merely unstated, so has_selection is `yes`. But the criterion word the paper uses "
+          "-- 'accuracy' / 'prediction power' -- is NOT among its reported metrics (ROC-AUC and "
+          "best F1), so the multiple-metrics tie-break does not apply and the call cannot be made."),
+ "2109.06675": dict(
+   coder1="n/a", coder2="aligned", adjudicated="aligned", has_selection="yes",
+   reason="Coder 2 found the paper's one data-driven configuration choice, which coder 1 missed: "
+          "down-sampling is adopted because it 'effectively improves prediction performance'. The "
+          "criterion is unnamed but every metric the paper computes (accuracy, precision, recall, "
+          "F-measure, CSI) is reported, so the frozen tie-break gives `aligned`."),
+ "2111.03496": dict(
+   coder1="undetermined", coder2="aligned", adjudicated="aligned", has_selection="yes",
+   reason="Both coders read the same sentence -- a sliding window chosen from {3,5,10,15} because "
+          "one value 'is best', with no metric named. Coder 2 applies the frozen multiple-metrics "
+          "rule more faithfully: every candidate criterion the paper computes (P, R, F, AUC) is "
+          "reported, so one of them equals T_sel whichever it was. `aligned`."),
+}
+
+# Screen resolutions the two coders read differently. These are NOT adjudicated
+# here -- the pre-registration puts adjudication on `mismatch` -- but they are
+# recorded so the denominator's sensitivity is visible rather than hidden.
+SCREEN_DISAGREEMENTS = {
+ "2106.12875": "coder 2 calls it `fails S4` (it is a book chapter surveying the authors' own "
+               "systems); coder 1 called it confirmed. If S4 fails it leaves the denominator.",
+ "2504.08743": "coder 2 calls it `fails S3` (only intrinsic coherence/diversity, no reference); "
+               "coder 1 called it confirmed.",
+ "2510.15801": "coder 2 calls it `fails S2` (the corpus is not scholarly documents); coder 1 "
+               "called it `fails S3`. Both exclude it.",
+}
+
 def main() -> int:
     missing = []
     for rec in CODING:
@@ -302,11 +356,23 @@ def main() -> int:
         print(f"coded set != screened-in set; missing {ids_in - coded}, extra {coded - ids_in}")
         return 1
 
+    for rec in CODING:
+        a = ADJUDICATION.get(rec["id"])
+        if a:
+            rec["adjudicated_mismatch"] = a["adjudicated"]
+            rec["adjudicated_has_selection"] = a["has_selection"]
+            rec["adjudication_reason"] = a["reason"]
+        else:
+            rec["adjudicated_mismatch"] = rec["mismatch"]
+            rec["adjudicated_has_selection"] = rec["has_selection"]
+
     doc = {
         "preregistration": "decisions/2026-08-13-select-report-audit-preregistration.md",
         "amendment": "decisions/2026-08-13-audit-rubric-amendment.md",
         "coder": "coder1",
         "n_coded": len(CODING),
+        "adjudication": ADJUDICATION,
+        "screen_disagreements_not_adjudicated": SCREEN_DISAGREEMENTS,
         "records": CODING,
     }
     (OUT / "coding.json").write_text(json.dumps(doc, indent=1), encoding="utf-8")
