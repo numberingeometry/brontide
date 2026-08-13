@@ -1,0 +1,1193 @@
+Identifying Emerging Technologies and Leading Companies using Network Dynamics of Patent Clusters: a Cybersecurity Case Study 
+
+ Report GitHub Issue 
+ × 
+
+ Title: 
+
+ Content selection saved. Describe the issue below:
+
+ Description: 
+
+ Submit without GitHub 
+ Submit in GitHub 
+
+ arXiv is now an independent nonprofit! 
+ Learn more 
+ × 
+
+ Back to arXiv 
+
+ Why HTML? 
+
+ Report Issue 
+
+ Back to Abstract 
+
+ Download PDF 
+
+ Abstract 
+
+ 1 Introduction 
+
+ 2 Related Work 
+
+ 3 Data sources 
+
+ 4 Methodology 
+
+ 4.1 Data Preprocessing layer 
+
+ 4.2 Machine Learning layer 
+
+ 4.3 Managerial layer 
+
+ 4.4 Network Analytics layer 
+
+ Technology Index 
+
+ Assignee Quality Index 
+
+ Impact Index 
+
+ Normalised Impact Index 
+
+ Influence Index 
+
+ 5 Empirical analysis and results 
+
+ 6 Discussion 
+
+ 7 Conclusion, Limitations, Future scope 
+
+ References 
+
+ 8 Annex 
+
+ License: CC BY 4.0
+
+arXiv:2209.10224v1 [cs.CR] 21 Sep 2022
+
+ Identifying Emerging Technologies and Leading Companies using Network Dynamics of Patent Clusters: a Cybersecurity Case Study
+
+ Michael Tsesmelis
+
+ Affiliation: Cyber-Defence Campus, armasuisse Science and Technology
+
+ Ljiljana Dolamic
+
+ Affiliation: Cyber-Defence Campus, armasuisse Science and Technology
+
+ Marcus Matthias Keupp
+
+ Affiliation: Department of Defense Economics, Military Academy at ETH Zurich
+
+ Dimitri Percia David
+
+ Affiliation: Cyber-Defence Campus, armasuisse Science and Technology
+
+ Affiliation: Information Science Institute, University of Geneva
+
+ Affiliation: Institute of Entrepreneurship and Management, University of Applied Science (HES-SO) Valais-Wallis
+
+ Alain Mermoud
+
+ Affiliation: Cyber-Defence Campus, armasuisse Science and Technology
+
+ Abstract 
+
+ Strategic decisions rely heavily on non-scientific instrumentation to forecast emerging technologies and leading companies. Instead, we build a fast quantitative system with a small computational footprint to discover the most important technologies and companies in a given field, using generalisable methods applicable to any industry. With the help of patent data from the US Patent and Trademark Office, we first assign a value to each patent thanks to automated machine learning tools. We then apply network science to track the interaction and evolution of companies and clusters of patents (i.e. technologies) to create rankings for both sets that highlight important or emerging network nodes thanks to five network centrality indices. Finally, we illustrate our system with a case study based on the cybersecurity industry. Our results produce useful insights, for instance by highlighting (i) emerging technologies with a growing mean patent value and cluster size, (ii) the most influential companies in the field and (iii) attractive startups with few but impactful patents. Complementary analysis also provides evidence of decreasing marginal returns of research and development in larger companies in the cybersecurity industry.
+
+ 1 Introduction
+
+ With accelerating innovation cycles, stakeholders in both industry and government have an increasing need for dependable and real-time insights on technological paradigm shifts. With clear and timely knowledge on emerging technologies within their industries, these stakeholders can adapt the course of their business to accommodate these changes as efficiently as possible and thus reduce costly and unnecessary ventures.
+
+ Although data-backed solutions to modern technology monitoring and identification are improving, strategic business decisions still rely heavily on the results of non-scientific instrumentation. Oftentimes, the identification of emerging technologies relies on human intuition rather than robust data science approaches. For instance, consultancy firms continue to use the Delphi method in an effort to predict future business and technology trends, a product that many institutions acquire for the lack of alternatives. This dearth of options cripples many industries, including the cybersecurity sector, which is doubly affected by the poor technology landscape mapping. First, cybersecurity experts should stay up-to-date with innovations within their own field for the industry to perform at its best. Secondly, because the cybersecurity sector monitors and defends other industrial and commercial systems from attack, it is crucial for cybersecurity specialists to understand how other systems and their attack surfaces evolve over time. Thus, the cybersecurity industry is extremely reliant on timely information about emerging technologies and leading companies linked to them.
+
+ Hereafter, we present a general recommender system 1 1 
+ 1 
+
+ https://github.com/WanderingMike/Network_dynamics_of_patent_clusters suitable for technology monitoring in any industry, which ranks technologies and companies according to useful strategic indicators. The existing literature has mainly focused on ex-post bibliometric analysis, and has done so in very restricted industries. We take a different approach by analysing near-past dynamics and predicting current and near-future trends. This renders our solution much more useful for applied technology monitoring.
+For such a data-driven system to run dependably over long stretches of time, in organisations with limited computational and human resources, we recognise the need for four major features. First, as much of the new solution should be automated to allow efficient and error-free data search and processing. The second feature, closely linked to the previous one, is speed. Since open source data is usually published several times yearly, it is preferable to run more lightweight algorithms at shorter intervals rather than a long-running algorithm. Thirdly, the solution must not be overreliant on any one indicator, but should rather take the financial approach of comparing a multitude of indicators before making a selection of which companies or technologies to highlight. This feature also inscribes itself well in the theory of artificial intelligence, where decision-making is the product of many different data sources and knowledge representations. Finally, the solution must be generalisable, thus allowing different search criteria (based on different technological fields). This factor presupposes a system reactive to paradigm changes across time and industries.
+
+ This paper will describe the design of a system that identifies rising and impactful technologies and the companies tied to them. The solution will rely on a sequential blend of machine learning and network analytics and will be fed data from the United States Patent Office (USPTO). Our research highlights how a lightweight data-driven system can produce useful insights. Our cybersecurity case study shows clear and fine-grained technology rankings which point to rising interest in neural networks, payment technologies, control units, WiFi security and cryptography. The system also successfully identifies the most impactful big technology firms as well as pre-eminent startups in the field. This information provides useful information for systems acquisition, equity investments, or technology policy.
+
+ 2 Related Work
+
+ While the meaning of the word ’emerging’ seems intuitive, it is difficult to recognise a commonly accepted definition which can be used to label technologies in our recommender system. A large number of publications attempt to define the concept, which has resulted in a convolution of definitions which sometimes overlap and in certain regards differ widely. For some authors [ 19 , 15 , 5 , 9 , 7 ] , a technology is deemed emerging when its potential impact on the economy or society is high, a terminology which includes both evolutionary changes as well as disruptive innovations. Other scholars [ 3 ] pay more attention to the intrinsic uncertainty of a technology’s rise. Some deem it a combination of both of these aspects that affect how ”emerging” a technology is. Another group [ 22 ] underlines novelty and growth as key determinant factors. Finally, the technological convergence literature believes that emerging technologies arise when two originally independent technologies fuse to give rise to a technological breakthrough [ 23 ] .
+
+ This failure to approach a reasonably clear definition has naturally played to the advantage of qualitative methods of investigation. Some institutions, such as Gartner, Forrester Research, IHS Markit and the World Economic Forum regularly publish lists of emerging technologies with very little indication on how these lists are curated. Despite differences both in terms of frequency of publication and length, the contents of these lists often agree, thus pointing to a certain statistical significance of the published recommendations.
+
+ On the other hand, quantitative studies of emerging technologies generally agree that measuring a proxy of growth and technology interest provides enough information for industrial applications. Indeed, even though it might be hard to define whether one particular technology is emerging, it is much easier to compute the relative importance of technologies. The entire analysis thus becomes a comparison between different technologies using common metrics in order to differentiate rising from relatively stale or declining technologies. We follow this train of thought in building our own system, and regard emerging technologies as those with the highest growth rates in citations and patent count. In our framework, emerging technologies are therefore not necessarily new, but witness the fastest increases in interest from researchers and patent applicants.
+
+ Publicly available data is often used to predict emerging technologies in the existing literature. Commonly exploited data sets are patents from the United States Patent and Trademark Office (USPTO), Global Patent Index (GPI), and Thompson Innovation. Some publications use these bibliometric sources to deploy growth models for technology prediction [ 1 , 10 , 18 , 20 ] . S-Curve models are based on the concept of logistic or Gompertz growth that eventually leads to saturation. The clear advantage of such models is their sound mathematical foundation. After fitting the data to the model, the exact growth formula displays the current maturity state of a technology and its future development potential. One research study [ 6 ] applied bibliometric methods, US patent analysis and S-curves for forecasting fuel cells, food safety, and optical storage using a technology-specific set of methods. Similarly, [ 20 ] used expert interviews to fit data acquired by text-mining patents into growth curve models for predicting hybrid cars and fuel cells. Text-mining on patents and fitting to S-curves was also proposed in [ 11 ] , and [ 2 ] found a correlation between patent and publication data extracted by scientometric methods for 20 technologies and deployed S-curves for forecasting. S-Curve models for predicting emerging technologies were also proposed by [ 10 , 18 ] .
+
+ Recently, artificial intelligence has (re-)gained much attention and consequently machine learning has been deployed to model and predict emerging technologies. [ 12 ] used supervised learning on citation graphs from USPTO data to automatically label and forecast emerging technologies with high precision in a given year. Similarly, [ 24 ] applied supervised deep learning on worldwide patent data. The training sets were labelled manually based on Gartner’s Hype Cycle. [ 13 ] extracted 21 indicators from the USPTO data and using neural networks achieved impressive predictive power on a subset of 35,256 patents. The big issue with these studies is their focus on a specific set of technologies chosen in advance [ 10 , 18 , 20 ] . As a consequence, most recommender systems can only be applied to a new case study after a painstaking process of data curation and machine learning model selection. This calibration can require the full-time attention of a small team of data scientists.
+
+ We thus recognise that the existing literature shows good results in applying novel statistical and computational methods to analysing and predicting the success of technologies within a specific industry. However, our goal is rather to pursue a lightweight system that can easily switch between different user queries, with fast results. This would in effect solve the lack of quantitative options in technology monitoring that we highlighted previously by offering a reliable alternative applicable to any industry with no additional effort. Moreover, we recognise the need to involve not just technologies into our system, but also interesting companies tied to these technologies. One strand of research by [ 17 ] has studied the mutual influence of companies and technologies from the cybersecurity field using bi-partite graph structure. We use such an approach to create networks of technologies and companies in our own recommender system.
+
+ We do rely on existing solutions to optimise the speed and efficiency of our solution. Our system deals with resource constraints and incomplete data sets by using probabilistic models in machine learning to simplify the research problem and thus its computational complexity; rather than using the entire data set of all artifacts (whether it be patents, publications, job openings, and so on), we reduce the space complexity of the problem by working with distributions of data points described by simpler statistics such as the mean and the variance. Financial engineering also offers an improved approach to high-variance problems; rather than using a single forecasting method, the field suggests averaging the forecasts obtained thanks to several instruments [ 14 , 4 ] . This approach attenuates the variance on the final results and thus offers more dependable insights. In our system, this translates to using several indicators and data sources to confirm the importance of particular technologies and companies. With these methods in place, we believe our system offers a novel way of ranking emerging technologies and leading companies.
+
+ 3 Data sources
+
+ We build our recommender system using patent data from the US Patent and Trademark Office (USPTO). Patents provide an essential means to capture the growth trajectory and novelty of a technology [ 1 , 16 , 8 ] . In order to determine the importance of a new technology cluster, it is however not enough to simply count the number of patents related to a technology, as this ignores the relative value of each patent. Instead, we decide to assign a value to each patent based on the number of citations it receives in the five-year period after its publication. This indicator, termed the five-year forward citation (5YFC) value, is the basis for the Machine Learning algorithm. We have chosen a five-year horizon as a benchmark, since the literature estimates the median forward citation to occur between the fourth and fifth year after a patent’s publication [ 13 ] . Figure 1 shows the average 5FYC value for different fundamental science categories per year. For instance, information technology and physics innovations of the late 1990s were highly cited in the five years following their publications.
+
+ Figure 1: Average five-year forward citation value of the nine different Cooperative Patent Classification technology sections. All patents belong to at least one section. 
+ A - Human necessities (agriculture, garments,…); B - Performing Operations & Transporting; C - Chemistry & Metallurgy; D - Textiles & Paper; E - Fixed Constructions; F - Mechanical Engineering, Lightning, Heating, Weapons & Blasting; G - Physics; H - Electricity; Y - New technological developments 
+
+ Broadly speaking, our research will analyse the interplay of three sets of entities. Firstly, data on patents p p help us differentiate valuable from non-valuable patents. Secondly, each patent is usually sponsored by one or more assignees a a , which are organisations or individuals that have an ownership interest in the patent claims. Assignees are added to the network as separate entities, and thus we retrieve assignee and assignee-patent relationship data from the USPTO database. Finally, based on their protected claims, patents are tied to specific Cooperative Patent Classification (CPC) groups c c . CPC is a classification scheme which clusters patents according to the subject matter of the patented innovation. CPC, along with the US and International classification schemes, allow innovations to be grouped into predefined technological clusters. The overall hierarchy scheme of the CPC is as follows: S ​ u ​ b ​ g ​ r ​ o ​ u ​ p ⊆ G ​ r ​ o ​ u ​ p ⊆ S ​ u ​ b ​ c ​ l ​ a ​ s ​ s ⊆ C ​ l ​ a ​ s ​ s ⊆ S ​ e ​ c ​ t ​ i ​ o ​ n Subgroup\subseteq Group\subseteq Subclass\subseteq Class\subseteq Section . We rely on the 242,050 CPC subgroups to define all currently existing technologies, and retain data on groups for the machine learning phase. All downloaded data sets are found in Table 1 .
+
+ Data set name 
+
+ Description 
+
+ assignee.tsv 
+
+ Disambiguated assignee data for granted patents and pre-granted applications, of which we retain the assignee ID and the company name. It is important to note the geographical diversity of the assignees; many non-American companies have submitted documentation to protect their inventions in the United States, and thus our data source extends beyond the confines of the American technological landscape. 
+
+ cpc_current.tsv 
+
+ Current CPC classification data for all patents, of which we retain the patent ID, CPC group ID and CPC subgroup ID. 
+
+ otherreference.tsv 
+
+ Non-patent citations mentioned in patents (e.g. articles, papers, etc. We only retain the patent ID column in order to count the number of references each patent makes to non-patent literature. 
+
+ patent.tsv 
+
+ Data on granted patents, of which we retain the patent ID, the grant date, the abstract text, and the number of claims. 
+
+ patent_assignee.tsv 
+
+ Metadata table for many-to-many relationships between assignees and patents, of which we retain the patent ID and assignee ID. 
+
+ patent_inventor.tsv 
+
+ Metadata table for many-to-many relationships between patents and inventors, of which we retain only the patent ID information in order to count the number of inventors present on application documents. 
+
+ uspatentcitation.tsv 
+
+ Data on citations between US patents, of which we retain the cited patent ID and the citing patent ID. 
+
+ Table 1: Full list of required data sets. Their content is described as well as the retained data points, which appear as columns in a tab-separated format. The data sets can be downloaded from Patentsview . 
+
+ Patentsview provides patent information from the United States Patent Office (USPTO) for all patents issued since 1976. The bulk data sets are available for download on their website. We relied on the data set available in October 2021 which contains 7’101’932 patents. All data sets are open to the public and available free of charge. Additionally, data sets are regularly maintained and thus represent an up-to-date repository of scientific evidence.
+
+ 4 Methodology
+
+ Our recommender system consists of four layers, shown in Figure 2 below. First, patent data is cleaned in the Data Preprocessing layer. Secondly, in the Machine Learning layer, we cluster these patents and extract key descriptive features to train machine learning classifiers. The output of the Machine Learning layer is a labeled set of patents, split between low- and high-value patents. The Managerial layer then selects relevant patents based on the user’s query and passes them further on. The Network Analytics layer receives these topical patents and builds a graph of patent clusters (i.e. technologies) and patent assignees (i.e. companies), which our system uses to calculate useful indicators and rankings of both sets of graph nodes.
+
+ Layered system flowchart 
+
+ Figure 2: Flowchart depicting the four different layers of the system as well as the data flow through it. The function find_topical_patents finds overlaps between patents abstracts and the keyword input given by the user. The API allows users to investigate the network of clusters and assignees created by the Network Analytics layer. 
+
+ 4.1 Data Preprocessing layer
+
+ The Data Preprocessing layer is the intersection between the USPTO database on the outside and our system on the inside. As such, it plays a vital role in cleaning and preprocessing the data in a way that satisfies the requirements of the algorithm working downstream. A successful Data Preprocessing layer performs three tasks: (i) trimming of data sets to the required information, (ii) preventing easy and repeatable errors early on, and (iii) producing lightweight data containers.
+
+ To satisfy (i), each data set is loaded and unnecessary data columns are removed; the remaining ones are relabeled with intuitive and standardised names used across the system scripts. This work is also a forward-thinking process, as it entails determining the data prerequisites of the Machine Learning and Network Analytics layers early on. The Machine Learning layer requires descriptive information about patents to forecast their 5YFC. On the other hand, the Network Analytics layer needs many-to-many tables to assign patents p p their respective assignees a a and CPC subgroups c c .
+
+ For task (ii), freeing the program from easy errors should be seen as a commitment to understanding the data sets. Each column is assigned a data type (e.g. integer, string, dates, etc) and missing values are updated with common replacements such as the median of the column, a plain 0, or NaN values.
+
+ Finally, the approach of our algorithm to task (iii) allows us to compute clusters and networks much faster and with less memory overhead. Indeed, common practice would load all data sets as data frames in random-access memory (RAM), a space-hungry method. With such large arrays, it is not uncommon to witness memory shortages on consumer-grade computers with 16- or 32GB RAM space. Creating a more lightweight algorithm required thinking beyond the traditional data science methods. Options such as creating an external SQL database were too slow, and reading data sets sequentially was prone to errors. We opted for storing the data using multi-dimensional dictionaries (hereafter called tensors), saved locally using pickle file formatting rather than the heavier comma-separated-value format.
+
+ 4.2 Machine Learning layer
+
+ In studies such as [ 13 ] , accuracy scores on classification problems using patents remain low, especially for time frames beyond 2 years. Additionally and more dangerously, the highly unbalanced training data sets of such studies skew the results in favour of the dominant class, and hence the algorithm’s overall performance is kept artificially high. We opt for a more robust approach by first applying a statistical analysis to the data set and based on these results adapting our output classes. Instead of four possible classification values as found in the study of [ 13 ] , we reduce our problem to a binary classification system with a patent value v ​ a ​ l ​ u ​ e p value_{p} of 0 for low-value patents and 1 for high-value patents. In order to label each patent, we first measure the distribution of the 5YFC values of patents older than 5 years. We then define high value patents as those with a 5YFC above the third quartile. Following this, we train the machine learning algorithms on an identical number of low- and high-value patents. Moreover, in order to improve the applicability and robustness of our algorithms across patents from all 242,050 CPC subgroups, we take for our classification system a randomised selection of patents. To boost the Machine Learning layer further, we simplify the input indicators fed to the algorithm and test our training set on a wide selection of classification algorithms.
+
+ The 5FYC can easily be gleaned for patents older than 5 years, since our data sets contain that information. However, these values are missing for the most recently published patents. It is precisely to fill this gap that we deploy machine learning methods. We first compile a shortlist of input variables, most of them copied directly from [ 13 ] . Table 2 summarises these indicators. A total of 13 indicators are used as input data for a supervised classification problem with the output value v ​ a ​ l ​ u ​ e p value_{p} . Rather than using a single machine learning algorithm, we search for the best-in-class by testing a wide sample of general classifiers on our data set and comparing performance levels. In this task, we are supported by the auto-sklearn framework, which automatically selects the best possible model and calibrates its hyperparameters to maximise classification scores with patents that already have a 5YFC value.
+
+ Indicator 
+
+ Description 
+
+ Five-year forward citation (5YFC) 
+
+ Binary value representing the value of a patent, 1 being high-value, 0 low-value 
+
+ Class-level technological originality (CTO) 
+
+ Herfindahl index on CPC groups of cited patents 
+
+ Prior knowledge (PK) 
+
+ Number of backward citations 
+
+ Scientific knowledge (SK) 
+
+ Number of non-patent literature references 
+
+ Technology cycle time (TCT) 
+
+ Median age of cited patents 
+
+ Main field (MF) 
+
+ Main class to which a patent belongs 
+
+ Technological scope (TS) 
+
+ Number of classes to which a patent belongs 
+
+ Protection coverage (PCD) 
+
+ Number of claims 
+
+ Collaboration (COL) 
+
+ 1 if a patent has more than one assignee, else 0 
+
+ Inventors (INV) 
+
+ Number of inventors 
+
+ Total know-how (TKH) 
+
+ Total number of patents issued by an assignee 
+
+ Core area know-how (CKH) 
+
+ Number of patents in a CPC group of interest issued by an assignee 
+
+ Total technological strength (TTS) 
+
+ Number of forward citations of patents issued by an assignee 
+
+ Core technological strength (CTS) 
+
+ Number of forward citations of patents in a CPC group of interest issued by an assignee 
+
+ Table 2: Summary of patent indicators used by the machine learning algorithms. The 5YFC is the binary output variable, the rest are input variables. 
+
+ Once the training phase is over, we predict the binary value of the most recently published patents. Finally, for each cluster c c in year n n , we measure the mean value of its patents as well as the yearly patent count. Thus, we get:
+
+ s ​ i ​ z ​ e c , n = | c n | size_{c,n}=|c_{n}| 
+
+ (1) 
+
+ v ​ a ​ l ​ u ​ e c , n = 1 s ​ i ​ z ​ e c , n ​ ∑ v ​ a ​ l ​ u ​ e p ∈ c n v ​ a ​ l ​ u ​ e p value_{c,n}=\frac{1}{size_{c,n}}\sum_{value_{p}\in c_{n}}value_{p} 
+
+ (2) 
+
+ where
+
+ c n c_{n} is a technology cluster belonging to C C and containing patents issued in year n n 
+
+ v ​ a ​ l ​ u ​ e p value_{p} is the patent value (0 or 1) for patent p p 
+
+ 4.3 Managerial layer
+
+ The Managerial layer is the front end of our system and deals with user input in the form of jobs. These jobs contain settings to adjust job duration and to specify job content. By giving the system a list of unique or concatenated keywords related to a search topic, the user designates a particular area of interest. The managerial layer receives these keywords and scans all 7’101’932 patent abstracts for occurrences of these words. The patents in which these concepts appear verbatim are saved in a list of topical patents. Each job thus produces a list of patents strongly or weakly connected to the technological query. From the managerial layer, we then activate for each job and list of topical patents a network that will map technologies and companies related to these patents.
+
+ Although our approach to identifying patents related to specific queries can be deemed elementary, we believe this approach results in a more comprehensive and statistically significant view of the patent corpus. By specifying a keyword list that is both precise - i.e. bearing little overlap with unrelated queries - and complete - i.e. capturing all essential traits of the search -, the abstract search module captures most existing connections between the search query and the patent corpus without the need for complex mechanisms that often result in false positives. In the Network Analytics layer, each patent will lead us to its CPC subgroups, and this voting mechanism will activate some CPC subgroups more than others. Thus, CPC subgroups that deal heavily with the terms of our queries will outweigh nodes that are only sparingly mentioned. This correction mechanism underlines the robustness of investigating large data sets instead of focusing on fewer data points, which is often the case in the previous literature on technology forecasting.
+
+ 4.4 Network Analytics layer
+
+ The Network Analytics layer is the final processing layer and is responsible for computing different indicators that measure technology emergingness and company rankings. On the basis of the queries made in the managerial layer, the Network Analytics layer selects relevant CPC subgroups (also known as topical clusters) associated with the topical patents. We permeate this step further by first retrieving all patents belonging to these selected topical clusters, and secondly all assignees that sponsored these latter patents (hereafter named topical assignees). From this sequential process, we thus end up with two sets of entities from which we build a graph. A graph is a structure used to model pairwise relationships between entities [ 17 ] . In our solution, these entities are on the one hand a subset of the 242’050 CPC subgroups C C , with each topical cluster c c forming a separate node in the graph. The second set of topical assignees A A is directly associated with these CPC subgroups, and each assignee a a forms a separate graph node as well. We specifically build a bipartite network, whose nodes can be divided into two disjoint sets C C and A A , with all edges E E between nodes joining one node of each set and never two entities of the same set.
+
+ Since our research seeks to highlight the latest emerging trends in technologies, we use only the most recent data in the time-series produced by the Machine Learning layer to measure emergingness values. Across the set N N of all years covered by the data set, we measure technology emergingness as the summation of three growth factors between the years a ​ r ​ g ​ m ​ a ​ x ​ N − 3 argmax\;N-3 and a ​ r ​ g ​ m ​ a ​ x ​ N argmax\;N . This step considerably reduces the complexity of the computational problem: rather than working with a long time-series of graphs, we only require four year’s worth of patents to identify emerging nodes. Subsequently, each CPC subgroup node is weighted by its value v ​ a ​ l ​ u ​ e c , n value_{c,n} and labeled with its patent count c ​ o ​ u ​ n ​ t c , n count_{c,n} . Secondly, the edges e ∈ E e\in E between entities are weighted by the amount of patents that a tuple ( c ∈ C c\in C , a ∈ A a\in A ) have in common.
+
+ We decided to build 5 indices to measure node centrality, which highlight important technologies and companies based on different criteria. The values of these indices all relate to the specific job query.
+
+ Technology Index
+
+ The Technology Index is the only index of our methodology pertaining to technologies rather than to companies. In chapter 2, we described several concepts used in defining emerging technologies. We hereafter choose to define emergingness as an increase in overall interest and impact of a technology across time. In our system, we have defined each of 242,050 CPC subgroups as potential technologies. The absolute interest in these technologies is hereby proxied by the number of patents granted by the USPTO in each CPC subgroup per year, i.e. c ​ o ​ u ​ n ​ t c , n count_{c,n} . The impact measure on the other hand is proxied by v ​ a ​ l ​ u ​ e c , n value_{c,n} . Then, to calculate the emergingness of a technology, we consider the difference of these two values between year n n and n − 1 n-1 in the range between a ​ r ​ g ​ m ​ a ​ x ​ N − 3 argmax\;N-3 to a ​ r ​ g ​ m ​ a ​ x ​ N argmax\;N . Thus, we have:
+
+ v ​ a ​ l ​ u ​ e ​ g ​ r ​ o ​ w ​ t ​ h c , n = v ​ a ​ l ​ u ​ e c , n v ​ a ​ l ​ u ​ e c , n − 1 value\>growth_{c,n}=\frac{value_{c,n}}{value_{c,n-1}} 
+
+ (3) 
+
+ c ​ l ​ u ​ s ​ t ​ e ​ r ​ g ​ r ​ o ​ w ​ t ​ h c , n = s ​ i ​ z ​ e c , n s ​ i ​ z ​ e c , n − 1 × s ​ i ​ z ​ e c , n − 1 m cluster\>growth_{c,n}=\frac{size_{c,n}}{size_{c,n-1}}\times\sqrt[m]{size_{c,n-1}} 
+
+ (4) 
+
+ t ​ e ​ c ​ h ​ i ​ n ​ d ​ e ​ x c = 1 3 ​ ∑ n ∈ N v ​ a ​ l ​ u ​ e ​ g ​ r ​ o ​ w ​ t ​ h c , n × c ​ l ​ u ​ s ​ t ​ e ​ r ​ g ​ r ​ o ​ w ​ t ​ h c , n tech\>index_{c}=\frac{1}{3}\sum_{n\in N}{value\>growth_{c,n}\times cluster\>growth_{c,n}} 
+
+ (5) 
+
+ where
+
+ m m calibrates penalty for small patent clusters (here, m m =5)
+
+ c c one technology cluster (CPC subgroup cluster) in C C 
+
+ n n one year between a ​ r ​ g ​ m ​ a ​ x ​ N − 3 argmax\;N-3 to a ​ r ​ g ​ m ​ a ​ x ​ N argmax\;N 
+
+ Assignee Quality Index
+
+ Given our query, we have built a topology of relevant assignees, called topical assignees. These have in common at least one granted patent in a set of query-relevant technologies. This index is obtained by measuring the mean value of the patents assigned to assignee a a in year a ​ r ​ g ​ m ​ a ​ x ​ N argmax\;N . This index highlights research institutions producing the highest quality or impactful research. We thus have:
+
+ v ​ a ​ l ​ u ​ e a = 1 s ​ i ​ z ​ e a ​ ∑ v ​ a ​ l ​ u ​ e p ∈ a v ​ a ​ l ​ u ​ e p value_{a}=\frac{1}{size_{a}}\sum_{value_{p}\in a}value_{p} 
+
+ (6) 
+
+ Impact Index
+
+ Rather than looking at the value of the patents an assignee has submitted, the Impact Index measures the value of the contribution of an assignee to a query and rewards assignees that have strong connections to important technologies in the network. We define the Impact Index as a sum of the relationships each assignee has with all topical clusters in the network. Given an assignee a a and a CPC subgroup c c , the strength of this relationship is defined as the product of the v ​ a ​ l ​ u ​ e a value_{a} of the assignee node, the v ​ a ​ l ​ u ​ e c , n value_{c,n} of the CPC subgroup node, and the network edge weight between the two entities w ​ e ​ i ​ g ​ h ​ t e weight_{e} . This index captures the overall contribution of a company to a field, and hence highlights companies foundational to the area of interest. We have:
+
+ w e i g h t e = | { { c , a } | c ∈ C , a ∈ A } | weight_{e}=|\{\{c,a\}\;|\;c\in C,\>a\in A\}| 
+
+ (7) 
+
+ i ​ m ​ p ​ a ​ c ​ t a = ∑ e ∈ E a v ​ a ​ l ​ u ​ e a × v ​ a ​ l ​ u ​ e c , arg ​ max ⁡ N × w ​ e ​ i ​ g ​ h ​ t e impact_{a}=\sum_{e\in E_{a}}value_{a}\times value_{c,\argmax N}\times weight_{e} 
+
+ (8) 
+
+ where
+
+ E a E_{a} is the set of all edges e connected to assignee a 
+
+ Normalised Impact Index
+
+ The Normalised Impact Index is a proportionally weighted version of the Impact Index. Indeed, we recognise that some smaller and lesser known companies with a high proportion of high-value patents will not appear prominently in the Impact Index due to their small number of patents. The Normalised Impact Index corrects for this oversight. This index is particularly prone to highlighting influential startups. We have:
+
+ n ​ o ​ r ​ m ​ i ​ n ​ d ​ e ​ x a = i ​ m ​ p ​ a ​ c ​ t a ∑ e ∈ E a w ​ e ​ i ​ g ​ h ​ t e normindex_{a}=\frac{impact_{a}}{\sum_{e\in E_{a}}weight_{e}} 
+
+ (9) 
+
+ Influence Index
+
+ In graph analytics, a common metric of network centrality is obtained with the eigenvector centrality. Discussed extensively in [ 21 ] , eigenvector centrality computes the centrality for a node based on the centrality of its neighbours. Thus, this index highlights well connected and influential companies in the network. The eigenvector centrality for node i is the i -th element of the vector x defined by the equation:
+
+ A ​ x = λ ​ x Ax=\lambda x 
+
+ (10) 
+
+ where
+
+ A A is the adjacency matrix of the Graph G with eigenvalue λ \lambda 
+
+ We get two measures, the influence of assignee nodes i ​ n ​ f ​ l ​ u ​ e ​ n ​ c ​ e a influence_{a} and that of CPC subgroup nodes i ​ n ​ f ​ l ​ u ​ e ​ n ​ c ​ e c influence_{c} , of which we retain only the first.
+
+ 5 Empirical analysis and results
+
+ Our initial motivation for building a robust and lightweight technology monitoring system was to encourage anticipation efforts in the cybersecurity sector. To illustrate the performance of our system in those settings, we ran a job using a manually curated list of keywords capturing the essence of cybersecurity. These keywords were chosen from the cybersecurity glossary published by the National Initiative for Cybersecurity Careers and Studies (NICCS) and were retained for their specificity, i.e. each word pertained only to cybersecurity-related topics. We have selected the following words: 
+ ’allowlist’,
+’antimalware’,
+’antispyware’,
+’antivirus’,
+’asymmetric key’,
+’attack signature’,
+’blocklist’,
+’blue team’,
+’bot’,
+’botnet’,
+’bug’,
+’ciphertext’,
+’computer forensics’,
+’computer security incident’,
+’computer virus’,
+’computer worm’,
+’cryptanalysis’,
+’cryptography’,
+’cryptographic’,
+’cryptology’,
+’cyber incident’,
+’cybersecurity’,
+’cyber security’,
+’cyberspace’,
+’cyber threat intelligence’,
+’data breach’,
+’data leakage’,
+’data theft’,
+’decrypt’,
+’decrypted’,
+’decryption’,
+’denial of service’,
+’digital forensics’,
+’digital signature’,
+’encrypt’,
+’encrypted’,
+’encryption’,
+’firewall’,
+’hacker’,
+’hashing’,
+’keylogger’,
+’malware’,
+’malicious code’,
+’network resilience’,
+’password’,
+’pen test’,
+’pentest’,
+’phishing’,
+’private key’,
+’public key’,
+’red team’,
+’rootkit’,
+’spoofing’,
+’spyware’,
+’symmetric key’,
+’systems security analysis’,
+’threat actor’,
+’trojan’,
+’white team’.
+
+ We ran our job on a specialised high-performance computer (HPC) node with 128 AMD EPYC 7742 CPUs. We however estimate 16 CPUs to suffice for such a task. The maximum concurrent RAM usage stands at around 100GB, half of which is occupied by the ten different tensors loaded with Patentsview data and the rest occupied intermittently by the large machine learning data frames. Execution time is highly correlated with the machine learning step size. We ran a best-model search using the auto-sklearn framework, capped at 0.6 hours testing time per model and 6 hours in total. The training set consisted of 15,000 low-value patents (binary value 0) and 15,000 high-value patents (binary value 1), thus consisting of a perfectly balanced data frame with a random guess accuracy rate of 50%. The auto-sklearn framework ran 37 different target algorithms. One algorithm crashed, 3 exceeded the set time limit, and 5 exceeded the memory limit. In the end, the algorithm opted for a mix of differently parametrised random forest models, attaining an accuracy value of 0.6737, or about two in three patents. Following this, we predicted the output values of the 1’740’613 patents granted in the latest five-year period. This step required over 11 hours. All in all, the Data Preprocessing and Machine Learning layers required approximately 26 hours to run. In the Network Analytics layer, different jobs can run successively on top of these results; with n n the amount of topical patents, each job has an approximate time complexity of O ⁡ ( log ⁡ n ) O(\log{}n) , since topical patents usually share topical clusters.
+
+ Figures 3(a) , 3(b) , 4 and 5 present the distribution of cluster size and cluster value for all technologies linked to our cybersecurity-related query. In Figure 3(b) , the cumulative distribution function for cluster size shows that most cybersecurity technologies in the CPC topology have gathered fewer than 500 patents since their inception. Figure 3(a) however shows that many cybersecurity-related technologies contain highly-valued patents. This becomes even more apparent when comparing these measures with statistics describing the entire patent database. This comparison, shown in Figures 4 and 5 , highlights the quality of cybersecurity-related patents. Technologies linked to cybersecurity show median cluster values between 0.3 and 0.5 for the last four years. Although the trend of cluster value points downward, the contrast to the values for the full data set is very evident; cybersecurity innovations are highly cited compared to other patents.
+
+ Next, we present the technology and company rankings of our recommender system. This recommender system is built atop the cybersecurity graph discussed in Chapter 4. Table 6 in the Annex presents the 10 most highly-ranked CPC subgroup nodes in this graph based on their Technology Index. From these results, we notice a strong interest in biology-inspired computer systems (mainly neural networks), payment systems, WiFi & control unit security, and cryptography.
+
+ Cumulative distribution functions (CDF) of clusters 
+
+ ((a)) Figure A 
+
+ ((b)) Figure B. 
+
+ Figure 3: Cumulative distribution functions (CDF) of the cluster value and cluster size for topical clusters. We see from Figure A that most clusters related to cybersecurity have a value between 0.2 and 0.6, meaning they contain a relatively high proportion of high-value to low-value patents. Figure B points to a highly granular cybersecurity environment, consisting of many small technology clusters. 
+
+ Violin plots for cluster size 
+
+ Figure 4: Violin plots for cluster size, from 2018 to 2021. The dashed lines represent the separations between the four quartiles. We see that clusters linked to cybersecurity are bigger than the average cluster. 
+
+ Violin plots for cluster value 
+
+ Figure 5: Violin plots for cluster value, from 2018 to 2021. The dashed lines represent the separations between the four quartiles. We see that clusters linked to cybersecurity are on average much more valuable than the average patent. This means the former patents receive more citations and attention than the latter. 
+
+ We do not present here the ranking of the Assignee Quality Index, because many companies therein have the maximum value of 1 and presenting a list of the top 10 companies in that table is futile; rather, that ranking is best used for looking up a company-specific value. In Table 3 , we present the top 10 companies according to the Impact Index. Unsurprisingly, major software and hardware companies top the list, propelled mainly by their large patent count. Table 4 scales the Impact Index based on each company’s patent output size, and thus we can highlight smaller, lesser known companies that have a considerable impact on the cybersecurity market proportional to their size. We have only selected companies with at least 5 granted patents in the last year; this step filters out outlier companies that produced very few high-value patents and thus found themselves at the top of the list, more out of luck than the product of high-quality research that can be reproduced repeatedly over several years. Finally, Table 5 shows the most influential companies in the cybersecurity market. We have again very dominant technology companies topping out the list, however hardware companies have the edge here. This could be explained by the business model of some of these companies, which integrate many software and hardware solutions into their customer products and hence must stay up-to-date in many cybersecurity-relevant topics.
+
+ # 
+
+ Company 
+
+ Patent Count 
+
+ Value 
+
+ Impact 
+
+ 1 
+
+ International Business Machines Corporation 
+
+ 7314 
+
+ 0.479355 
+
+ 3,488,180 
+
+ 2 
+
+ Microsoft Technology Licensing, LLC 
+
+ 2644 
+
+ 0.815053 
+
+ 3,157,710 
+
+ 3 
+
+ Amazon Technologies, Inc. 
+
+ 2133 
+
+ 0.487107 
+
+ 1,632,140 
+
+ 4 
+
+ Cisco Technology, Inc 
+
+ 1040 
+
+ 0.779808 
+
+ 1,532,470 
+
+ 5 
+
+ Advanced New Technologies Co, Ltd 
+
+ 518 
+
+ 0.486486 
+
+ 1,453,670 
+
+ 6 
+
+ Intel Corporation 
+
+ 2788 
+
+ 0.457317 
+
+ 1,283,470 
+
+ 7 
+
+ EMC IP Holding Company LLC 
+
+ 1235 
+
+ 0.733603 
+
+ 1,265,040 
+
+ 8 
+
+ Apple Inc. 
+
+ 2568 
+
+ 0.54595 
+
+ 1,132,630 
+
+ 9 
+
+ AS America, Inc. 
+
+ 496 
+
+ 0.59879 
+
+ 941,869 
+
+ 10 
+
+ Google LLC 
+
+ 1621 
+
+ 0.676126 
+
+ 921,388 
+
+ Table 3: Companies ranked according to the Impact Index. The list is made up of major software and hardware companies, boosted by a large number of impactful patents. 
+
+ # 
+
+ Company 
+
+ Value 
+
+ Patent Count 
+
+ Norm. Impact 
+
+ 1 
+
+ CyberArk Software Ltd. 
+
+ 0.7567 
+
+ 37 
+
+ 833.551 
+
+ 2 
+
+ Intertrust Technologies Corporation 
+
+ 0.8571 
+
+ 14 
+
+ 771.041 
+
+ 3 
+
+ SHAPE SECURITY, INC. 
+
+ 0.9090 
+
+ 11 
+
+ 769.185 
+
+ 4 
+
+ F5 NETWORKS, INC. 
+
+ 0.9230 
+
+ 26 
+
+ 765.03 
+
+ 5 
+
+ Sophos Limited 
+
+ 0.8695 
+
+ 46 
+
+ 744.879 
+
+ 6 
+
+ McAfee, LLC 
+
+ 0.8924 
+
+ 93 
+
+ 730.186 
+
+ 7 
+
+ SONICWALL INC. 
+
+ 0.8571 
+
+ 14 
+
+ 726.287 
+
+ 8 
+
+ MX TECHNOLOGIES, INC. 
+
+ 0.875 
+
+ 16 
+
+ 717.432 
+
+ 9 
+
+ FireEye, Inc. 
+
+ 0.9787 
+
+ 47 
+
+ 683.293 
+
+ 10 
+
+ Netskope, Inc. 
+
+ 0.75 
+
+ 20 
+
+ 632.204 
+
+ Table 4: Companies ranked according to the Normalised Impact Index. Companies with fewer than 5 patents are removed for more useful results. This ranking highlights small but impactful companies. 
+
+ # 
+
+ Company 
+
+ Patent Count 
+
+ Value 
+
+ Influence 
+
+ 1 
+
+ International Business Machines Corporation 
+
+ 7314 
+
+ 0.4793 
+
+ 0.3573 
+
+ 2 
+
+ Samsung Electronics Co., Ltd. 
+
+ 5415 
+
+ 0.3566 
+
+ 0.2811 
+
+ 3 
+
+ Qualcomm Incorporated 
+
+ 2129 
+
+ 0.5758 
+
+ 0.1948 
+
+ 4 
+
+ Huawei Technologies Co., Ltd. 
+
+ 2765 
+
+ 0.0239 
+
+ 0.1787 
+
+ 5 
+
+ LG Electronics, Inc. 
+
+ 2094 
+
+ 0.1905 
+
+ 0.1763 
+
+ 6 
+
+ Apple Inc. 
+
+ 2568 
+
+ 0.5459 
+
+ 0.1668 
+
+ 7 
+
+ Microsoft Technology Licensing, LLC. 
+
+ 2644 
+
+ 0.8150 
+
+ 0.1608 
+
+ 8 
+
+ Intel Corporation 
+
+ 2788 
+
+ 0.4573 
+
+ 0.1599 
+
+ 9 
+
+ Amazon Technologies, Inc. 
+
+ 2133 
+
+ 0.4871 
+
+ 0.106 
+
+ 10 
+
+ Facebook, Inc. 
+
+ 1317 
+
+ 0.2498 
+
+ 0.1025 
+
+ Table 5: Companies ranked according to the Influence Index. Many of these assignees are hardware companies with ties to a large set of technologies. 
+
+ Moreover, by cross-plotting several of these statistics, we can glean additional insights for research and development (R&D) management. Figure 6 plots for each assignee (i) the patent count against (ii) the normalised impact of the company on the cybersecurity market. Based on preliminary analysis, it seems that the two indicators are negatively correlated. This supports the economic theory of decreasing marginal return in large companies; the larger the R&D output of technology companies, the less valuable each cybersecurity innovation seems to be. Figure 7 in the Annex plots assignee influence against assignee impact, with no statistically significant trend. It is therefore not possible to state that horizontal integration or investments into many corners of the cybersecurity market improve a company’s impact within the field.
+
+ Assignee patent count vs Normalised impact 
+
+ Figure 6: Plot of patent count against the normalised impact index, for all topical clusters. It seems that both variables are correlated through a negative exponential, which supports the economic theory of decreasing marginal returns in large companies. Further analysis could confirm this link. 
+
+ 6 Discussion
+
+ Each indicator in our case study serves different cybersecurity and cyberdefence end users. The Technology Index allows companies and governments to allocate their resources to rising and valuable technologies in the cyberspace. It also hinders blindspots in an institution’s cyber threat management, by highlighting all technologies and areas of business where cybersecurity plays an important role. The Technology Index can also help steer industrial policy and encourage early adoption of industry standards for emerging technologies.
+
+ The Impact Index can be used to identify leading companies in cybersecurity. These companies set technology standards and employ the largest share of the field’s experts. Economists therefore have an incentive to follow the progress of these major market players. Thanks to the Impact Index, cybersecurity engineers and consultants also know where to purchase the most established and well-funded cybersecurity products. The Normalised Impact index on the other hand can be useful for early-stage investments into promising cybersecurity firms with the most near-term potential. Finally, the Influence Index allows clients to partner up with the best-connected companies in the cybersecurity market, either to explore the market at large, jointly develop additional products or to hire consultancy services from.
+
+ The following description could be a potential use-case of these indicators. By cross-correlating the Impact Index and the Technology Index, a national government can spot strong and weak areas of the local cybersecurity market. Using the results of the Normalised Impact Index, different ministries can enact targeted investments into the most promising native startups. This analysis is also bolstered by an API built into the recommender system, which indexes the most important technologies for a selected company or the most prolific companies for a selected technology (see Figure 2 ).
+
+ 7 Conclusion, Limitations, Future scope
+
+ In order to investigate the cybersecurity technology and market landscape, we have built a generalisable and lightweight patent-analysis system. First, with the help of a best-in-class machine learning framework, we split patents into high- and low-value classes using patent metadata as training inputs. From this binary classification and with the help of patent count time-series, we derived the growth in interest for all technologies of the CPC classification scheme. Furthermore, we measured various company scores based on their patent portfolio. Running this system on the cybersecurity industry, our results show highly satisfactory rankings of emerging technologies and companies, with outputs corresponding to expert expectations for such a system.
+We also recognise the need for further research to look beyond patents as a source of information. Indeed, some technology fields experience more pressure to submit patent applications, and this is especially true in long-standing technology companies such as IBM. These differences naturally skew our system output towards companies and technology fields that make patent submissions a priority. Given the current advances in Natural Language Processing and computational Bayesian methods, we also argue that recognising topic-related patents could be improved with state-of-the-art topic extraction and modelling methods. Overall, we believe our system to be a first stepping stone towards a highly intelligent market and technology forecasting tool.
+
+ References
+
+ [1] 
+ Birgitte Andersen
+
+ “The hunt for S-shaped growth paths in technological innovation: a patent study”
+
+ In Journal of evolutionary economics 9.4 
+
+ Springer, 1999, pp. 487–526
+
+ [2] 
+ Murat Bengisu and Ramzi Nekhili
+
+ “Forecasting emerging technologies with the aid of science and technology databases”
+
+ In Technological Forecasting and Social Change 73.7 , 2006, pp. 835–844
+
+ DOI: https://doi.org/10.1016/j.techfore.2005.09.001 
+
+ [3] 
+ Wouter Boon and Ellen Moors
+
+ “Exploring emerging technologies using metaphors: A study of orphan drugs and pharmacogenomics”
+
+ In Social Science & Medicine 66.9 , 2008, pp. 1915–1927
+
+ DOI: https://doi.org/10.1016/j.socscimed.2008.01.012 
+
+ [4] 
+ Robert. Clemen
+
+ “Combining forecasts: A review and annotated bibliography”
+
+ In International Journal of Forecasting 5.4 
+
+ Elsevier, 1989, pp. 559–583
+
+ DOI: 10.1016/0169-2070(89)90012-5 
+
+ [5] 
+ Nicoletta Corrocher, Franco Malerba and Fabio Montobbio
+
+ “The emergence of new technologies in the ICT field: main actors, geographical distribution and knowledge sources”, 2003
+
+ URL: https://EconPapers.repec.org/RePEc:ins:quaeco:qf0317 
+
+ [6] 
+ Tugrul. Daim, Guillermo Rueda, Hilary Martin and Pisek Gerdsri
+
+ “Forecasting emerging technologies: Use of bibliometrics and patent analysis” Tech Mining: Exploiting Science and Technology Information Resources
+
+ In Technological Forecasting and Social Change 73.8 , 2006, pp. 981–1012
+
+ DOI: https://doi.org/10.1016/j.techfore.2006.04.004 
+
+ [7] 
+ Mohanad Halaweh
+
+ “Emerging Technology: What is it?”
+
+ In Journal of Technology Management & Innovation 8.3 , 2013, pp. 108–115
+
+ DOI: 10.4067/S0718-27242013000400010 
+
+ [8] 
+ Reinhard Haupt, Martin Kloyer and Marcus Lange
+
+ “Patent indicators for the technology life cycle development”
+
+ In Research Policy 36.3 
+
+ Elsevier, 2007, pp. 387–398
+
+ [9] 
+ Shih-Chang Hung and Yee-Yeen Chu
+
+ “Stimulating new industries from emerging technologies: challenges for the public sector”
+
+ In Technovation 26.1 , 2006, pp. 104–110
+
+ DOI: https://doi.org/10.1016/j.technovation.2004.07.018 
+
+ [10] 
+ Gizem Intepe and Tufan Koc
+
+ “The Use of S Curves in Technology Forecasting and its Application On 3D TV Technology”
+
+ In International Journal of Industrial and Manufacturing Engineering 6.11 , 2012
+
+ [11] 
+ D. Kucharavy, E. Schenk and R. Guio
+
+ “Long-Run Forecasting of Emerging Technologies with Logistic Models and Growth of Knowledge”
+
+ In Proceedings of the 19th CIRP Design Conference - Competitive Design, Cranfield University, 30-31 March, 2009 , 2009, pp. 277
+
+ [12] 
+ Moses Kyebambe et al.
+
+ “Forecasting emerging technologies: A supervised learning approach through patent analysis”
+
+ In Technological Forecasting and Social Change 125 , 2017, pp. 236–244
+
+ DOI: https://doi.org/10.1016/j.techfore.2017.08.002 
+
+ [13] 
+ Changyong Lee, Ohnjin Kwon and Daeil Kim Myeongjung
+
+ “Early identification of emerging technologies: A machine learning approach using multiple patent indicators”
+
+ In Technological Forecasting and Social Change 127.3 
+
+ Elsevier Inc., 2018, pp. 291–303
+
+ DOI: 10.1016/j.techfore.2017.10.002 
+
+ [14] 
+ Spyros Makridakis and Robert. Winkler
+
+ “Averages of Forecasts: Some Empirical Results”
+
+ In Management Science 29.9 , 1983, pp. 987–996
+
+ DOI: 10.1287/mnsc.29.9.987 
+
+ [15] 
+ Ben. Martin
+
+ “Foresight in science and technology”
+
+ In Technology Analysis & Strategic Management 7.2 
+
+ Routledge, 1995, pp. 139–168
+
+ DOI: 10.1080/09537329508524202 
+
+ [16] 
+ Martin Meyer
+
+ “Patent citation analysis in a novel field of technology: An exploration of nano-science and nano-technology”
+
+ In Scientometrics 51.1 
+
+ Akadémiai Kiadó, co-published with Springer Science+ Business Media BV, Formerly Kluwer Academic Publishers BV, 2001, pp. 163–183
+
+ [17] 
+ Anita Mezzetti et al.
+
+ “TechRank: A Network-Centrality Approach for Informed Cybersecurity-Investment”
+
+ Arxiv, 2021, pp. 1–7
+
+ DOI: arXiv:2112.05548 
+
+ [18] 
+ Mariano Nieto, Francisco Lopéz and Fernando Cruz
+
+ “Performance analysis of technology using the S curve model: the case of digital signal processing (DSP) technologies”
+
+ In Technovation 18.6 , 1998, pp. 439–457
+
+ DOI: https://dRotolo2015oi.org/10.1016/S0166-4972(98)00021-2 
+
+ [19] 
+ Alan Porter, J Roessner, Xiao-Yin Jin and Nils Newman
+
+ “Measuring national ‘emerging technology’capabilities”
+
+ In Science and Public Policy 29.3 
+
+ Beech Tree Publishing, 2002, pp. 189–200
+
+ [20] 
+ S. Ranaei, M. Karvonen, A. Suominen and T. Kässi
+
+ “Forecasting emerging technologies of low emission vehicle”
+
+ In Proceedings of PICMET ’14 Conference: Portland International Center for Management of Engineering and Technology; Infrastructure and Service Integration , 2014, pp. 2924–2937
+
+ [21] 
+ Britta Ruhnau
+
+ “Eigenvector-centrality - a node-centrality?”
+
+ In Social Networks 22.4 
+
+ Elsevier, 2000, pp. 357–365
+
+ DOI: 10.1016/S0378-8733(00)00031-9 
+
+ [22] 
+ Henry Small, Kevin. Boyack and Richard Klavans
+
+ “Identifying emerging topics in science and technology”
+
+ In Research Policy 43.8 , 2014, pp. 1450–1467
+
+ DOI: https://doi.org/10.1016/j.respol.2014.02.005 
+
+ [23] 
+ Zhinan Wang, Alan Porter, Xuefeng Wang and Stephen Carley
+
+ “An approach to identify emergent topics of technological convergence: A case study for 3D printing”
+
+ In Technological Forecasting and Social Change 146 , 2019, pp. 723–732
+
+ DOI: 10.1016/j.techfore.2018.12.015 
+
+ [24] 
+ Yuan Zhou et al.
+
+ “Forecasting emerging technologies with deep learning and data augmentation: convergence emerging technologies vs non-convergence emerging technologies”
+
+ In Proceedings of 6th International Conference on Future-Oriented Technology Analysis (FTA) , 2018
+
+ URL: https://ec.europa.eu/jrc/sites/jrcsh/files/fta2018-paper-b3-zhou.pdf 
+
+ 8 Annex
+
+ Tech. Index 
+
+ Subgroup 
+
+ Patent count 
+
+ Citation count 
+
+ Description 
+
+ 8.02 
+
+ G06N3/08 
+
+ 6519 
+
+ 251.6 
+
+ Computer systems based on biological models-using neural network models-Learning methods 
+
+ 8.02 
+
+ G06F7/50 
+
+ 163 
+
+ 13.7 
+
+ Methods or arrangements for processing data by operating upon the order or content of the data handled -Methods or arrangements for performing computations using exclusively denominational number representation, e.g. using binary, ternary, decimal representation-using non-contact-making devices, e.g. tube, solid state device; using unspecified devices-Adding; Subtracting 
+
+ 7.92 
+
+ G06Q20/3558 
+
+ 132 
+
+ 81.4 
+
+ Payment architectures, schemes or protocols -characterised by the use of specific devices ; or networks-using cards, e.g. integrated circuit [IC] cards or magnetic cards-Personalisation of cards for use-Preliminary personalisation for transfer to user 
+
+ 7.90 
+
+ G06N3/0454 
+
+ 5458 
+
+ 141.3 
+
+ Computer systems based on biological models-using neural network models-Architectures, e.g. interconnection topology-using a combination of multiple neural nets 
+
+ 7.55 
+
+ G06N20/00 
+
+ 13947 
+
+ 747.4 
+
+ Machine learning 
+
+ 7.48 
+
+ H04W80/08 
+
+ 279 
+
+ 14.6 
+
+ Wireless network protocols or protocol adaptations to wireless operation-Upper layer protocols 
+
+ 7.15 
+
+ G11C8/20 
+
+ 243 
+
+ 53.7 
+
+ Arrangements for selecting an address in a digital store -Address safety or protection circuits, i.e. arrangements for preventing unauthorized or accidental access 
+
+ 7.06 
+
+ G06F9/3818 
+
+ 66 
+
+ 61.4 
+
+ Arrangements for program control, e.g. control units -using stored programs, i.e. using an internal store of processing equipment to receive or retain programs-Arrangements for executing machine instructions, e.g. instruction decode -Concurrent instruction execution, e.g. pipeline, look ahead-Decoding for concurrent execution 
+
+ 7.05 
+
+ H04L2209/38 
+
+ 2858 
+
+ 2728.0 
+
+ Additional information or applications relating to cryptographic mechanisms or cryptographic arrangements for secret or secure communication H04L9/00-Chaining, e.g. hash chain or certificate chain 
+
+ 6.91 
+
+ G06N3/0472 
+
+ 977 
+
+ 51.0 
+
+ Computer systems based on biological models-using neural network models-Architectures, e.g. interconnection topology-using probabilistic elements, e.g. p-rams, stochastic processors 
+
+ Table 6: Technologies ranked according to Technology Index. Important emerging technologies in cybersecurity are linked to neural networks, payment systems, WiFi, control units and cryptography. 
+
+ Assignee influence vs Assignee impact 
+
+ Figure 7: Plot of cluster influence against cluster impact, for all topical clusters. There is no apparent relationship between the two. 
+
+ Experimental support, please
+ view the build logs 
+ for errors. Generated by
+
+ L
+ A 
+ T
+ E 
+
+ xml 
+
+ .
+
+ Instructions for reporting errors
+
+ We are continuing to improve HTML versions of papers, and your feedback helps enhance accessibility and mobile
+ support. To report errors in the HTML that will help us improve conversion and rendering, choose any of the
+ methods listed below:
+
+ Click the "Report Issue" ( 
+
+ ) button, located in the page header.
+
+ Tip: You can select the relevant text first, to include it in your report.
+
+ Our team has already identified the following issues . We appreciate your time reviewing and reporting rendering errors we
+ may not have found yet. Your efforts will help us improve the HTML versions for all readers, because disability
+ should not be a barrier to accessing research. Thank you for your continued support in championing open access for
+ all.
+
+ Have a free development cycle? Help support accessibility at arXiv! Our collaborators at LaTeXML maintain a list of packages that need conversion , and welcome developer contributions .
+
+ We gratefully acknowledge support from
+ our major funders ,
+ member institutions , ,
+ and all contributors.
+
+ About 
+ · 
+ Help 
+ · 
+ Contact 
+ · 
+ Subscribe 
+ · 
+ Copyright 
+ · 
+ Privacy 
+ · 
+ Accessibility 
+ · 
+ Operational Status (opens in new tab) 
+
+ Major funding support from

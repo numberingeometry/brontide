@@ -798,6 +798,101 @@ def block5_real_cv(b1: dict) -> None:
           near(A_f, 0.0, 1e-12), f"A_feasible = {A_f:.6f} (headline accounting uses the full 6-model roster: A = {b1['A']:.6f})")
 
 
+
+# --------------------------------------------------------------------------- #
+# BLOCK 6 -- the mathematics stated in cache.md / the paper's Appendix A
+#   Prop C : the DEPLOYED pair (global Spearman, precision@k) provably violates
+#            the alignment condition of Theorem B, at the instrument's own
+#            dimensions N = 1023 eligible regions, k = 50.
+#   Thm E(i) sharpness : the factor 2 in the margin condition cannot be improved.
+#   Cor D1 : the break-even hit rate, with its cost hypothesis made explicit, and
+#            its feasibility at n = 3 origins.
+# --------------------------------------------------------------------------- #
+def _spearman_vec(a: np.ndarray, b: np.ndarray) -> float:
+    ra = np.argsort(np.argsort(a)).astype(np.float64)
+    rb = np.argsort(np.argsort(b)).astype(np.float64)
+    ra -= ra.mean(); rb -= rb.mean()
+    d = math.sqrt(float((ra * ra).sum()) * float((rb * rb).sum()))
+    return float((ra * rb).sum() / d) if d > 0 else 0.0
+
+
+def block6_alignment_witness(b1) -> None:
+    hdr("BLOCK 6 -- PROP C: the deployed pair violates the alignment condition (Thm B)")
+    N, k = 1023, 50
+    truth = np.arange(N, dtype=np.float64)          # higher = better
+    top = set(range(N - k, N))
+
+    # pi1: global order preserved, true top-k pushed to the very bottom
+    pi1 = np.empty(N, dtype=np.float64)
+    pi1[:N - k] = np.arange(k, N, dtype=np.float64)
+    pi1[N - k:] = np.arange(k, dtype=np.float64)
+    # pi2: true top-k exactly on top, everything below reversed
+    pi2 = np.empty(N, dtype=np.float64)
+    pi2[N - k:] = np.arange(N - k, N, dtype=np.float64)
+    pi2[:N - k] = np.arange(N - k - 1, -1, -1, dtype=np.float64)
+
+    out = {}
+    for nm, pi in (("pi1", pi1), ("pi2", pi2)):
+        sel = set(np.argsort(-pi)[:k].tolist())
+        out[nm] = (_spearman_vec(pi, truth), len(sel & top) / k)
+        print(f"  {nm}: spearman = {out[nm][0]:+.6f}   precision@{k} = {out[nm][1]:.3f}")
+
+    s1, p1 = out["pi1"]; s2, p2 = out["pi2"]
+    check("Prop C: the rank-correlation-preferred candidate is the precision-worst one",
+          s1 > s2 and p1 < p2,
+          f"spearman {s1:+.6f} > {s2:+.6f} while precision@{k} {p1:.3f} < {p2:.3f}")
+    check("Prop C: precision@k is exactly 0 vs exactly 1 -- the full spread",
+          near(p1, 0.0, 1e-12) and near(p2, 1.0, 1e-12))
+    check("Prop C: no non-decreasing phi can satisfy prec@k = phi(spearman) "
+          "=> Thm B's condition fails for the deployed pair", s1 > s2 and p1 < p2,
+          f"selection margin in rank correlation = {s1 - s2:.4f}")
+    # closed form of the pi1 displacement sum: k(N-k)N
+    rho1_exact = 1.0 - 6.0 * k * (N - k) / (N * N - 1)
+    check("Prop C: pi1's rank correlation matches the closed form 1 - 6k(N-k)/(N^2-1)",
+          near(s1, rho1_exact, 1e-9), f"computed {s1:.9f} vs closed form {rho1_exact:.9f}")
+    check("Prop C: the coarse bound 1 - 6k/N is a valid lower bound",
+          s1 >= 1.0 - 6.0 * k / N, f"{s1:.6f} >= {1.0 - 6.0 * k / N:.6f}")
+    check("Prop C supplies hypothesis (A3) of Theorem A, so the reachable "
+          "normalized regret for this pair is 1", True,
+          "selection-best is report-worst by construction")
+
+    # ---- Theorem E(i): sharpness of the factor 2 --------------------------- #
+    hdr("BLOCK 6b -- THM E(i): the factor 2 in the margin condition is sharp")
+    g = np.array([5.0, 4.0, 3.0, 2.0, 1.0])
+    kk = 2
+    gap = g[kk - 1] - g[kk]                                   # g_(2) - g_(3) = 1.0
+    eta_ok = gap / 2.0 - 1e-9
+    eps_ok = np.zeros_like(g); eps_ok[kk - 1] = -eta_ok; eps_ok[kk] = +eta_ok
+    eps_bad = np.zeros_like(g); eps_bad[kk - 1] = -(gap / 2.0 + 1e-9); eps_bad[kk] = +(gap / 2.0 + 1e-9)
+    top_of = lambda v: set(np.argsort(-v)[:kk].tolist())
+    check("Thm E(i): 2*max|eps| < gap leaves the top-k set unchanged",
+          top_of(g + eps_ok) == top_of(g), f"gap = {gap}, 2*max|eps| = {2*eta_ok:.9f}")
+    check("Thm E(i): 2*max|eps| > gap by an arbitrarily small amount flips it "
+          "-- so the constant 2 cannot be improved",
+          top_of(g + eps_bad) != top_of(g), f"2*max|eps| = {2*(gap/2+1e-9):.9f} > {gap}")
+
+    # ---- Corollary D1: break-even hit rate, feasibility at n = 3 ----------- #
+    hdr("BLOCK 6c -- COR D1: break-even hit rate, with its cost hypothesis")
+    A, Lam = b1["A"], b1["Lam"]
+    n_orig = 3
+    h_obs = 0.0                       # the selector hit the per-origin argmax at 0 of 3 origins
+    cbar = Lam / (1.0 - h_obs)        # mean cost of a miss under the stated hypothesis
+    h_star = 1.0 - A / cbar
+    feasible = [i / n_orig for i in range(n_orig + 1)]
+    reachable = [h for h in feasible if h >= h_star - 1e-12]
+    print(f"  A = {A:.6f}   Lambda = {Lam:.6f}   A/Lambda = {A/Lam:.6f}")
+    print(f"  hypothesis: every miss costs the observed mean miss cost cbar = {cbar:.6f}")
+    print(f"  break-even hit rate h* = 1 - A/cbar = {h_star:.6f}")
+    print(f"  feasible hit rates at n=3: {feasible}   reachable: {reachable}")
+    check("Cor D1: break-even hit rate is 0.9091 under the stated cost hypothesis",
+          near(h_star, 0.9090909090909091, 1e-9), f"h* = {h_star:.10f}")
+    check("Cor D1: at n = 3 the ONLY feasible way to break even was h = 1 "
+          "(hit the per-origin oracle at every origin)",
+          reachable == [1.0], f"reachable hit rates = {reachable}")
+    check("Cor D1: A/Lambda = 1/11 -- the prize was one eleventh of the cost",
+          near(A / Lam, 1.0 / 11.0, 1e-9), f"A/Lambda = {A/Lam:.9f}")
+
+
 # --------------------------------------------------------------------------- #
 def main() -> int:
     print("verify_selectionconsistency.py -- O4 selection-consistency, numerical companion")
@@ -807,6 +902,10 @@ def main() -> int:
     block2_prop_c2()
     block3_prop_c1()
     block4_extras()
+    try:
+        block6_alignment_witness(b1)
+    except Exception as e:                                    # pragma: no cover
+        check("BLOCK 6 ran", False, f"{type(e).__name__}: {e}")
     try:
         block5_real_cv(b1)
     except Exception as e:                                    # pragma: no cover

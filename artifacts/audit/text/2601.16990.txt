@@ -1,0 +1,3308 @@
+pyBiblioNet: A python library for a comprehensive network-based bibliometric analysis 
+
+ Report GitHub Issue 
+ × 
+
+ Title: 
+
+ Content selection saved. Describe the issue below:
+
+ Description: 
+
+ Submit without GitHub 
+ Submit in GitHub 
+
+ arXiv is now an independent nonprofit! 
+ Learn more 
+ × 
+
+ Back to arXiv 
+
+ Why HTML? 
+
+ Report Issue 
+
+ Back to Abstract 
+
+ Download PDF 
+
+ Abstract 
+
+ 1 Introduction and related work 
+
+ 1.1 Our contribution 
+
+ 2 Network-based bibliometrics 
+
+ 2.1 Centrality metrics 
+
+ 2.2 Community detection 
+
+ 3 pyBiblioNet: Exploring bibliometric data through network analysis 
+
+ 3.1 Root set/base set structure of citation networks 
+
+ 3.2 Data Collection: querying the OpenAlex API 
+
+ 3.3 Data Analytics 
+
+ 3.4 Network-based Bibliometrics 
+
+ 4 Use Case: Application of pyBiblioNet on the Query “15 Minute City” 
+
+ 4.1 Retrieving Articles and Constructing the Citation Graph 
+
+ 4.2 Metadata Export 
+
+ 4.3 Data Analysis 
+
+ 4.4 Network-based Bibliometrics 
+
+ 4.5 Results and Discussion 
+
+ 5 Conclusion, Limitations and Future Work 
+
+ 6 Documentation of the openalex Module 
+
+ 6.1 Core Functions 
+
+ 6.1.1 string_generator_from_lite_regex 
+
+ 6.1.2 query_OpenAlex 
+
+ 6.1.3 retrieve_articles 
+
+ 6.1.4 export_articles_to_csv 
+
+ 6.1.5 export_authors_to_csv 
+
+ 6.1.6 export_institutions_to_csv 
+
+ 6.1.7 export_venues_to_csv 
+
+ 6.1.8 export_articles_to_scopus 
+
+ 6.1.9 create_citation_graph 
+
+ 6.1.10 create_coauthorship_graph 
+
+ 7 Documentation of the bibliometric_analysis Module 
+
+ 7.1 Core Functions 
+
+ 7.1.1 extract_metrics_to_csv 
+
+ 7.1.2 extract_clusters_to_csv 
+
+ 7.1.3 cluster_graph 
+
+ 7.2 Charts Functions 
+
+ 7.2.1 plot_article_trends 
+
+ 7.2.2 plot_topic_trends 
+
+ 7.2.3 plot_top_authors 
+
+ 7.2.4 plot_top_keywords_from_abstracts 
+
+ 7.2.5 plot_keyword_trends 
+
+ 7.3 Charts Networks Functions 
+
+ 7.3.1 show_clustered_graph 
+
+ 7.3.2 show_cluster_statistics 
+
+ 7.3.3 show_graph_statistics 
+
+ References 
+
+ License: CC BY 4.0
+
+arXiv:2601.16990v1 [cs.DL] 07 Jan 2026
+
+ Bibliometric analysis is a critical tool for understanding the structure, dynamics, and impact of scientific research. Traditional methods often fall short in capturing the intricate relationships and evolving trends within scientific literature. To address this gap, we present pyBiblioNet, a Python library designed to facilitate comprehensive network-based bibliometric analysis, providing insights into citation networks, co-authorship networks, and keyword co-occurrence networks. The library integrates with OpenAlex, a popular and open catalogue to the global research system, enabling users to easily preprocess, visualize, and analyse bibliometric data. Key features include topic selection, automatic data download via OpenAlex APIs, creation of the root and base sets of manuscripts to analyze, creation of the citation and co-authorship networks, network visualization tools, and a suite of algorithms for computing network centralities, clustering, and community detection, all of them tailored to the bibliometric domain. Additionally, it enables the analysis of key topics and concepts using NLP techniques. We showcase the main functions of the library by performing a bibliometric analysis on the multidisciplinary “15-minute city paradigm”, demonstrating the utility of pyBiblioNet in uncovering hidden patterns and emerging trends in various scientific domains. pyBiblioNet can empower researchers, librarians, and policymakers with a powerful, user-friendly tool for enhancing their bibliometric analyses and making data-driven decisions.
+
+ pyBiblioNet: A python library for a comprehensive network-based bibliometric analysis
+
+ Mirko Lai
+
+ Email: mirko.lai@uniupo.it 
+
+ Affiliation: Dipartimento di Scienze e Innovazione Tecnologica, Università del Piemonte Orientale, V.le Teresa Michel, 11, Alessandria, 15121, Piedmont, Italy
+
+ Salvatore Vilella
+
+ Email: salvatore.vilella@uniupo.it 
+
+ Affiliation: Dipartimento di Scienze e Innovazione Tecnologica, Università del Piemonte Orientale, V.le Teresa Michel, 11, Alessandria, 15121, Piedmont, Italy
+
+ Federica Cena
+
+ Email: federica.cena@unito.it 
+
+ Affiliation: Dipartimento di Informatica, Università degli Studi di Torino, C.so Svizzera 185, Via Pessinetto, 12, Turin, 10149, Piedmont, Italy
+
+ Giancarlo Ruffo
+
+ Email: giancarlo.ruffo@uniupo.it 
+
+ Affiliation: Dipartimento di Scienze e Innovazione Tecnologica, Università del Piemonte Orientale, V.le Teresa Michel, 11, Alessandria, 15121, Piedmont, Italy
+
+ keywords bibliometric analysis, network analysis, python library, 15 minute city
+
+ † † equal-contributors: These authors contributed equally to this work. † † equal-contributors: These authors contributed equally to this work. 
+
+ 1 Introduction and related work
+
+ Bibliometric analysis is an essential methodology for exploring the structure, dynamics, and impact of scientific research. By systematically quantifying and analysing scholarly outputs, bibliometric techniques enable researchers to uncover patterns in citation practices, co-authorship relationships, and the evolution of research themes. While all scientific domains have their traditions, habits and common practices when it comes to bibliographic research, there exists a number of cross-domain tools 47 , that help researchers in retrieving information, organize and explore their preferred bibliographic sources. The presence of such tools is becoming crucial, considering the ever-increasing growing rate of papers published every year, that saw an exponential surge since the 1990s 27 , making it considerably harder for scientists to keep up-to-date in their field of research, and even harder for them to approach a domain outside their expertise.
+
+ Within this context, it might be instrumental to integrate new approaches to facilitate bibliometric tasks, such as including network analysis, which offers complementary metrics relevant to bibliometric research. As highlighted in 24 , network analysis is an integral part of modern bibliometric studies: many literature surveys in a wide variety of fields have used it to uncover relationships between research domains and sub-domains, authors, research institutions and, most importantly, ideas and concepts, e.g., 41 ; 11 ; 62 ; 56 ; 20 ; 13 ; 10 ; 58 .
+
+ Indeed, by construction, network analysis allows for the examination of relationships among publications through various network types. Citation networks illustrate how publications are interconnected via citations, while collaboration networks reveal co-authorship patterns among researchers. Additionally, semantic networks can highlight common terms across publications, providing insights into thematic connections within the literature. Techniques such as co-citation and bibliographic coupling further enrich this analysis by identifying clusters of related works and emerging research areas. Tools like VOSviewer 64 , which employs a distance-based approach to create visual representations of citation relationships and co-authorship networks, and Gephi 15 are frequently employed to visualize these networks, offering graphical representations that enhance the understanding of complex bibliometric relationships 63 . This multifaceted approach not only aids in identifying influential authors and journals but also helps in mapping the evolution of research fields over time. Other solutions, such as Research Rabbit 21 , provide bibliography management tools together with the visualization of citation and co-authorship networks.
+
+ The development of bibliometric tools has gained momentum in recent years, with several software libraries to facilitate data collection and analysis 47 . Notable among these is Bibliometrix 12 , an R package that provides extensive functionalities for bibliometric analysis, including data extraction from various databases and visualization capabilities. Another significant contribution is pyBibX 52 , which integrates artificial intelligence capabilities (including Embedding vectors, Topic Modeling, Text Summarization, and other general Natural Language Processing tasks, employing models such as Sentence-BERT, BerTopic, BERT, chatGPT, and PEGASUS) into bibliometric analysis by allowing exploratory data analysis and network capabilities such as citation and collaboration analysis.
+
+ In a broader context, several authors (e.g., 60 ; 61 ) have highlighted the growing need to accelerate research workflows through the adoption of automated tools that can reduce time spent on literature synthesis via reliable search and summarization methods. While generative AI tools like ChatGPT and Perplexity offer promising opportunities, they also raise ethical concerns, such as the risks of plagiarism, bias, and over-reliance on AI-generated content. Therefore, it is essential to combine the efficiency of AI with the critical thinking and oversight of human researchers. From this perspective, challenges related to interpretation and explainability become crucial and should not be neglected. Network-based bibliometric analysis offers a robust theoretical framework in which each metric can be clearly understood, explored, and visualized. We argue that, in the short term, network-based bibliometric analysis will complement rather than be replaced by generative AI tools, particularly in addressing the issue of information overload in scientific literature.
+
+ 1.1 Our contribution
+
+ Such a diverse landscape of software solutions provides different answers to the need of facilitating bibliometric research 47 . The most of them, like bibliometricx 12 and pybibx 52 , include network analysis. However, it is often limited to visualization purposes, to obtain a general idea of the citation landscape and to identify cohesive clusters of papers and researchers; quite often they require manual data collection from source databases like Web of Science or Scopus, with data typically being downloaded in CSV or BibTeX format for further processing.
+
+ We developed pyBiblioNet, a Python library specifically designed to enhance network-based bibliometric analysis. pyBiblioNet consists of two main modules: one devoted to data collection and one aimed at community detection and network analysis.
+The first module leverages OpenAlex 55 APIs to easily collect bibliometric data and construct a citation graph (see documentation of the module openalex in Appendix 6 ). While other data sources can be included, the graph object is the core of the analysis implemented in the second module, that performs network metrics calculations and identifies relevant nodes and connections. Furthermore, it focuses on community detection, implementing different popular algorithms, such as Louvain 16 , Infomap 57 , Stochastic Block Models 34 (as detailed in Table 3 ), allowing the user to visualize the connections between clusters in a customizable visualization (see documentation of the module bibliometric_analysis in Appendix 7 ). Since pyBiblioNet is released as open source software 1 1 
+ 1 
+
+ https://github.com/mirkolai/pybiblionet and https://pypi.org/project/pybiblionet/ , it allows the users to integrate their own data sources, analyses and visualizations, making it an extremely flexible tool for network-based bibliometric research.
+
+ At the time of the release of the pyBibX library, Pereira et al. 52 conducted an in-depth analysis of 15 different bibliometric tools, providing for each of them a detailed summary of key features, data sources, and operational environments.
+In this article, we compare our system, pyBiblioNet, with the three tools that, according to their analysis, satisfied the highest number of identified key features, i.e. pyBibX 52 , Bibliometrix 12 , and Scientopy 59 .
+Table 1 presents a comparative analysis between pyBiblioNet, pyBibX, Bibliometrix, and Scientopy.
+
+ Tool 
+
+ Source 
+
+ Data Analysis 
+
+ Network Analysis 
+
+ Artificial Intelligence 
+
+ bibliometrix 
+
+ Cochrane 
+
+ Dimensions 
+
+ PubMed 
+
+ Scopus 
+
+ WoS 
+
+ Data Manipulation 
+
+ Data Analysis 
+
+ Wordcloud 
+
+ Projection 
+
+ Evolution Plot 
+
+ Sankey Diagram 
+
+ Bar Plot 
+
+ Citation Analysis 
+
+ Collaboration Analysis 
+
+ Similarity Analysis 
+
+ World Collab. Analysis 
+
+ - 
+
+ pyBibX 
+
+ PubMed 
+
+ Scopus 
+
+ WoS 
+
+ Data Manipulation 
+
+ Data Analysis 
+
+ Wordcloud 
+
+ N-Gram 
+
+ Projection 
+
+ Evolution Plot 
+
+ Sankey Diagram 
+
+ Treemap 
+
+ Bar Plot 
+
+ Citation Analysis 
+
+ Collaboration Analysis 
+
+ Similarity Analysis 
+
+ World Collab. Analysis 
+
+ Topic Modeling 
+
+ Embeddings 
+
+ Summarization 
+
+ chatGPT 
+
+ Scientopy 
+
+ Scopus 
+
+ WoS 
+
+ Data Manipulation 
+
+ Data Analysis 
+
+ Wordcloud 
+
+ Evolution Plot 
+
+ Bar Plot 
+
+ Citation Analysis 
+
+ Collaboration Analysis 
+
+ Similarity Analysis 
+
+ World Collab. Analysis 
+
+ - 
+
+ pyBiblioNet 
+
+ OpenAlex 
+
+ Clustered Network 
+
+ N-Gram 
+
+ Evolution Plot 
+
+ Bar Plot 
+
+ Citation Analysis 
+
+ Collaboration Analysis 
+
+ Cluster Analysis 
+
+ Base Set Analysis 
+
+ Centrality Analysis 
+
+ Topic Modeling 
+
+ Table 1 : Comparison of bibliometric tools in terms of source, data analysis capabilities, network analysis features, and AI integration. 
+
+ Among the analysed libraries, pyBibX offers the highest number of features, including advanced features that employ large language models.
+With pyBiblioNet, our objective was not to replicate functionalities already implemented by existing libraries, but rather to provide novel and distinctive features.
+
+ First of all, pyBiblioNet is the only tool that utilizes OpenAlex as a data source that is not only an alternative but also integrates multiple data sources, including ORCID, ROR, DOAJ, Unpaywall, PubMed, PubMed Central, and the ISSN International Center. Additionally, it offers a significantly larger number of articles (243 million) compared to Scopus (87 million), Web of Science (Core) (87 million), and Dimensions (135 million) 2 2 
+ 2 
+
+ https://openalex.org/about#comparison .
+
+ Furthermore, although our current analysis focuses primarily on citation and co-authorship networks, we introduced the possibility of expanding the network by including base set nodes — that is, articles that do not initially satisfy the search filters but are connected to the root set network — thereby broadening the scope of the analysis.
+Another important innovation is the application of clustering techniques to the citation network in order to perform thematic analysis of groups of articles.
+A similar clustering approach can be applied to the co-authorship network to study collaboration patterns between countries.
+Finally, we made centrality metrics easily accessible, allowing for the identification of influential articles based on criteria beyond simple citation counts, such as the number of collaborations.
+
+ In order to avoid creating yet another isolated library, we also aimed to ensure interoperability with existing tools by allowing the export of metadata retrieved from OpenAlex in a format compatible with other libraries. Moreover, citation and co-authorship networks can be exported in standardized formats suitable for use with external network analysis tools.
+
+ 2 Network-based bibliometrics
+
+ As pointed out in the previous section, network-based bibliometrics is a set of analytical methods and tools that employs network science to study and quantify the relationships and influence among scientific entities, such as authors, articles, journals, or institutions. This methodology is rooted in the principles of graph theory and social network analysis, where scientific bibliometric networks are often represented as directed or undirected graphs and weighted or unweighted graphs , with scientific entities represented as nodes connected by edges that denote interactions between them. A directed graph G = ( V , E ) G=(V,E) consists of a set of nodes V V and a set of directed edges E E , where each edge has a direction, denoted by an ordered pair ( u , v ) ∈ E (u,v)\in E , meaning that there is a directed connection from node u u to node v v .
+Conversely, an undirected graph is one in which the edges have no direction, and the connection between two nodes u u and v v is represented simply by an unordered pair { u , v } \{u,v\} .
+This representation is appropriate when the relationship between entities is mutual, such as co-authorship between researchers.
+Additionally, a weighted graph is a graph in which each edge is assigned a weight, typically representing the strength or intensity of the relationship between two nodes.
+Mathematically, a weighted graph can be represented as G = ( V , E , w ) G=(V,E,w) , where w : E → ℝ w:E\to\mathbb{R} is a weight function that assigns a real-valued weight to each edge.
+For bibliometric networks, these weights might reflect, for instance, the number of collaborative works between two authors.
+An unweighted graph , on the other hand, assumes that all relationships are equal and does not differentiate between the strengths of connections; for instance, this is the case for citation networks among articles, since an article can cite another only once.
+
+ 2.1 Centrality metrics
+
+ The power of network analysis lies in the ability to identify key actors in a simple and quantitative way. This can be achieved by computing a wide variety of centrality metrics, some of which are implemented in the library and listed in Tab. 2 . These metrics go beyond the simple count of citations of a paper or the h-index of an author, quantifying in a more sophisticated way the importance of an entity in different roles. Some entities can be widely popular across different scientific communities or, on the contrary, can be extremely popular but only in their sub-domains; some can have a key role in bridging different communities, allowing researchers to transition from one group of papers to another; some have a tendency to be cited by - or to collaborate with - very authoritative entities. These and other nuances can be captured and quantified by network analysis, and are effective within the context of bibliometric analysis, as shown in Diallo et. al 23 .
+
+ Metric 
+
+ Definition 
+
+ Relevance 
+
+ Degree Centrality 
+
+ C D ​ ( v ) = deg ⁡ ( v ) C_{D}(v)=\deg(v) , where deg ⁡ ( v ) \deg(v) is the number of edges incident to node v v . 
+
+ Identifies frequently cited papers or prolific authors, indicating direct influence or productivity. 
+
+ Betweenness Centrality 
+
+ C B ​ ( v ) = ∑ s ≠ v ≠ t σ s ​ t ​ ( v ) σ s ​ t C_{B}(v)=\sum_{s\neq v\neq t}\frac{\sigma_{st}(v)}{\sigma_{st}} , where σ s ​ t \sigma_{st} is the total number of shortest paths from s s to t t , and σ s ​ t ​ ( v ) \sigma_{st}(v) is the number of those paths passing through v v . 
+
+ Highlights nodes serving as intermediaries, facilitating the flow of information across different parts of the network, such as interdisciplinary papers. 
+
+ Closeness Centrality 
+
+ C C ​ ( v ) = 1 ∑ u ≠ v d ⁡ ( v , u ) C_{C}(v)=\frac{1}{\sum_{u\neq v}d(v,u)} , where d ⁡ ( v , u ) d(v,u) is the shortest path distance between v v and u u . 
+
+ Identifies nodes that are strategically positioned to efficiently access or disseminate information throughout the network. 
+
+ Eigenvector Centrality 
+
+ C E ​ ( v ) ∝ ∑ u ∈ V A v ​ u ​ C E ​ ( u ) C_{E}(v)\propto\sum_{u\in V}A_{vu}C_{E}(u) , where A A is the adjacency matrix of the network. 
+
+ Identifies nodes with broader systemic impact, such as seminal papers cited by other highly influential works. 
+
+ PageRank 
+
+ P ​ R ​ ( A ) = 1 − d N + d ​ ∑ i = 1 k P ​ R ​ ( B i ) L ⁡ ( B i ) PR(A)=\frac{1-d}{N}+d\sum_{i=1}^{k}\frac{PR(B_{i})}{L(B_{i})} 
+where d d is the damping factor, N N is the total number of pages in the network, B i B_{i} are the pages linking to page A A , and L ⁡ ( B i ) L(B_{i}) denotes the number of outbound links from page B i B_{i} .
+. 
+
+ Highlights authoritative or impactful works, even if they do not have the highest direct citation count. 
+
+ Table 2 : Popular network-based centrality metrics and their relevance to bibliometric networks. 
+
+ 2.2 Community detection 
+
+ Community detection provides a powerful approach to transcending traditional categorizations based on scientific domain or discipline. It reveals the natural structure of the system, uncovering the intrinsic organization of scientific knowledge and cooperation. Traditional classifications, such as those based on predefined scientific fields or subject areas, are often constrained by rigid boundaries and may fail to capture the dynamic and interdisciplinary nature of modern research. Community detection, on the other hand, identifies clusters of tightly connected nodes based on the actual relationships within the network; be they citation links, co-authorship ties, or other forms of interaction. These clusters represent organic groups of research activity, reflecting how knowledge is naturally organized and interconnected.
+
+ By detecting these communities, we gain insight into the true topology of the scientific landscape. Differently from topic modelling, which extracts semantic themes from textual content, grouping documents by word usage, community detection relies on structural relationships (citations or co-authorships) to identify clusters of closely connected entities. Thus, it captures the structural and collaborative patterns of scientific activity, rather than purely thematic similarity. The two approaches are complementary, offering distinct but overlapping perspectives on how knowledge is produced and organized. For example, instead of viewing research on artificial intelligence as a monolithic field, community detection might reveal distinct subfields such as machine learning, natural language processing, and computer vision, as well as their connections to related areas such as neuroscience or ethics. Similarly, interdisciplinary research areas, which often fall between the cracks of traditional categorization, can emerge as distinct communities, highlighting their unique contribution to the scientific ecosystem. One can also study how communities evolve over time, identifying emerging fields or shifts in research focus. For instance, a growing cluster within a citation network might indicate an area of rapid innovation or increasing interest, providing early signals for trends in scientific research. Additionally, the ability to detect bridge nodes (i.e., those that connect distinct communities) enables the identification of key actors or works that facilitate knowledge transfer and interdisciplinary collaboration.
+
+ There exists a large number of methodologies for community detection that can be applied to a wide variety of fields, with different perks and disadvantages. While we refer the reader to some scientific surveys for a comprehensive overview of the field 28 ; 40 ; 36 , we report a brief overview of some popular techniques, all of which are implemented in the library, in Tab. 3 , along with their relevance to bibliometric analysis.
+
+ Method 
+
+ Definition 
+
+ Relevance 
+
+ Louvain 16 
+
+ A modularity-based method that iteratively optimizes community structure for maximum modularity. 
+
+ Efficient for analyzing large bibliometric networks, identifying clusters such as research disciplines or topical subfields based on modular structure. 
+
+ Girvan-Newman 30 
+
+ Uses edge betweenness to iteratively remove the most ”central” edges, fragmenting the network. 
+
+ Useful for identifying hierarchical structures in citation or co-authorship networks, such as nested subfields or interdisciplinary bridges. 
+
+ Infomap 57 
+
+ Partitions networks to minimize the description length of random walks. 
+
+ Captures natural groupings in citation or collaboration networks, revealing how knowledge flows between topics or communities. 
+
+ Spectral Clustering 50 
+
+ Partitions networks using the eigenvalues of graph Laplacians to identify clusters. 
+
+ Suitable for detecting broad disciplinary boundaries or high-level structural patterns in bibliometric networks. 
+
+ Stochastic Block Models 34 
+
+ Assumes communities are latent variables generating the observed network structure. 
+
+ Effective for probabilistic modeling of bibliometric networks. 
+
+ Table 3 : Popular methods for community detection and their relevance to bibliometric networks. 
+
+ 3 pyBiblioNet: Exploring bibliometric data through network analysis
+
+ The structure of pyBiblioNet is synthesized in Fig. 1 . The structure consists of two main components: data collection and bibliometric analysis. The bibliometric analysis module is composed of the core analysis functionality and visualization modules, which enable the generation of graphs to facilitate interpretation. In this section, we will analyze the main components of the software.
+
+ Figure 1 : Scheme of pyBiblioNet. The library is divided into two main building blocks: a first block for data collection, that currently gathers data from OpenAlex but that can potentially be integrated by users with other bibliographic sources; the final output is a citation graph, that will be explored using the functions included in the second building block, devoted to bibliometric analysis. 
+
+ 3.1 Root set/base set structure of citation networks
+
+ The methodology underlying pyBiblioNet is based on the analysis of network metrics and on the concept of root set/base set in networks, as introduced in the HITS (Hyperlink-Induced Topic Search) algorithm developed by Jon Kleinberg in 1999 38 . Broadly speaking, the root set represents the densely connected and most relevant part of the graph, typically including nodes central to the query. The base set instead includes less connected nodes, often on the network’s fringes, such as articles cited by root set articles but not central themselves. Including the base set allows for a more comprehensive graph that provides insights into indirect relationships and broader connections, while excluding it focuses the analysis on the root set, often leading to a more compact and analytically focused network. The pseudocode 1 illustrates the process.
+
+ It consists of two main steps: FetchArticles and CreateCitationGraph .
+ FetchArticles retrieves the root set and the base set articles from a bibliographic database (e.g., OpenAlex) based on user-defined search criteria.
+For each retrieved article, various metadata are available and the list of articles it cites and the list of articles that cite it are additionally included.
+This creates a concise dataset representing a specific topic or area of interest.
+The data collection process may require multiple queries, primarily because it needs to retrieve the list of cited or citing articles, and a considerable amount of time due to a predefined timeout set to prevent excessive load on the APIs. Additionally, OpenAlex allows up to 100,000 requests per user per day. Therefore, it is recommended to cache queries by setting the parameter cache=True .
+
+ CreateCitationGraph transforms the retrieved articles into a graph representation, where nodes correspond to articles and edges represent citation relationships.
+If base set is set to False , the graph includes only those articles matching the search criteria (the root set articles). Conversely, when base set is True , the graph is expanded to include citations involving articles outside the root set , creating a richer, context-aware graph that highlights the interactions between the root set and base set nodes.
+In citation networks, the root set represents a tightly connected group of articles central to a specific topic or field. These articles are often highly cited and interrelated. The base set , on the other hand, consists of less-connected articles that may cite or be cited by the root set but are not central to the network. Including the base set provides a broader view of the citation landscape, which can reveal the influence of the root set articles on external works and vice versa.
+
+ Similarly, regarding the co-authorship network, the CreateCoAuthorshipGraph procedure allows the creation of an undirected network where nodes represent authors, and an edge exists when two authors co-publish an article. When base set is True , all articles are considered; otherwise, only the co-authorship relationships of the root set articles are included.
+
+ As an example, suppose a researcher is studying the field of ”network science”. The FetchArticles procedure retrieves articles strictly focused on this field, such as foundational papers and key recent studies. Setting base set to False in, the CreateCitationGraph procedure then builds a graph where nodes are these root set articles and edges represent citations between them, forming a dense, topic-specific network.
+
+ If the researcher instead sets base set to True , the graph is extended to include base set articles that cite the root set literature or are cited by it. For instance, articles from related fields like ”social network analysis” or ”complex systems” might appear in the graph. This broader perspective could reveal interdisciplinary influences and connections between network science and adjacent domains.
+
+ Algorithm 1 Pseudocode that illustrates the process. 
+
+ Fetch Articles: 
+
+ 1: 
+
+ procedure FetchArticles ( s ​ e ​ a ​ r ​ c ​ h ​ _ ​ c ​ r ​ i ​ t ​ e ​ r ​ i ​ a search\_criteria )
+
+ 2: 
+
+     articles ← \leftarrow fetch_from_openalex(search_criteria) 
+
+ 3: 
+
+     for article in articles do 
+
+ 4: 
+
+      cited_by ← \leftarrow get_in_citations(article) 
+
+ 5: 
+
+      article.cited_by ← \leftarrow cited_by 
+
+ 6: 
+
+      cite ← \leftarrow get_out_citations(article) 
+
+ 7: 
+
+      article.cite ← \leftarrow cite 
+
+ 8: 
+
+     end for 
+
+ 9: 
+
+     return articles 
+
+ 10: 
+
+ end procedure 
+
+ Create CoAuthorship Graph: 
+
+ 1: 
+
+ procedure CreateCoAuthorshipGraph ( a ​ r ​ t ​ i ​ c ​ l ​ e ​ s , b ​ a ​ s ​ e ​ s ​ e ​ t articles,baseset )
+
+ 2: 
+
+     graph ← \leftarrow initialize_empty_graph() 
+
+ 3: 
+
+     done = set() 
+
+ 4: 
+
+     for article in articles do 
+
+ 5: 
+
+      done.add(article) 
+
+ 6: 
+
+      for author1 in article do 
+
+ 7: 
+
+        add_node_to_graph(graph, author1) 
+
+ 8: 
+
+        for author2 in article do 
+
+ 9: 
+
+          add_node_to_graph(graph, author2) 
+
+ 10: 
+
+          add_edge_to_graph(graph, author1, author2) 
+
+ 11: 
+
+        end for 
+
+ 12: 
+
+      end for 
+
+ 13: 
+
+      if baseset == True then 
+
+ 14: 
+
+        for article in article.cited_by ∪ \cup article.cite do 
+
+ 15: 
+
+          if article ∉ \notin = done then 
+
+ 16: 
+
+           done.add(article) 
+
+ 17: 
+
+           for author1 in article do 
+
+ 18: 
+
+             add_node_to_graph(graph, author1) 
+
+ 19: 
+
+             for author2 in article do 
+
+ 20: 
+
+                add_node_to_graph(graph, author2) 
+
+ 21: 
+
+                add_edge_to_graph(graph, author1, author2) 
+
+ 22: 
+
+             end for 
+
+ 23: 
+
+           end for 
+
+ 24: 
+
+          end if 
+
+ 25: 
+
+        end for 
+
+ 26: 
+
+      end if 
+
+ 27: 
+
+     end for 
+
+ 28: 
+
+     return graph 
+
+ 29: 
+
+ end procedure 
+
+ Create Citation Graph: 
+
+ 1: 
+
+ procedure CreateCitationGraph ( a ​ r ​ t ​ i ​ c ​ l ​ e ​ s , b ​ a ​ s ​ e ​ s ​ e ​ t articles,baseset )
+
+ 2: 
+
+     graph ← \leftarrow initialize_empty_graph() 
+
+ 3: 
+
+     for article in articles do 
+
+ 4: 
+
+      add_node_to_graph(graph, article) 
+
+ 5: 
+
+     end for 
+
+ 6: 
+
+     for article in articles do 
+
+ 7: 
+
+      for cited_by in article.cited_by do 
+
+ 8: 
+
+        if baseset == False then 
+
+ 9: 
+
+          if cited_by in articles then 
+
+ 10: 
+
+           add_edge_to_graph(graph, cited_by, article) 
+
+ 11: 
+
+          end if 
+
+ 12: 
+
+        else 
+
+ 13: 
+
+          if cited_by ∉ \notin graph then 
+
+ 14: 
+
+           add_node_to_graph(graph, cited_by) 
+
+ 15: 
+
+          end if 
+
+ 16: 
+
+          add_edge_to_graph(graph, cited_by, article) 
+
+ 17: 
+
+        end if 
+
+ 18: 
+
+      end for 
+
+ 19: 
+
+      for cite in article.cite do 
+
+ 20: 
+
+        if baseset == False then 
+
+ 21: 
+
+          if cite in articles then 
+
+ 22: 
+
+           add_edge_to_graph(graph, article, cite) 
+
+ 23: 
+
+          end if 
+
+ 24: 
+
+        else 
+
+ 25: 
+
+          if cite ∉ \notin graph then 
+
+ 26: 
+
+           add_node_to_graph(graph, cite) 
+
+ 27: 
+
+          end if 
+
+ 28: 
+
+          add_edge_to_graph(graph, article, cite) 
+
+ 29: 
+
+        end if 
+
+ 30: 
+
+      end for 
+
+ 31: 
+
+     end for 
+
+ 32: 
+
+     return graph 
+
+ 33: 
+
+ end procedure 
+
+ 3.2 Data Collection: querying the OpenAlex API
+
+ pyBiblioNet performs bibliometric analyses using data sourced from OpenAlex 55 . OpenAlex is an open-access database designed to provide comprehensive and structured information on scholarly works, including metadata on academic publications, authors, institutions, journals, and research concepts. It serves as a freely available alternative to proprietary academic databases such as Scopus and Web of Science. The data in OpenAlex is sourced from multiple repositories, including CrossRef, ORCID, and PubMed, ensuring broad coverage and regular updates. The database is organised in entities, which are summarised in Tab. 4 ; these entities are interconnected, allowing for complex queries and relational analyses. OpenAlex offers a RESTful API for programmatic access to this data, facilitating its integration into bibliometric tools and analyses. By exploiting the API’s functionalities, the user can perform complex boolean queries on multiple conditions, filtering results, searching for keywords and phrases and so on.
+
+ Entity 
+
+ Description 
+
+ Works 
+
+ Individual scholarly outputs like journal articles, books, and conference papers. 
+
+ Authors 
+
+ Details on researchers, including affiliations and publication history. 
+
+ Sources 
+
+ Journals, conferences, and other publication outlets. 
+
+ Institutions 
+
+ Universities, research organizations, and other affiliated bodies. 
+
+ Topics 
+
+ Topics and research areas, allowing for topic modeling and analysis. 
+
+ Publishers 
+
+ List of publishers and related information. 
+
+ Funders 
+
+ List of research funders, with information coming from Crossref, and enhanced with data from Wikidata and ROR. 
+
+ Geo 
+
+ Information to geo-categorize scholarly data, using United Nations data to divide the globe into continents and regions to make data filtering easier. 
+
+ Table 4 : Overview of OpenAlex Database Entities 
+
+ Just to mention a few examples, https://api.openalex.org/works?search=dna queries the works entity searching for works with the search term ”dna” in the title, abstract, or fulltext; https://api.openalex.org/authors?filter=display_name.search:einstein searches in the authors entity for all authors who have ”Einstein” as part of their name; https://api.openalex.org/works?filter=title.search:cubist queries the works entity searching for works with ”cubist” specifically in the title; https://api.openalex.org/works?search=(elmo AND "sesame street") NOT (cookie OR monster) searches for works that mention ”elmo” and ”sesame street,” but not the words ”cookie” or ”monster”.
+
+ Each one of these queries returns a JSON object with the results; each result is composed of many fields, containing a great deal of information on both the authors and the works. For a complete description of the available fields, we refer the reader to the OpenAlex API technical documentation 3 3 
+ 3 
+
+ https://docs.openalex.org/how-to-use-the-api/api-overview, last accessed: 15/05/2025 .
+
+ As for the structure of the library, the module that handles data collection and storage includes functions to:
+
+ • 
+
+ interact with bibliographic APIs . Through a custom wrapper, the user can interact with the OpenAlex APIs, streamlining the process of retrieving and analyzing scholarly data. Most importantly, it allows to specify the type of query as ’search’ , ’cite’ , or ’cited_by’ , as well as to select publication-specific time windows. The function conveniently implements caching to reduce redundant API calls and avoid hitting rate limits. Such function, depending on the query type, will yield results in JSON format as specified in Tab. 5 .
+
+ Query Type 
+
+ OpenAlex’s API 
+
+ Returns 
+
+ search 
+
+ works?filter=title_and_abstract.search: 
+
+ Searches the works entity, looking for the specific query in titles and abstracts. 
+
+ cite 
+
+ works?filter=cites: 
+
+ Retrieves all the works that explicitly cite the queried parameter. 
+
+ cited by 
+
+ works?filter=cited_by: 
+
+ Retrieves all the works that are cited by a specific article. 
+
+ Table 5 : pyBiblioNet query types, the exploited OpenAlex’s API, and their respective returns. 
+
+ • 
+
+ Retrieving articles and constructing the graph 
+The function retrieve_articles enables users to perform different types of queries, such as searching for articles, retrieving articles that cite a specific work, or finding works cited by a given article. The function handles the complexities of constructing API requests and parsing responses (Table 6 .
+To facilitate complex search queries, the wrapper includes a utility function, string_generator_from_lite_regex , which generates a list of query strings from a simplified regular expression pattern. This allows for efficient generation of multiple search queries from a pattern of alternatives.
+the create_citation_graph function creates a directed graph from the retrieved articles, where nodes represent articles and edges represent citation relationships.
+In addition, the create_coauthorship_graph function creates an undirected graph from the retrieved articles, where nodes represent authors ors, and an edge exists when two authors co-publish an article. These graphs can be used to visualize and analyze the structure of citation networks. These functions leverage the NetworkX library 32 to build the graph, which can also be exported in GML format for further analysis in graph analysis tools. The export has been specifically designed to ensure compatibility with the Gephi tool (version 0.10.1), allowing the use of partition options (e.g., language, article type, countries, etc.) in the appearance menu.
+Here, the users will also specify whether they are interested in including only the root set or also the base set articles into the graph.
+
+ Method 
+
+ Task 
+
+ Description 
+
+ retrieve_articles 
+
+ Interact with the bibliographic database 
+
+ Fetches articles based on search queries, with options for retrieving citations and exporting the results to a CSV file. 
+
+ create_citation_graph 
+
+ Constructing Citation Networks 
+
+ Builds a directed graph of articles and their citation relationships, leveraging NetworkX for visualization and analysis. 
+
+ create_coauthorship_graph 
+
+ Constructing Coauthorship Networks 
+
+ Builds an undirected graph of authors and their co-authorship relationships, leveraging NetworkX for visualization and analysis. 
+
+ Table 6 : Overview of pyBiblioNet public methods employed for constructing the citation or a co-authorship Graph. 
+
+ • 
+
+ export the articles and authors’ metadata :
+The functions export_articles_to_csv and export_authors_to_csv allow exporting the metadata of the retrieved articles and authors in a CSV file (Table 7 ). Users can also specify which fields they wish to export and whether they want to include only the root set articles or also the base set articles.
+The library also supports the export of article venue information and author affiliations through the methods export_venue_to_csv and export_institution_to_csv .
+Finally, the function export_article_to_scopus allows for metadata export, including article-level metadata in a Scopus-compatible CSV format, thereby enabling the seamless use of data retrieved through the OpenAlex wrapper as input for other bibliometric analysis tools.
+
+ Method 
+
+ Task 
+
+ Description 
+
+ export_article_to_csv 
+
+ Export metadata 
+
+ Export articles metadata in CSV format. 
+
+ export_author_to_csv 
+
+ Export metadata 
+
+ Export authors metadata in CSV format. 
+
+ export_institution_to_csv 
+
+ Export metadata 
+
+ Export institutions metadata in CSV format. 
+
+ export_venue_to_csv 
+
+ Export metadata 
+
+ Export venue metadata in CSV format. 
+
+ export_article_to_scopus 
+
+ Export metadata 
+
+ Export articles’ metadata in Scopus-like CSV format . 
+
+ Table 7 : Overview of pyBiblioNet public methods employed for exporting articles’ and authors’ metadata . 
+
+ • 
+
+ Data Analysis 
+Table 8 presents the functions designed to support data analysis. These methods enable users to perform both temporal and ranking analyses, facilitating the interpretation of publication dynamics, topic evolution, and scholarly impact. In particular, temporal data analysis functions such as plot_article_trends , plot_topic_trends , and plot_keyword_trends allow the visualization of longitudinal patterns in article production, thematic shifts, and keyword prominence. Ranking functions like plot_top_authors and plot_top_keywords_from_abstracts support the identification of influential authors and the most frequent terms in article abstracts, optionally accounting for citation counts and the role of peripheral articles.
+
+ Method 
+
+ Task 
+
+ Description 
+
+ plot_article_trends 
+
+ Temporal data analysis 
+
+ Plots a stacked area chart that visualizes the number of root set and non-root set articles over time, aggregated by a specified interval. 
+
+ plot_topic_trends 
+
+ Temporal data analysis 
+
+ Plots a grouped stacked bar chart for aggregated data based on topics. 
+
+ plot_keyword_trends 
+
+ Temporal data analysis 
+
+ Plots a line chart showing the trends of top keywords over time. 
+
+ plot_top_authors 
+
+ Ranking analysis 
+
+ Plots a stacked bar chart showing the top authors and their articles or citations split by topics. 
+
+ plot_top_keywords _from_abstracts 
+
+ Ranking analysis 
+
+ Plots the most frequent keywords extracted from abstracts of articles, including base set when show_periphery=True . 
+
+ Table 8 : Overview of pyBiblioNet public methods employed for data analysis. 
+
+ 3.3 Data Analytics
+
+ Prior to the analysis of the citation network, it might be useful to obtain descriptive statistics of the corpus of articles gathered by the data collection module. This can be achieved through a set of functions contained in the bibliometric_analysis.charts module. This module includes functions to:
+
+ • 
+
+ Temporal Analysis: Three public methods (i.e. plot_article_trends , plot_topic_trends , and plot_keyword_trends ) allow for temporal trend analysis of the number of published articles, the topics covered, and the associated keywords.
+
+ • 
+
+ Ranking Analysis: The public methods plot_top_authors and plot_top_keywords_from_abstracts allow for the evaluation of the most prolific (or most cited) authors and the most relevant keywords extracted from the abstracts of all retrieved articles, respectively.
+
+ The topic is one of the entities in the OpenAlex database and can be analyzed in terms of “field” or “domain” where domain is the highest level in the ”domain, field, subfield, topic” system.
+For keyword extraction, we employed KeyBERT 31 to identify the most relevant terms. KeyBERT utilizes BERT embeddings to extract the most pertinent words or phrases from a given text. This approach enables the detection of key terms within abstracts over time, offering insights into their temporal evolution.
+
+ 3.4 Network-based Bibliometrics
+
+ The core of the bibliometric_analysis module deals with the analysis of the citation and co-authorship graphs in multiple ways. It supports the examination of structural properties, the identification of influential articles and authors, allowing users to extract centrality metrics, and performing clustering.
+
+ Method 
+
+ Task 
+
+ Description 
+
+ extract_metrics_to_csv 
+
+ Extracting Network Metrics 
+
+ Computes centrality metrics (e.g., betweenness, closeness, PageRank) for nodes in a citation network and exports the results to a CSV file. 
+
+ show_graph_statistics 
+
+ Visualizing Network Metrics 
+
+ Displays the distribution of centrality metrics (e.g., betweenness, closeness, PageRank) through histograms, presents the correlation heatmap of centrality measures, and provides a table with statistics of the citation graph. 
+
+ cluster_graph 
+
+ Clustering Articles 
+
+ Assigns clusters to articles in the network using algorithms like Louvain, Girvan-Newman, and Infomap, enabling the exploration of thematic groupings. 
+
+ extract_clusters_to_csv 
+
+ Exporting Clustering Results 
+
+ Exports cluster assignments and related node information to a CSV file for further analysis. 
+
+ show_clustered_graph 
+
+ Visualizing Clusters 
+
+ Visualizes cluster structures in the bibliometric graph, using pie charts to depict entity distributions and providing customization options for presentation. 
+
+ show_cluster_statistics 
+
+ Visualization of Cluster Sizes 
+
+ Generates bar charts to illustrate the distribution of cluster sizes within the network. 
+
+ Table 9 : Overview of pyBiblioNet public methods for bibliometric analysis and clustering. 
+
+ Table 9 provides an overview of the available functions, which include capabilities to:
+
+ • 
+
+ extract network metrics : once the citation graph is built, the extract_metrics_to_csv function calculates various centrality metrics for nodes (i.e., articles or authors) within a citation or a co-authorship network, and it saves these metrics along with other selected fields in a CSV file. The supported metrics currently include betweenness centrality, closeness centrality, eigenvector centrality, pagerank, degree, in-degree and out-degree (Table 2 ). These metrics are essential for identifying influential papers within a citation network. For example, high betweenness centrality may indicate a paper that connects different clusters of research, while PageRank can help identify papers that are frequently cited by influential works.
+
+ • 
+
+ visualize network statistics : the method show_graph_statistics generates customized graphs that facilitate a more detailed exploration of network statistics. The visualizations include a summary of overall network statistics, histograms displaying the distribution of each centrality metric, and a correlation matrix illustrating relationships among centrality metrics.
+
+ • 
+
+ perform community detection : the cluster_graph function assigns clusters to articles within the citation network, or to authors within the co-authorship network, using one of the community detection algorithms listed in Table 3 . The function returns a graph where each node is annotated with a cluster identifier, facilitating the exploration of research domains or thematic groupings within the dataset. While supported algorithms currently include Louvain, Girvan-Newman, Infomap, Spectral Clustering, and Stochastic Block Models, other algorithms can easily be included according to the necessities discussed in Sec. 2.2 . Node-cluster associations can also be exported to CSV for further analysis through the method extract_clusters_to_csv .
+
+ • 
+
+ visualize communities : a key feature of pyBiblioNet is the visualization of the community structure of the bibliometric graph. The visualization revolves around the show_clustered_graph function. It provides an intuitive representation of clusters of articles or authors in a bibliometric network, utilizing pie charts to depict the distribution of topics (for articles) or countries (for authors) within each cluster. This function also allows for various customization options to tailor the visual output to specific needs, such as adjusting the color and size of nodes and topics, as well as the thickness of pie charts.
+
+ 4 Use Case: Application of pyBiblioNet on the Query “15 Minute City”
+
+ In this section, we show the use of the pyBiblioNet library for conducting a bibliometric analysis on the query “15-minute city”, an urban planning concept that promotes access to essential services within a 15-minute walk or bike ride from home 48 . This topic gained increasing interest in recent years due to its association with urban planning and sustainable development concepts. Also, it has been studied by scholars from different disciplines and perspectives, so that we can more easily showcase how effective a clusters analysis can be.
+
+ The analysis comprises different phases: the retrieval of relevant articles and the construction of a citation network, followed by the extraction of key bibliometric metrics and the clustering of the citation and co-authorship graphs. Below, we describe the execution of these steps in detail.
+
+ 4.1 Retrieving Articles and Constructing the Citation Graph
+
+ In the following example, we perform the first step of a typical application of pyBiblioNet by retrieving articles based on the bibliometric query and by creating a citation network using the methods described in Table 6 . The following code snippet shows the process:
+
+ ⬇ 
+
+ import json 
+
+ from pybiblionet . openalex . core import string_generator_from_lite_regex , retrieve_articles , create_citation_graph , create_coauthorship_graph 
+
+ if __name__ == "__main__" : 
+
+ queries = string_generator_from_lite_regex ( "(15)( )(minute|min)( )(city)" ) 
+
+ mail = "your_email@example.com" 
+
+ from_publication_date = "2019-01-01" 
+
+ to_publication_date = None 
+
+ periphery = True 
+
+ json_file_path = retrieve_articles ( queries , mail , from_publication_date , to_publication_date ) 
+
+ #the articles are saved in a json file inside the query_result folder 
+
+ articles = json . load ( open ( json_file_path )) 
+
+ G_citation = create_citation_graph ( articles , "citation_graph.GML" , periphery = True ) 
+
+ print ( G_citation . number_of_nodes (), G_citation . number_of_edges ()) 
+
+ G_coauthorship = create_coauthorship_graph ( articles , "coauthorship_graph.GML" , periphery = True ) 
+
+ print ( G_coauthorship . number_of_nodes (), G_coauthorship . number_of_edges ()) 
+
+ This script uses the OpenAlex API to search for articles based on the query “15 minute/min city.” As we can see, we deployed some of the methods described in the previous section, that conveniently wrap all the operations involved in parsing the query, calling the appropriate OpenAlex API functions, retrieving and parsing the correct metadata upon which we will build the citation graph.
+
+ Indeed, the query is generated by the string_generator_from_lite_regex function, allowing for flexibility in how the query terms are combined. In this case, we specified the date range starting from January 1st, 2019. The retrieve_articles function is then executed with these parameters to collect the relevant articles, including those in the base set, and store them in a JSON file within the query_result folder.
+
+ Optionally, the retrieved articles can be exported as a CSV file by specifying the desired fields (e.g., export_path = ‘‘15minute.csv’’ ). The retrieved articles are then used to construct a citation graph using the create_citation_graph function. In this example, base set articles are included in the graph construction. The resulting graph is saved in GML format, which is well-suited for further analysis in the next step.
+As a standard and widely supported format, GML can also be used as input for external network analysis tools such as Gephi, thereby facilitating seamless integration into existing analytical tools.
+
+ 4.2 Metadata Export
+
+ The library also supports exporting collected data in CSV format, making it more accessible for users who may find the JSON output of the retrieve_articles method less convenient to explore. This functionality allows the export of selected metadata related to articles, authors, institutions, and venues. For institutions and venues, occurrence counts within the root set and base set are also included. These export capabilities are implemented in four methods within the core module, summarized in Table 7 (more details about these methods in Appendix 7 ). Users can customize the output by selecting specific fields and specifying the filename. To enhance interoperability with existing libraries and tools for bibliometric analysis, an additional feature allows exporting articles in Scopus-compatible formats, which are commonly used as input by tools such as Bibliometrix 12 , Scientopy 59 , and VOSviewer 64 . Although not all data fields available in Scopus are accessible through OpenAlex, we mapped all compatible elements to maximize the amount of usable information and support seamless integration with external tools.
+The following code snippet demonstrates how to export article metadata either in a user-defined CSV format—by selecting specific fields to include—or in a Scopus-like CSV format, which can then be used as input for the Python library pybibx 52 :
+
+ ⬇ 
+
+ from pybiblionet . openalex . core import export_articles_to_csv , export_authors_to_csv 
+
+ from pybibx . base import pbx_probe 
+
+ if __name__ == "__main__" : 
+
+ json_file_path = "query_results/query_result_1ea020320b230de5a973a39682eaa53dce89a9bb026b441a5f825232.json" 
+
+ export_articles_to_csv ( json_file_path , 
+
+ fields_to_export =[ "venue" , "type" , "id" , "doi" , "title" , "publication_date" , "authorships_display_name" , "language" ], 
+
+ export_path = "15minute_articles.csv" 
+
+ ) 
+
+ export_articles_to_scopus ( json_file_path , 
+
+ export_path = "scopus/scopus.csv" , 
+
+ include_periphery = True 
+
+ ) 
+
+ filename = "scopus/myscopus.csv" 
+
+ bibfile = pbx_probe ( file_bib = filename , db = "scopus" , del_duplicated = True ) 
+
+ report = bibfile . eda_bib () 
+
+ 4.3 Data Analysis
+
+ Table 8 presents the methods provided by the library for analyzing the temporal distribution of articles recovered by the public method retrieve_articles (more details in Appendix 7 ). These methods enable various types of visualizations, including stacked area charts illustrating the distribution of root set and base set articles over specified intervals, grouped stacked bar charts for aggregated topic-based data, stacked bar charts showing top authors and the distribution of their primary topic contributions, keyword frequency analysis from abstracts, and keyword trend analysis over time.
+The code snippets presented in the algorithm demonstrate that articles can be loaded from the same file generated using retrieve_articles in Section 4.1 and that generate the charts shown in Figure 2 . The methods that generate the graphs are customizable in terms of style, allowing for personalized visualization by adjusting different levels of temporal aggregation or limiting the number of displayed entries.
+
+ ⬇ 
+
+ from pybiblionet . bibliometric_analysis . charts import plot_topic_trends , plot_article_trends , \ 
+
+ plot_top_authors , plot_top_keywords_from_abstracts , plot_keyword_trends 
+
+ from datetime import datetime 
+
+ import matplotlib . pyplot as plt 
+
+ from matplotlib import colors 
+
+ import numpy as np 
+
+ import json 
+
+ if __name__ == "__main__" : 
+
+ json_file_path = "query_results/query_result_1ea020320b230de5a973a39682eaa53dce89a9bb026b441a5f825232.json" 
+
+ articles = json . load ( open ( json_file_path )) 
+
+ plot_article_trends ( articles , 
+
+ date_from = datetime (2020, 1, 1), 
+
+ interval = "quarter" , # Change to "month" or "quarter" or "year" as needed 
+
+ date_to = datetime (2023, 12, 31), 
+
+ num_ticks =20) 
+
+ plot_topic_trends ( 
+
+ articles , 
+
+ top_n_colors = [ colors . to_hex ( c ) for c in plt . get_cmap ( ’tab10’ )( np . linspace (0, 1, 10))], 
+
+ show_core = True , 
+
+ show_periphery = True , 
+
+ interval = "month" , # Change to "quarter" or "year" 
+
+ date_from = datetime (2021, 9, 1), 
+
+ date_to = datetime (2022, 12, 31), 
+
+ top_n =10, 
+
+ ) 
+
+ plot_top_authors ( 
+
+ articles , 
+
+ date_from = datetime (2020, 1, 1), 
+
+ date_to = datetime (2022, 12, 31), 
+
+ num_authors =10, 
+
+ by_citations = True , 
+
+ show_periphery = False , 
+
+ n_colors =[ "#1f77b4" , "#ff7f0e" , "#2ca02c" , "#d62728" , "#9467bd" ] 
+
+ ) 
+
+ plot_top_keywords_from_abstracts ( articles ) 
+
+ plot_keyword_trends ( 
+
+ articles = articles , 
+
+ date_from = datetime (2020, 1, 1), 
+
+ date_to = datetime (2023, 1, 1), 
+
+ show_core = True , 
+
+ show_periphery = True , 
+
+ top_n =10, 
+
+ ngram_range =(1, 2), 
+
+ interval = "quarter" 
+
+ ) 
+
+ (a) 
+
+ (b) 
+
+ (c) 
+
+ (d) 
+
+ (e) 
+
+ Figure 2 : Temporal analysis of published articles and research trends. (a) Number of articles published per quarter. (b) Top concepts appearing in articles by month. (c) Top 10 authors ranked by the number of published articles. (d) Most frequent keywords extracted from abstracts. (e) Trends of top keywords over time. 
+
+ Figure 2(a) presents the distribution of root set and base set articles through a stacked area chart. Root set articles are those that explicitly include the search string ”15 minutes” in their title or abstract, while base set articles do not. The first article identified using this search criterion 4 4 
+ 4 
+
+ it is important to note that retrieve_articles was also configured with a date filter, restricting results to publications after January 1, 2019. Consequently, no root set articles published before this date are included in the retrieved dataset dates back to January 2020. Although the “15-minute city” paradigm was initially proposed by Carlos Moreno in 2016, it gained significant popularity only in 2020 when the Mayor of Paris, Anne Hidalgo, advocated for its adoption during her re-election campaign.
+Indeed, from 2020 onwards, the number of root set articles has increased, alongside the growth in base set articles. Notably, peaks in publications are observed in January, aligning with well-known trends in scientific publishing. One possible explanation is that gratuity fees reset at the beginning of the new year, or that citations are counted starting from the following year. As a result, articles published early in the year may have a longer citation lifespan, potentially increasing their overall impact. This trend suggests that articles on this topic not only cite earlier works but also frequently reference contemporary research.
+Figures 2(b) and 2(c) provide further insights. Carlos Moreno emerges as a highly cited author among root set articles, often in collaboration with co-authors such as Allam and Chabaud, and the main topic domains are Social Science and Physical Science. This finding is unsurprising given the fact that Moreno was the first that proposed the 15-minute paradigm. Figure 2(b) further reveals that base set articles include a substantial number of publications focusing on COVID-19 epidemiological studies. These articles began appearing shortly after the onset of the pandemic and are frequently cited by root set articles. This correlation likely stems from the fact that the 15-minute city concept aligns well with pandemic-era urban planning needs, facilitating localized access to essential services and supporting lockdown measures.
+Beyond pandemic-related studies, the majority of topics covered in base set articles pertain to mobility, urban planning, and smart cities, highlighting the broader relevance of the 15-minute city paradigm within these research domains.
+
+ Figures 2(d) and 2(e) illustrate the results of keyword extraction using KeyBERT 5 5 
+ 5 
+
+ KeyBERT may return morphologically similar keywords due to the lack of lemmatization, treating singular and plural forms as distinct despite their semantic equivalence (e.g. smart city and smart cities ). . Specifically, Figure 2(d) presents a simple bar chart displaying the most frequent keywords in root set articles, while Figure 2(e) additionally depicts temporal trends including base set articles. Although the overall frequency of keywords increases over time, certain terms, including “city covid” and “city concept”, exhibit a more pronounced growth. This initial phase of analysis provides valuable insights into the evolution of discourse on this topic over time, the most involved authors, and related subtopics
+
+ 4.4 Network-based Bibliometrics
+
+ Once we retrieve all the relevant information pertaining the OpenAlex query, upon which we built a citation a co-authorship graph, we can exploit some of the methods implemented in pyBiblioNet, and described in Sec. 3.4 , to perform the bibliometric analysis, the community detection and the visualization of the results (a summary of the method is provided in 9 ).
+
+ ⬇ 
+
+ import networkx as nx 
+
+ import numpy as np 
+
+ import matplotlib . pyplot as plt 
+
+ from pybiblionet . bibliometric_analysis . core import extract_metrics_to_csv , cluster_graph , extract_clusters_to_csv 
+
+ from pybiblionet . bibliometric_analysis . charts_network import show_clustered_graph , show_cluster_statistics , show_graph_statistics 
+
+ from matplotlib import colors 
+
+ if __name__ == "__main__" : 
+
+ print ( "Reading graph..." ) 
+
+ json_file_path = "query_results/query_result_1ea020320b230de5a973a39682eaa53dce89a9bb026b441a5f825232.json" 
+
+ network_file_name = "15minute_citation_graph.GML" 
+
+ G = nx . read_gml ( network_file_name ) 
+
+ print ( "Extracting metrics..." ) 
+
+ metrics = [ "betweenness_centrality" , "closeness_centrality" , "page_rank" , "in_degree" , "out_degree" ] 
+
+ fields = [ "id" , "title" ] 
+
+ csv_file_path = "metrics_and_fields.csv" 
+
+ extract_metrics_to_csv ( G , metrics , fields , csv_file_path ) 
+
+ show_graph_statistics ( G , csv_file_path ) 
+
+ print ( "\nClustering the graph..." ) 
+
+ clustered_graph = cluster_graph ( G , algorithm = ’louvain’ ,) 
+
+ csv_file_path = "cluster_and_fields.csv" 
+
+ extract_clusters_to_csv ( clustered_graph , fields , csv_file_path ) 
+
+ print ( "Visualizing clusters..." ) 
+
+ show_clustered_graph ( clustered_graph , image_size =(800, 800), 
+
+ n_clusters =5, 
+
+ topics_level = "field" , 
+
+ ) 
+
+ show_cluster_statistics ( csv_file_path , image_size =(800, 800), 
+
+ n_clusters =5) 
+
+ In the snippet of code, we first load the citation graph from the GML file exported in Section 4.1 and then extract various centrality measures, such as betweenness centrality , closeness centrality , and PageRank (calling the function extract_metrics_to_csv ).These metrics are stored in a CSV file along with key information about the articles (e.g., title, abstract, authors), providing insight into the importance of different articles within the citation network. The function show_graph_statistics allows for the visualization of general network statistics, the distribution of each metric, and the correlation heatmap of metrics (Figures 3 ).
+Although the same operation can be performed for the co-authorship network, it is important to note that this network is undirected. Consequently, in-degree and out-degree metrics are not applicable. Similarly, the types of fields that can be exported for each author differ from those available for articles.
+The export of metadata from articles associated with network measures allows for the identification of the most relevant articles for each metric, even without advanced computational expertise. By simply sorting the data using a program capable of reading CSV files (such as LibreOffice Calc), users can rank articles accordingly. In addition to identifying the most cited root set or base set articles, examining those with the highest eigenvector centrality, for instance, enables the detection of nodes with broader systemic impact, such as seminal papers that are frequently cited by other highly influential works.
+
+ (a) 
+
+ (b) 
+
+ (c) 
+
+ Figure 3 : (a) It presents the distribution of the sampled metrics, with betweenness centrality shown as an example in this image. (b) Statistics of the citation graph obtained by querying ”15 minutes city” using pyBiblioNet. In this graph, nodes are scientific papers that are linked by an edge if there is an outgoing or incoming citation between them. (c) Correlation heatmap of centrality measures. 
+
+ We can then cluster the graphs exploiting the cluster_graph method, passing as an argument one of the implemented clustering techniques. For the purpose of this example the louvain algorithm was chosen. The clustering results, along with article metadata, are exported into another CSV file for further examination. The clustered graph can be visualized using the show_cluster function, which highlights the top 5 clusters by size. The output can be seen in Fig. 4(a) . Each cluster is accompanied by a visual representation of its composition in terms of research areas (the most frequent 5 domains identified within the 5 largest clusters are displayed).
+The distribution of key topics across the different clusters indicates that the subject “15-minute city” is multidisciplinary; however, there are clusters where certain main topics are more frequent. For example, one cluster exhibits a higher proportion of articles on “Computer Science” and “Engineering” compared to the others. The presence of articles on “Environmental Science” is not surprising, as the 15-minute city paradigm is viewed as a means to reduce private car use, thereby decreasing urban pollution within a framework centered on sustainability and well-being. Figure 4(c) presents a bar chart depicting the size of the individual clusters. Figures 4(b) and 4(d) display the same pair of graphs generated from the co-authorship network, the most frequent 5 countries within the 5 largest clusters are displayed. The key difference lies in the fact that the entities presented in the citation network correspond to the main topics of the articles in the cluster, whereas in the co-authorship network, the affiliation countries of the authors are shown.
+The clusters in the co-authorship network appear more segregated, as there are no co-authorship relationships between the majority of the author clusters. Additionally, it becomes evident that collaboration between authors from different nationalities is limited to a few countries, predominantly Western, and specifically European. The large presence of authors with French affiliations can be explained by the fact that the model gained prominence in Paris.
+
+ (a) 
+
+ (b) 
+
+ (c) 
+
+ (d) 
+
+ Figure 4 : (a) and (b) Visualization of the clusters obtained through the function show_clustered_graph respectively in the citation and co-authorship graphs. Each numbered cluster is surrounded by an indication of the main research areas of the papers, or country affiliation of the authors belonging to that particular cluster. (c) and (d) Visualization of the cluster sizes through the function show_clusters_chart respectively in the citation and co-authorship graph. 
+
+ 4.5 Results and Discussion
+
+ The information retrieved by means of the different pyBiblioNet methods helps us in reconstructing an interesting bibliographical landscape around the topic of the 15-minutes city. By crawling data on the query ”15 minutes/min city” starting from 2019, we are able to build a citation and a co-authorship graph whose basic statistics are synthesized in Fig. 3(a) . As seen, we retrieved a total of 9372 papers that, according to OpenAlex, satisfy the user query; by building the graph and analysing the connections among the papers, we are able to identify the most central papers and to explore more tightly connected clusters of research works, with the ultimate goal of narrowing down the large volume of results to identify the most relevant ones based on our objectives and needs.
+
+ A simple analysis shows, on this very sparse network, a good level of correlation among the different centrality metrics, suggesting that overall there is good agreement in the importance of fundamental papers regardless of the specific definition of the centrality. However, once centrality is measured, it can be interesting to rank nodes and to pick a selection of most influential nodes according to the different definitions of centrality, to analyze specific variations and understand if there is only a very small number of influential papers playing more roles in the network, or if there is a diversity in terms of typology and research domains - and to quantify the extent of such variety.
+
+ This analysis can be further informed by the results of the community detection seen in Fig. 4(a) . The largest clusters identified by Louvain are composed of a variety of papers, which is already quite multidisciplinary, as we can see in the cluster composition shown in Fig. 4(a) . Moreover, by inspecting the centrality-based node rankings in each community, we can identify the most prominent papers in each group. For this example, we only consider two well-known metrics, such as betweenness and closeness centrality.
+Tables 10 and 11 show us that, beyond a couple of research works that are consistently prominent across different metrics, using more than one metric can already bring to the attention of the user different papers depending on the chosen metric. Many of these papers are in turn different from those that can be retrieved by simply looking at the list of the most cited research, shown in Tab. 12 . The composition of the communities is also non-trivial in terms of topics and research areas, suggesting that we are dealing with a strongly multi-disciplinary query, and this must be kept into account when performing a bibliometric analysis on the topic.
+
+ Cluster 
+ Title 
+ Concepts 
+ Rank 
+ Betweenness 
+
+ 0 
+
+ Introducing the “15-Minute City”: Sustainability, Resilience and Place Identity in Future Post-Pandemic Cities 48 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 1 ∘ 1^{\circ} 
+ 1.48e-03 
+
+ 15-Minute City: Decomposing the New Urban Planning Eutopia 54 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 9 ∘ 9^{\circ} 
+ 2.71e-04 
+
+ A Case Study of a 15-Minute City Concept in Singapore’s 2040 Land Transport Master Plan: 20-Minute Towns and a 45-Minute City 43 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 101 ∘ 101^{\circ} 
+ 1.94e-05 
+
+ 49 
+
+ Unpacking the ‘15-Minute City’ via 6G, IoT, and Digital Twins: Towards a New Narrative for Increasing Urban Efficiency, Resilience, and Sustainability 5 
+
+ Media Technology (Smart Cities and Technologies) 
+
+ 8 ∘ 8^{\circ} 
+ 3.02e-04 
+
+ The Theoretical, Practical, and Technological Foundations of the 15-Minute City Model: Proximity and Its Environmental, Social and Economic Benefits for Sustainability 3 
+
+ Media Technology (Smart Cities and Technologies) 
+
+ 16 ∘ 16^{\circ} 
+ 1.65e-04 
+
+ Proximity-Based Planning and the “15-Minute City”: A Sustainable Model for the City of the Future 7 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 17 ∘ 17^{\circ} 
+ 1.62e-04 
+
+ 32 
+
+ A composite X-minute city cycling accessibility metric and its role in assessing spatial and socioeconomic inequalities – A case study in Utrecht, the Netherlands 39 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 23 ∘ 23^{\circ} 
+ 1.19e-04 
+
+ Moving the 15-minute city beyond the urban core: The role of accessibility and public transport in the Netherlands 53 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 28 ∘ 28^{\circ} 
+ 8.77e-05 
+
+ Understanding the determinants of x-minute city policies: A review of the North American and Australian cities’ planning documents 42 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 29 ∘ 29^{\circ} 
+ 8.75e-05 
+
+ 4 
+
+ Measuring compliance with the 15-minute city concept: State-of-the-art, major components and further requirements 51 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 4 ∘ 4^{\circ} 
+ 3.61e-04 
+
+ The 15-minute city: Urban planning and design efforts toward creating sustainable neighborhoods 37 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 6 ∘ 6^{\circ} 
+ 3.36e-04 
+
+ The 15-minute city for all? – Measuring individual and temporal variations in walking accessibility 66 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 10 ∘ 10^{\circ} 
+ 2.35e-04 
+
+ 5 
+
+ Urban Transition and the Return of Neighbourhood Planning. Questioning the Proximity Syndrome and the 15-Minute City 44 
+
+ Management, Monitoring, Policy and Law (Urban Planning and Valuation) 
+
+ 11 ∘ 11^{\circ} 
+ 2.24e-04 
+
+ Barcelona under the 15-Minute City Lens: Mapping the Accessibility and Proximity Potential Based on Pedestrian Travel Times 26 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 12 ∘ 12^{\circ} 
+ 2.16e-04 
+
+ The Future of the City in the Name of Proximity: A New Perspective for the Urban Regeneration of Council Housing Suburbs in Italy after the Pandemic 25 
+
+ Management, Monitoring, Policy and Law (Urban Planning and Valuation) 
+
+ 35 ∘ 35^{\circ} 
+ 7.86e-05 
+
+ Table 10 : Top Papers by Betweenness Centrality by Cluster 
+
+ Cluster 
+ Title 
+ Concepts 
+ Rank 
+ Closeness 
+
+ 0 
+
+ Introducing the “15-Minute City”: Sustainability, Resilience and Place Identity in Future Post-Pandemic Cities 48 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 1 ∘ 1^{\circ} 
+ 1.32e-01 
+
+ Residents’ preferences for walkable neighbourhoods 17 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 27 ∘ 27^{\circ} 
+ 8.03e-02 
+
+ Influence of mixed land-use on realizing the social capital 49 
+
+ Sociology and Political Science (Urban, Neighborhood, and Segregation Studies) 
+
+ 33 ∘ 33^{\circ} 
+ 8.03e-02 
+
+ 49 
+
+ Redefining the Smart City: Culture, Metabolism and Governance 8 
+
+ Media Technology (Smart Cities and Technologies) 
+
+ 6 ∘ 6^{\circ} 
+ 8.34e-02 
+
+ Cities and the Digital Revolution 9 
+
+ Media Technology (ICT Impact and Policies) 
+
+ 7 ∘ 7^{\circ} 
+ 8.29e-02 
+
+ On big data, artificial intelligence and smart cities 6 
+
+ Media Technology (Smart Cities and Technologies) 
+
+ 8 ∘ 8^{\circ} 
+ 8.24e-02 
+
+ 32 
+
+ The 15-minute walkable neighborhoods: Measurement, social inequalities and implications for building healthy communities in urban China 65 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 2 ∘ 2^{\circ} 
+ 9.29e-02 
+
+ Accessibility in Practice: 20-Minute City as a Sustainability Planning Goal 18 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 3 ∘ 3^{\circ} 
+ 8.65e-02 
+
+ The effect of COVID-19 and subsequent social distancing on travel behavior 22 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 19 ∘ 19^{\circ} 
+ 8.06e-02 
+
+ 4 
+
+ Negotiating Proximity in Sustainable Urban Planning: A Swedish Case 29 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 78 ∘ 78^{\circ} 
+ 4.04e-02 
+
+ Is accessibility an idea whose time has finally come? 33 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 105 ∘ 105^{\circ} 
+ 2.74e-02 
+
+ The sustainable mobility paradigm 14 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 113 ∘ 113^{\circ} 
+ 2.44e-02 
+
+ 5 
+
+ The Walkable city and the importance of the proximity environments for Barcelona’s everyday mobility 45 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 4 ∘ 4^{\circ} 
+ 8.50e-02 
+
+ Transport and social exclusion in London 19 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 73 ∘ 73^{\circ} 
+ 4.30e-02 
+
+ Barcelona under the 15-Minute City Lens: Mapping the Accessibility and Proximity Potential Based on Pedestrian Travel Times 26 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 110 ∘ 110^{\circ} 
+ 2.49e-02 
+
+ Table 11 : Top Papers by Closeness Centrality by Cluster 
+
+ Cluster 
+ Title 
+ Concepts 
+ Rank 
+ Citations 
+
+ 0 
+
+ Introducing the “15-Minute City”: Sustainability, Resilience and Place Identity in Future Post-Pandemic Cities 48 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 1 ∘ 1^{\circ} 
+ 992 
+
+ 15-Minute City: Decomposing the New Urban Planning Eutopia 54 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 2 ∘ 2^{\circ} 
+ 318 
+
+ The 15-Minute City Quantified Using Mobility Data 1 
+
+ Transportation (Human Mobility and Location-Based Analysis) 
+
+ 59 ∘ 59^{\circ} 
+ 14 
+
+ 49 
+
+ The ‘15-Minute City’ concept can shape a net-zero urban future 4 
+
+ Media Technology (Smart Cities and Technologies) 
+
+ 7 ∘ 7^{\circ} 
+ 105 
+
+ Unpacking the ‘15-Minute City’ via 6G, IoT, and Digital Twins: Towards a New Narrative for Increasing Urban Efficiency, Resilience, and Sustainability 5 
+
+ Media Technology (Smart Cities and Technologies) 
+
+ 9 ∘ 9^{\circ} 
+ 87 
+
+ The Theoretical, Practical, and Technological Foundations of the 15-Minute City Model: Proximity and Its Environmental, Social and Economic Benefits for Sustainability 3 
+
+ Media Technology (Smart Cities and Technologies) 
+
+ 17 ∘ 17^{\circ} 
+ 56 
+
+ 32 
+
+ Is the 15-minute city within reach? Evaluating walking and cycling accessibility to grocery stores in Vancouver 35 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 15 ∘ 15^{\circ} 
+ 57 
+
+ A composite X-minute city cycling accessibility metric and its role in assessing spatial and socioeconomic inequalities – A case study in Utrecht, the Netherlands 39 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 25 ∘ 25^{\circ} 
+ 36 
+
+ Understanding the determinants of x-minute city policies: A review of the North American and Australian cities’ planning documents 42 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 30 ∘ 30^{\circ} 
+ 32 
+
+ 4 
+
+ The 15-minute city: Urban planning and design efforts toward creating sustainable neighborhoods 37 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 5 ∘ 5^{\circ} 
+ 128 
+
+ The 15-minute city: interpreting the model to bring out urban resiliencies 2 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 10 ∘ 10^{\circ} 
+ 86 
+
+ The 15-minute city for all? – Measuring individual and temporal variations in walking accessibility 66 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 11 ∘ 11^{\circ} 
+ 76 
+
+ 5 
+
+ Barcelona under the 15-Minute City Lens: Mapping the Accessibility and Proximity Potential Based on Pedestrian Travel Times 26 
+
+ Transportation (Urban Transport and Accessibility) 
+
+ 8 ∘ 8^{\circ} 
+ 98 
+
+ Urban Transition and the Return of Neighbourhood Planning. Questioning the Proximity Syndrome and the 15-Minute City 44 
+
+ Management, Monitoring, Policy and Law (Urban Planning and Valuation) 
+
+ 26 ∘ 26^{\circ} 
+ 34 
+
+ Pathways to 15-Minute City adoption: Can our understanding of climate policies’ acceptability explain the backlash towards x-minute city programs? 46 
+
+ Communication (Social Media and Politics) 
+
+ 62 ∘ 62^{\circ} 
+ 13 
+
+ Table 12 : Top Root Set Papers by citations by Cluster 
+
+ Finally, table 13 shows the top five authors based on five centrality metrics in the co-authorship network: degree, betweenness, closeness, eigenvector, and PageRank. Using multiple metrics helps to capture different aspects of influence and collaboration patterns that would not be visible by looking only at the number of co-authors.
+For example, B. Büttner ranks highly across nearly all measures, suggesting not only that he collaborates widely but also that he holds a central and structurally important position in the network. In contrast, authors like K. Geurs or G. Pozoukidou appear only in the betweenness ranking. This indicates that their influence comes from acting as connectors between otherwise separate groups, rather than from collaborating with many others directly.
+The eigenvector and PageRank metrics offer yet another perspective: they highlight authors who are connected to other well-connected or central collaborators. Among the top 5 authors by PageRank, Z. Allam and C. Moreno emerge, reflecting their foundational contributions to the development of the topic, which has since attracted significant attention and collaboration from other leading researchers in the field.
+Overall, the centrality measures reveal different dimensions of academic presence within a collaborative network allowing a more complete and nuanced understanding than simply counting the number of collaborations.
+
+ We can compare the research items collected and organized through pyBiblioNet to a systematic literature review such as 51 . In that study, the authors identified 78 conference and journal research papers from Scopus using the keywords “15 min* cit*” and “20 min* cit*”, without specifying a time range. After filtering for English-language papers and applying full-text eligibility criteria, they retained 40 articles. Subsequently, they conducted both backward and forward snowballing (i.e., identifying additional relevant works by examining the references of the selected articles and the papers that cited them) resulting in a final corpus of 45 articles. In contrast, using pyBiblioNet with the query “15 minut* city” and restricting the search to articles published from January 1, 2019 onward, we retrieved 409 root set articles, of which 285 were journal or conference papers written in English. Including the base set, the total rises to 2615 articles. Notably, we find that our methodology is able to collect a more conspicuous number of articles; of course, the list of papers presented in the cited work is the result of an extensive process of manual selection, where papers were carefully curated and evaluated to ensure relevance and quality. Indeed, the construction of a literature review does not depend solely on the number of articles retrieved through keyword-based queries; however, a very large volume of results can significantly complicate the process, making a systematic review on a given topic both extensive and time-consuming. To address this challenge, pyBiblioNet provides mechanisms to help researchers prioritize the most relevant articles. This can be achieved by ranking articles based on centrality measures within the citation network, or by identifying articles authored by individuals who themselves occupy structurally central positions in the co-authorship network. Furthermore, the availability of topic modeling enables filtering of the corpus based on thematic content, while the application of community detection algorithms allows for the identification of coherent groups of articles or authors.
+These communities can then be used to focus the analysis on specific subfields or research clusters, thereby supporting a more targeted and in-depth exploration of the scientific landscape. Furthermore, the articles identified through pyBiblioNet—which can be exported in CSV format—are readily filterable by language, document type (e.g., journal and conference papers only), and inclusion or exclusion of the base set. This significantly streamlines the work of researchers who need to identify, organize, and evaluate relevant articles for conducting a systematic review.
+
+ Rank 
+ Degree 
+ Betweenness 
+ Closeness 
+
+ 1 
+ B. Büttner 
+ 1.40e-1 
+ B. Büttner 
+ 1.10e-2 
+ B. Büttner 
+ 1.40e-1 
+
+ 2 
+ M. T. B. Larriva 
+ 1.03e-1 
+ K. Geurs 
+ 1.87e-3 
+ A. Gorrini 
+ 1.12e-1 
+
+ 3 
+ J. Nofre 
+ 1.02e-1 
+ G. Pozoukidou 
+ 9.51e-4 
+ D. Presicce 
+ 1.12e-1 
+
+ 4 
+ J. Carpio-Pinedo 
+ 1.02e-1 
+ J. Nofre 
+ 6.34e-4 
+ F. Messa 
+ 1.12e-1 
+
+ 5 
+ A. Gorrini 
+ 1.02e-1 
+ L. Abdelfattah 
+ 6.34e-4 
+ M. T. B. Larriva 
+ 1.12e-1 
+
+ Rank 
+ Eigenvector 
+ PageRank 
+
+ 1 
+ B. Büttner 
+ 1.01e-1 
+ Z. Allam 
+ 3.24e-3 
+
+ 2 
+ M. T. B. Larriva 
+ 1.00e-1 
+ B. Büttner 
+ 2.98e-3 
+
+ 3 
+ A. Gorrini 
+ 1.00e-1 
+ C. Moreno 
+ 2.51e-3 
+
+ 4 
+ D. Presicce 
+ 1.00e-1 
+ B. Murgante 
+ 2.49e-3 
+
+ 5 
+ F. Messa 
+ 1.00e-1 
+ O. Marquet 
+ 2.40e-3 
+
+ Table 13 : Top 5 authors by various centrality measures 
+
+ 5 Conclusion, Limitations and Future Work
+
+ pyBiblioNet is a Python package designed to easily collect bibliographic data on a specific query and to perform bibliometric analyses based on network science. To do so, it includes a number of methods that perform all the required steps to parse the query, collect and export the bibliographic data, build and analyze the citation and co-authorship graphs. While it currently relies on OpenAlex to gather bibliometric data, the modular structure of pyBiblioNet allows users to include their own set of functions to include further sources of data, such as the Elsevier Research Products APIs 6 6 
+ 6 
+
+ https://dev.elsevier.com/ or PubMed APIs 7 7 
+ 7 
+
+ https://www.ncbi.nlm.nih.gov/home/develop/api/ , as long as the final outputs of this module are conveniently structured for the ingestion by the module that performs the bibliometric analysis.
+
+ pyBiblioNet is particularly helpful in exploring a strongly multidisciplinary scientific domain, as seen in the use case of Sec. 4 . Basing the bibliometric analysis on network analysis measures is effective since it allows us to assess the structural relationships between publications, authors, and research topics. By leveraging network analysis measures, pyBiblioNet enables the identification of key authors, influential publications, and emerging research clusters. This approach provides insights into collaborative patterns, disciplinary intersections, and the evolution of knowledge within the scientific domain, revealing trends and influential nodes that traditional bibliometric methods may overlook. Moreover, in such a multidisciplinary environment, using this technique helps a researcher navigate an unfamiliar domain.
+
+ Notably, we find that our methodology is able to collect a more conspicuous number of diverse sources; of course, the list of papers presented in a systematic literature review is the result of an extensive process of manual selection, where papers were carefully curated and evaluated to ensure relevance and quality. In contrast, pyBiblioNet serves as a complementary tool positioned at the initial stages of a researcher’s workflow, designed to bring a broad range of works into consideration with minimal effort. By leveraging network analysis, pyBiblioNet is capable of identifying influential publications across a diverse array of topics that are relevant to the query. This approach minimizes biases that could stem from the researcher’s preconceptions, promoting a more comprehensive and impartial exploration of the field. Consequently, it enhances the researcher’s ability to access a wider and potentially richer pool of resources, which can then be subjected to finer, manual selection processes later on. This combination of automated and manual review processes optimizes the rigor and breadth of a literature review, fostering a more heterogeneous view of the scientific landscape.
+
+ Nevertheless, it is important to acknowledge some limitations of the current implementation of pyBiblioNet. Specifically, the analysis is restricted to citation and co-authorship networks. Other network structures could be explored, such as author-to-author citation networks. Moreover, we employed a selected set of centrality measures and community detection algorithms, but incorporating a broader range of metrics and community detection algorithms could enhance the depth of the bibliometric analysis. Additionally, the interoperability between the collection module and other tools or libraries in Python and R could be improved by supporting export in standardized formats, such as those used by Web of Science, Dimensions,
+or PubMed, which are commonly accepted as input by many bibliometric analysis tools. Furthermore, the topic modeling module is currently quite basic, and it does not implement any caching mechanisms, which could significantly affect performance on large datasets. Finally, the generated visualizations are static and offer limited customization; introducing interactive and configurable visual outputs would make the tool more flexible and accessible to a broader range of users. We plan to fix some of these limitations in future versions of the library.
+
+ 6 Documentation of the openalex Module
+
+ This appendix provides documentation for the openalex module, detailing its public methods and their functionalities.
+
+ 6.1 Core Functions
+
+ 6.1.1 string_generator_from_lite_regex 
+
+ Generates a list of query strings from a simplified regular expression pattern.
+
+ Parameters: 
+
+ • 
+
+ queries_regex (str): A string representing a simplified regex pattern.
+
+ Returns: 
+
+ • 
+
+ List[str] : List of query strings.
+
+ 6.1.2 query_OpenAlex 
+
+ Queries the OpenAlex API based on the given parameters.
+
+ Parameters: 
+
+ • 
+
+ api_type (str): Type of API query (’search’, ’cite’, ’cited_by’).
+
+ • 
+
+ parameter (Optional[str]): Article ID for ’cite’ and ’cited_by’ queries.
+
+ • 
+
+ mail (str): Email for API request identification.
+
+ • 
+
+ from_publication_date (Optional[str]): Start date for filtering (YYYY-MM-DD).
+
+ • 
+
+ to_publication_date (Optional[str]): End date for filtering (YYYY-MM-DD).
+
+ • 
+
+ cache (bool): Use caching.
+
+ Returns: 
+
+ • 
+
+ List[Dict[str, Dict]] : List of results matching the query.
+
+ 6.1.3 retrieve_articles 
+
+ Retrieves root set articles from OpenAlex based on a list of queries and optional parameters.
+
+ Parameters: 
+
+ • 
+
+ queries (List[str]): Search queries.
+
+ • 
+
+ mail (str): Email for API request identification.
+
+ • 
+
+ from_publication_date (Optional[str]): Start date (YYYY-MM-DD).
+
+ • 
+
+ to_publication_date (Optional[str]): End date (YYYY-MM-DD).
+
+ Returns: 
+
+ • 
+
+ str : File path to the JSON results.
+
+ 6.1.4 export_articles_to_csv 
+
+ Exports articles data from a JSON file to CSV.
+
+ Parameters: 
+
+ • 
+
+ json_file_path (str): Path to the JSON file.
+
+ • 
+
+ fields_to_export (Optional[List[str]]): Fields to include.
+
+ • 
+
+ export_path (Optional[str]): Path for the exported CSV.
+
+ Returns: 
+
+ • 
+
+ None : Save selected fields to a CSV file.
+
+ 6.1.5 export_authors_to_csv 
+
+ Exports author data from a JSON file to CSV.
+
+ Parameters: 
+
+ • 
+
+ json_file_path (str): Path to the JSON file.
+
+ • 
+
+ fields_to_export (Optional[List[str]]): Fields to include.
+
+ • 
+
+ export_path (Optional[str]): Path for the exported CSV.
+
+ Returns: 
+
+ • 
+
+ None : Save selected fields to a CSV file.
+
+ 6.1.6 export_institutions_to_csv 
+
+ Exports institution data from a JSON file to CSV.
+
+ Parameters: 
+
+ • 
+
+ json_file_path (str): Path to the JSON file.
+
+ • 
+
+ fields_to_export (Optional[List[str]]): Fields to include.
+
+ • 
+
+ export_path (Optional[str]): Path for the exported CSV.
+
+ Returns: 
+
+ • 
+
+ None : Save selected fields to a CSV file.
+
+ 6.1.7 export_venues_to_csv 
+
+ Exports venue data from a JSON file to CSV.
+
+ Parameters: 
+
+ • 
+
+ json_file_path (str): Path to the JSON file.
+
+ • 
+
+ fields_to_export (Optional[List[str]]): Fields to include.
+
+ • 
+
+ export_path (Optional[str]): Path for the exported CSV.
+
+ Returns: 
+
+ • 
+
+ None : Save selected fields to a CSV file.
+
+ 6.1.8 export_articles_to_scopus 
+
+ Exports author data from a JSON file to Scopus like CSV.
+
+ Parameters: 
+
+ • 
+
+ json_file_path (str): Path to the JSON file.
+
+ • 
+
+ include_periphery (Optional[boolean]): Include the base set.
+
+ • 
+
+ export_path (Optional[str]): Path for the exported CSV.
+
+ Returns: 
+
+ • 
+
+ None : Save selected fields to a CSV file.
+
+ 6.1.9 create_citation_graph 
+
+ Creates a directed graph from article data representing citations.
+
+ Parameters: 
+
+ • 
+
+ articles (Dict[str, Dict]): Article data.
+
+ • 
+
+ export_path (Optional[str]): Path to export the graph.
+
+ Returns: 
+
+ • 
+
+ nx.DiGraph : An undirected co-authorship graph.
+
+ 6.1.10 create_coauthorship_graph 
+
+ Creates an undirected graph representing co-authorship relationships.
+
+ Parameters: 
+
+ • 
+
+ articles (Dict[str, Dict]): Article data.
+
+ • 
+
+ export_path (Optional[str]): Path to export the graph.
+
+ • 
+
+ periphery (bool): Include base set articles.
+
+ Returns: 
+
+ • 
+
+ nx.Graph : An undirected co-authorship graph.
+
+ 7 Documentation of the bibliometric_analysis Module
+
+ 7.1 Core Functions
+
+ 7.1.1 extract_metrics_to_csv 
+
+ Extracts the specified metrics and fields from the graph and saves them to a CSV file.
+
+ Parameters: 
+
+ • 
+
+ G ( nx.DiGraph|nx.Graph ): A NetworkX directed or undirected graph.
+
+ • 
+
+ metrics ( List[str] ): A list of metrics to compute (available: ’betweenness_centrality’, ’closeness_centrality’, ’page_rank’, ’in_degree’, ’out_degree’, ’degree’).
+
+ • 
+
+ fields ( List[str] ): A list of fields to include in the CSV.
+
+ • 
+
+ csv_file_path ( str ): The path to the CSV file to save the results.
+
+ Returns: 
+
+ • 
+
+ None : Save selected fields and clusters to a CSV file.
+
+ 7.1.2 extract_clusters_to_csv 
+
+ Extracts the cluster and selected fields from the graph and saves them to a CSV file.
+
+ Parameters: 
+
+ • 
+
+ G ( nx.DiGraph|nx.Graph ): A NetworkX directed or undirected graph.
+
+ • 
+
+ fields ( List[str] ): A list of fields to include in the CSV.
+
+ • 
+
+ csv_file_path ( str ): The path to the CSV file to save the results.
+
+ Returns: 
+
+ • 
+
+ None : Save selected fields and metrics to a CSV file.
+
+ 7.1.3 cluster_graph 
+
+ Clusters the nodes in the graph using the specified clustering algorithm and returns a new graph with cluster numbers as node attributes.
+
+ Parameters: 
+
+ • 
+
+ G ( nx.DiGraph|nx.Graph ): A NetworkX directed or undirected graph.
+
+ • 
+
+ algorithm ( str ): The clustering algorithm to use
+( int ): The number of clusters to create when Spectral Clustering is used.
+
+ Returns: 
+
+ • 
+
+ A NetworkX graph with cluster numbers as a new node attribute.
+
+ 7.2 Charts Functions
+
+ 7.2.1 plot_article_trends 
+
+ Generates a stacked area chart visualizing the number of root set and base set articles over time, aggregated by the specified interval ( month , quarter , year ).
+
+ Parameters: 
+
+ • 
+
+ articles ( dict ): A dictionary containing articles with metadata.
+
+ • 
+
+ interval ( str ): Time interval for the x-axis labels. Can be "month" , "quarter" , or "year" .
+
+ • 
+
+ color_core ( Optional[str] ): Color for the root set articles in the plot.
+
+ • 
+
+ color_periphery ( Optional[str] ): Color for the base set articles.
+
+ • 
+
+ date_from ( Optional[datetime] ): Start date for the aggregation range.
+
+ • 
+
+ date_to ( Optional[datetime] ): End date for the aggregation range.
+
+ • 
+
+ num_ticks ( Optional[int] ): Maximum number of x-axis ticks to display.
+
+ Returns: 
+
+ • 
+
+ None : The function generates and displays the stacked area chart.
+
+ 7.2.2 plot_topic_trends 
+
+ Generates a grouped stacked bar chart to visualize aggregated data for topics or concepts over time. Articles can be split into root set and base set articles, with the option to filter by specific topics or concepts.
+
+ Parameters: 
+
+ • 
+
+ articles ( dict ): A dictionary containing articles with metadata.
+
+ • 
+
+ interval ( Optional[str] ): Aggregation interval for the x-axis ( "month" , "quarter" , "year" ).
+
+ • 
+
+ top_n_colors ( Optional[list] ): List of colors to use for the bars.
+
+ • 
+
+ show_periphery ( Optional[bool] ): If True , display base set articles.
+
+ • 
+
+ show_core ( Optional[bool] ): If True , display root set articles.
+
+ • 
+
+ field_key ( Optional[str] ): Key to filter by for topics ( "field" or "domain" ).
+
+ • 
+
+ date_from ( Optional[datetime] ): Start date for filtering.
+
+ • 
+
+ date_to ( Optional[datetime] ): End date for filtering.
+
+ • 
+
+ top_n ( Optional[int] ): Number of top topics/concepts to display.
+
+ • 
+
+ num_ticks ( Optional[int] ): Maximum number of ticks on the x-axis.
+
+ Returns: 
+
+ • 
+
+ None : The function generates and displays the grouped stacked bar chart.
+
+ 7.2.3 plot_top_authors 
+
+ Generates a stacked bar chart visualizing the top authors and their articles, split by topics or concepts. It can rank authors by the number of citations or publications.
+
+ Parameters: 
+
+ • 
+
+ articles ( dict ): A dictionary containing articles with metadata.
+
+ • 
+
+ field_key ( Optional[str] ): Key to filter topics by ( "field" or "domain" ).
+
+ • 
+
+ date_from ( Optional[datetime] ): Start date for filtering.
+
+ • 
+
+ date_to ( Optional[datetime] ): End date for filtering.
+
+ • 
+
+ num_authors ( int ): Number of top authors to display.
+
+ • 
+
+ by_citations ( bool ): If True , ranks authors by the number of citations instead of publications.
+
+ • 
+
+ show_periphery ( bool ): If True , includes base set articles in the analysis.
+
+ • 
+
+ show_core ( bool ): If True , includes root set articles in the analysis.
+
+ • 
+
+ n_colors ( Optional[list] ): List of colors for the chart bars.
+
+ Returns: 
+
+ • 
+
+ None : The function generates and displays the stacked bar chart.
+
+ 7.2.4 plot_top_keywords_from_abstracts 
+
+ Generates a chart to visualize the most frequent keywords extracted from article abstracts.
+
+ Parameters: 
+
+ • 
+
+ articles ( dict ): A dictionary containing articles with metadata.
+
+ • 
+
+ date_from ( Optional[datetime] ): Start date for filtering.
+
+ • 
+
+ date_to ( Optionaldatetime] ): End date for filtering.
+
+ • 
+
+ show_core ( bool ): If True , includes root set articles in the analysis.
+
+ • 
+
+ show_periphery ( bool ): If True , includes base set articles in the analysis.
+
+ • 
+
+ top_n ( int ): Number of top keywords to display.
+
+ • 
+
+ ngram_range ( tuple ): N-gram range for extracting keywords.
+
+ Returns: 
+
+ • 
+
+ None : The function generates and displays the chart.
+
+ 7.2.5 plot_keyword_trends 
+
+ Generates a chart to visualize the trends of top keywords over time.
+
+ Parameters: 
+
+ • 
+
+ articles ( dict ): A dictionary containing articles with metadata.
+
+ • 
+
+ date_from ( Optional[datetime] ): Start date for filtering.
+
+ • 
+
+ date_to ( Optional[datetime] ): End date for filtering.
+
+ • 
+
+ show_core ( bool ): If True , includes root set articles in the analysis.
+
+ • 
+
+ show_periphery ( bool ): If True , includes base set articles in the analysis.
+
+ • 
+
+ top_n ( int ): Number of top keywords to display.
+
+ • 
+
+ ngram_range ( tuple ): N-gram range for extracting keywords.
+
+ • 
+
+ interval ( str ): Time interval for aggregation ( "month" , "quarter" , "year" ).
+
+ • 
+
+ n_cluster ( Optional[List[str]] ): List of colors
+
+ Returns: 
+
+ • 
+
+ None : The function generates and displays the chart.
+
+ 7.3 Charts Networks Functions
+
+ 7.3.1 show_clustered_graph 
+
+ Visualizes clusters in a graph with pie charts representing the distribution of entries within each cluster. It also allows exporting article information in a CSV file.
+
+ Parameters: 
+
+ • 
+
+ G ( nx.DiGraph ): A NetworkX directed graph containing nodes with cluster data.
+
+ • 
+
+ n_clusters ( Optional[int] ): The number of top clusters to display.
+
+ • 
+
+ m_entries ( Optional[int] ): The number of top entries to display in pie charts.
+
+ • 
+
+ n_cluster_colors ( Optional[List[str]] ): List of colors for clusters.
+
+ • 
+
+ m_entry_colors ( Optional[List[str]] ): List of colors for pie chart entries.
+
+ • 
+
+ min_node_radius ( Optional[float] ): Minimum radius for the nodes.
+
+ • 
+
+ max_node_radius (Optional[float]): Maximum radius for the nodes.
+
+ • 
+
+ min_pie_radius (Optional[float]): Minimum radius for pie charts.
+
+ • 
+
+ max_pie_radius (Optional[float]): Maximum radius for pie charts.
+
+ • 
+
+ size_legend_marker (Optional[int]): Marker size for the legend.
+
+ • 
+
+ size_legend_font (Optional[int]): Font size for the legend.
+
+ • 
+
+ size_node_font (Optional[int]): Font size for node annotations.
+
+ • 
+
+ min_edge_width (Optional[int]): Minimum width of edges between clusters.
+
+ • 
+
+ max_edge_width (Optional[int]): Maximum width of edges between clusters.
+
+ • 
+
+ edge_color (Optional[str]): Color for the edges.
+
+ • 
+
+ top_m_entries ( Optional[List[str]] ): List of top entries to display.
+
+ • 
+
+ bbox_to_anchor_legend_entries ( Optional[Tuple[float, float, float, float]] ): Bounding box for entries legend.
+
+ • 
+
+ bbox_to_anchor_legend_clusters ( Optional[Tuple[float, float, float, float]] ): Bounding box for clusters legend.
+
+ • 
+
+ image_size ( Optional[Tuple[int, int]] ): Size of the output image.
+
+ • 
+
+ topics_level ( Optional[str] ): Level of topics to consider ( "field" or "domain" ).
+
+ • 
+
+ export_path_png ( Optional[str] ): Path to export the figure as PNG.
+
+ Returns: 
+
+ • 
+
+ None : The function generates and displays the clustered graph with pie charts.
+
+ 7.3.2 show_cluster_statistics 
+
+ Displays a horizontal bar chart showing the number of nodes in each cluster, along with a table containing cluster statistics.
+
+ Parameters: 
+
+ • 
+
+ csv_file_path ( str ): Path to the CSV file containing cluster data.
+
+ • 
+
+ color ( Optional[str] ): Color for the bar chart.
+
+ • 
+
+ image_size ( Optional[Tuple[int, int]] ): Size of the image for the output plot.
+
+ • 
+
+ n_clusters ( Optional[int] ): Number of top clusters to display.
+
+ Returns: 
+
+ • 
+
+ None : The function generates and displays the bar chart and statistics table.
+
+ 7.3.3 show_graph_statistics 
+
+ Displays a variety of statistics about the graph, including the number of nodes, number of edges, graph density, and various centrality measures. It also generates a correlation matrix and distribution histograms for centrality measures.
+
+ Parameters: 
+
+ • 
+
+ G ( nx.Graph ): The graph whose statistics are to be displayed.
+
+ • 
+
+ csv_file_path ( str ): Path to the CSV file containing centrality measure data.
+
+ • 
+
+ header_color ( str , optional): Color for the table headers.
+
+ Returns: 
+
+ • 
+
+ None : The function generates and displays various statistics, including a table, correlation heatmap, and histograms.
+
+ References
+
+ Abbiasov et al. (2022) 
+ T. Abbiasov, C. Heine, E. L. Glaeser, C. Ratti, S. Sabouri, A. S. Miranda, and P. Santi 
+
+ The 15-minute city quantified using mobility data .
+
+ Technical report 
+
+ National Bureau of Economic Research .
+
+ Cited by: Table 12 .
+
+ Abdelfattah et al. (2022) 
+ L. Abdelfattah, D. Deponte, and G. Fossa 
+
+ The 15-minute city: interpreting the model to bring out urban resiliencies .
+
+ Transportation Research Procedia 60 , pp. 330–337 .
+
+ Note: New scenarios for safe mobility in urban areasProceedings of the XXV International Conference Living and Walking in Cities (LWC 2021), September 9-10, 2021, Brescia, Italy 
+
+ External Links: ISSN 2352-1465 ,
+ Document 
+
+ Cited by: Table 12 .
+
+ Allam et al. (2022a) 
+ Z. Allam, S. E. Bibri, D. Chabaud, and C. Moreno 
+
+ The theoretical, practical, and technological foundations of the 15-minute city model: proximity and its environmental, social and economic benefits for sustainability .
+
+ Energies 15 ( 16 ), pp. 6042 .
+
+ Cited by: Table 10 ,
+ Table 12 .
+
+ Allam et al. (2022b) 
+ Z. Allam, S. E. Bibri, D. Chabaud, and C. Moreno 
+
+ The ‘15-minute city’ concept can shape a net-zero urban future .
+
+ Humanities and Social Sciences Communications 9 ( 1 ), pp. 126 .
+
+ External Links: Document ,
+ ISSN 2662-9992 
+
+ Cited by: Table 12 .
+
+ Allam et al. (2022c) 
+ Z. Allam, S. E. Bibri, D. S. Jones, D. Chabaud, and C. Moreno 
+
+ Unpacking the ‘15-minute city’via 6g, iot, and digital twins: towards a new narrative for increasing urban efficiency, resilience, and sustainability .
+
+ Sensors 22 ( 4 ), pp. 1369 .
+
+ Cited by: Table 10 ,
+ Table 12 .
+
+ Allam and Dhunny (2019) 
+ Z. Allam and Z. A. Dhunny 
+
+ On big data, artificial intelligence and smart cities .
+
+ Cities 89 , pp. 80–91 .
+
+ External Links: ISSN 0264-2751 ,
+ Document 
+
+ Cited by: Table 11 .
+
+ Allam et al. (2023) 
+ Z. Allam, C. Moreno, D. Chabaud, and F. Pratlong 
+
+ Proximity-based planning and the “15-minute city”: a sustainable model for the city of the future .
+
+ In The Palgrave Handbook of Global Sustainability ,
+
+ pp. 1523–1542 .
+
+ External Links: ISBN 978-3-031-01949-4 ,
+ Document 
+
+ Cited by: Table 10 .
+
+ Allam and Newman (2018) 
+ Z. Allam and P. Newman 
+
+ Redefining the smart city: culture, metabolism and governance .
+
+ Smart Cities 1 ( 1 ), pp. 4–25 .
+
+ Cited by: Table 11 .
+
+ Allam (2020) 
+ Z. Allam 
+
+ Cities and the digital revolution .
+
+ Springer .
+
+ Cited by: Table 11 .
+
+ Andersen (2021) 
+ N. Andersen 
+
+ Mapping the expatriate literature: a bibliometric review of the field from 1998 to 2017 and identification of current research fronts .
+
+ The International Journal of Human Resource Management 32 ( 22 ), pp. 4687–4724 .
+
+ Cited by: §1 .
+
+ Andrikopoulos and Economou (2016) 
+ A. Andrikopoulos and L. Economou 
+
+ Coauthorship and subauthorship patterns in financial economics .
+
+ International Review of Financial Analysis 46 , pp. 12–19 .
+
+ Cited by: §1 .
+
+ Aria and Cuccurullo (2017) 
+ M. Aria and C. Cuccurullo 
+
+ Bibliometrix: an r-tool for comprehensive science mapping analysis .
+
+ Journal of informetrics 11 ( 4 ), pp. 959–975 .
+
+ Cited by: §1.1 ,
+ §1.1 ,
+ §1 ,
+ §4.2 .
+
+ Baker et al. (2020) 
+ H. K. Baker, N. Pandey, S. Kumar, and A. Haldar 
+
+ A bibliometric analysis of board diversity: current status, development, and future research directions .
+
+ Journal of business research 108 , pp. 232–246 .
+
+ Cited by: §1 .
+
+ Banister (2008) 
+ D. Banister 
+
+ The sustainable mobility paradigm .
+
+ Transport Policy 15 ( 2 ), pp. 73–80 .
+
+ Note: New Developments in Urban Transportation Planning 
+
+ External Links: ISSN 0967-070X ,
+ Document 
+
+ Cited by: Table 11 .
+
+ Bastian et al. (2009) 
+ M. Bastian, S. Heymann, and M. Jacomy 
+
+ Gephi: an open source software for exploring and manipulating networks .
+
+ In Proceedings of the international AAAI conference on web and social media ,
+
+ Vol. 3 , pp. 361–362 .
+
+ Cited by: §1 .
+
+ Blondel et al. (2008) 
+ V. D. Blondel, J. Guillaume, R. Lambiotte, and E. Lefebvre 
+
+ Fast unfolding of communities in large networks .
+
+ Journal of Statistical Mechanics: Theory and Experiment 2008 ( 10 ), pp. P10008 .
+
+ Cited by: §1.1 ,
+ Table 3 .
+
+ Brookfield (2017) 
+ K. Brookfield 
+
+ Residents’ preferences for walkable neighbourhoods .
+
+ Journal of Urban Design 22 ( 1 ), pp. 44–58 .
+
+ External Links: Document 
+
+ Cited by: Table 11 .
+
+ Capasso Da Silva et al. (2019) 
+ D. Capasso Da Silva, D. A. King, and S. Lemar 
+
+ Accessibility in practice: 20-minute city as a sustainability planning goal .
+
+ Sustainability 12 ( 1 ), pp. 129 .
+
+ Cited by: Table 11 .
+
+ Church et al. (2000) 
+ A. Church, M. Frost, and K. Sullivan 
+
+ Transport and social exclusion in london .
+
+ Transport Policy 7 ( 3 ), pp. 195–205 .
+
+ External Links: ISSN 0967-070X ,
+ Document 
+
+ Cited by: Table 11 .
+
+ Cisneros et al. (2018) 
+ L. Cisneros, M. Ibanescu, C. Keen, O. Lobato-Calleros, and J. Niebla-Zatarain 
+
+ Bibliometric study of family business succession between 1939 and 2017: mapping and analyzing authors’ networks .
+
+ Scientometrics 117 , pp. 919–951 .
+
+ Cited by: §1 .
+
+ Cole and Boutet (2023) 
+ V. Cole and M. Boutet 
+
+ ResearchRabbit .
+
+ The Journal of the Canadian Health Libraries Association 44 ( 2 ), pp. 43–47 ( English ).
+
+ Note: © Cole and Boutet. No competing interests declared. 
+
+ External Links: Document ,
+ ISSN 1708-6892 ,
+ JCHLA-44-043 ,
+ Link 
+
+ Cited by: §1 .
+
+ De Vos (2020) 
+ J. De Vos 
+
+ The effect of covid-19 and subsequent social distancing on travel behavior .
+
+ Transportation Research Interdisciplinary Perspectives 5 , pp. 100121 .
+
+ External Links: ISSN 2590-1982 ,
+ Document 
+
+ Cited by: Table 11 .
+
+ Diallo et al. (2016) 
+ S. Y. Diallo, C. J. Lynch, R. Gore, and J. J. Padilla 
+
+ Identifying key papers within a journal via network centrality measures .
+
+ Scientometrics 107 , pp. 1005–1020 .
+
+ Cited by: §2.1 .
+
+ Donthu et al. (2021) 
+ N. Donthu, S. Kumar, D. Mukherjee, N. Pandey, and W. M. Lim 
+
+ How to conduct a bibliometric analysis: an overview and guidelines .
+
+ Journal of business research 133 , pp. 285–296 .
+
+ Cited by: §1 .
+
+ D’Onofrio and Trusiani (2022) 
+ R. D’Onofrio and E. Trusiani 
+
+ The future of the city in the name of proximity: a new perspective for the urban regeneration of council housing suburbs in italy after the pandemic .
+
+ Sustainability 14 ( 3 ), pp. 1252 .
+
+ Cited by: Table 10 .
+
+ Ferrer-Ortiz et al. (2022) 
+ C. Ferrer-Ortiz, O. Marquet, L. Mojica, and G. Vich 
+
+ Barcelona under the 15-minute city lens: mapping the accessibility and proximity potential based on pedestrian travel times .
+
+ Smart Cities 5 ( 1 ), pp. 146–161 .
+
+ Cited by: Table 10 ,
+ Table 11 ,
+ Table 12 .
+
+ Fire and Guestrin (2019) 
+ M. Fire and C. Guestrin 
+
+ Over-optimization of academic publishing metrics: observing goodhart’s law in action .
+
+ GigaScience 8 ( 6 ), pp. giz053 .
+
+ Cited by: §1 .
+
+ Fortunato (2010) 
+ S. Fortunato 
+
+ Community detection in graphs .
+
+ Physics Reports 486 ( 3 ), pp. 75–174 .
+
+ Cited by: §2.2 .
+
+ Gil Solá and Vilhelmson (2018) 
+ A. Gil Solá and B. Vilhelmson 
+
+ Negotiating proximity in sustainable urban planning: a swedish case .
+
+ Sustainability 11 ( 1 ), pp. 31 .
+
+ Cited by: Table 11 .
+
+ Girvan and Newman (2002) 
+ M. Girvan and M. E. Newman 
+
+ Community structure in social and biological networks .
+
+ Proceedings of the National Academy of Sciences 99 ( 12 ), pp. 7821–7826 .
+
+ Cited by: Table 3 .
+
+ Grootendorst (2020) 
+ M. Grootendorst 
+
+ KeyBERT: minimal keyword extraction with bert. .
+
+ Zenodo .
+
+ External Links: Document ,
+ Link 
+
+ Cited by: §3.3 .
+
+ Hagberg et al. (2008) 
+ A. Hagberg, P. J. Swart, and D. A. Schult 
+
+ Exploring network structure, dynamics, and function using networkx .
+
+ Technical report 
+
+ Los Alamos National Laboratory (LANL), Los Alamos, NM (United States) .
+
+ Cited by: 2nd item .
+
+ Handy (2020) 
+ S. Handy 
+
+ Is accessibility an idea whose time has finally come? .
+
+ Transportation Research Part D: Transport and Environment 83 , pp. 102319 .
+
+ External Links: ISSN 1361-9209 ,
+ Document 
+
+ Cited by: Table 11 .
+
+ Holland et al. (1983) 
+ P. W. Holland, K. B. Laskey, and S. Leinhardt 
+
+ Stochastic blockmodels: first steps .
+
+ Social Networks 5 ( 2 ), pp. 109–137 .
+
+ Cited by: §1.1 ,
+ Table 3 .
+
+ Hosford et al. (2022) 
+ K. Hosford, J. Beairsto, and M. Winters 
+
+ Is the 15-minute city within reach? evaluating walking and cycling accessibility to grocery stores in vancouver .
+
+ Transportation Research Interdisciplinary Perspectives 14 , pp. 100602 .
+
+ External Links: ISSN 2590-1982 ,
+ Document 
+
+ Cited by: Table 12 .
+
+ Jin et al. (2024) 
+ Y. Jin et al. 
+
+ Community detection methods based on exploiting attributes and interactions .
+
+ International Journal of Social Network Mining 10 ( 1 ), pp. 1–25 .
+
+ Cited by: §2.2 .
+
+ Khavarian-Garmsir et al. (2023) 
+ A. R. Khavarian-Garmsir, A. Sharifi, and A. Sadeghi 
+
+ The 15-minute city: urban planning and design efforts toward creating sustainable neighborhoods .
+
+ Cities 132 , pp. 104101 .
+
+ External Links: ISSN 0264-2751 ,
+ Document 
+
+ Cited by: Table 10 ,
+ Table 12 .
+
+ Kleinberg (1999) 
+ J. M. Kleinberg 
+
+ Authoritative sources in a hyperlinked environment .
+
+ J. ACM 46 ( 5 ), pp. 604–632 .
+
+ External Links: ISSN 0004-5411 ,
+ Document 
+
+ Cited by: §3.1 .
+
+ Knap et al. (2023) 
+ E. Knap, M. B. Ulak, K. T. Geurs, A. Mulders, and S. van der Drift 
+
+ A composite x-minute city cycling accessibility metric and its role in assessing spatial and socioeconomic inequalities – a case study in utrecht, the netherlands .
+
+ Journal of Urban Mobility 3 , pp. 100043 .
+
+ External Links: ISSN 2667-0917 ,
+ Document 
+
+ Cited by: Table 10 ,
+ Table 12 .
+
+ Li et al. (2024) 
+ J. Li, S. Lai, Z. Shuai, Y. Tan, Y. Jia, M. Yu, Z. Song, X. Peng, Z. Xu, Y. Ni, H. Qiu, J. Yang, Y. Liu, and Y. Lu 
+
+ A comprehensive review of community detection in graphs .
+
+ Neurocomputing 600 , pp. 128169 .
+
+ External Links: ISSN 0925-2312 ,
+ Document ,
+ Link 
+
+ Cited by: §2.2 .
+
+ Liu et al. (2015) 
+ Z. Liu, Y. Yin, W. Liu, and M. Dunford 
+
+ Visualizing the intellectual structure and evolution of innovation systems research: a bibliometric analysis .
+
+ Scientometrics 103 , pp. 135–158 .
+
+ Cited by: §1 .
+
+ Lu and Diab (2023) 
+ M. Lu and E. Diab 
+
+ Understanding the determinants of x-minute city policies: a review of the north american and australian cities’ planning documents .
+
+ Journal of Urban Mobility 3 , pp. 100040 .
+
+ External Links: ISSN 2667-0917 ,
+ Document 
+
+ Cited by: Table 10 ,
+ Table 12 .
+
+ Manifesty and Park (2022) 
+ O. R. Manifesty and J. Y. Park 
+
+ A case study of a 15-minute city concept in singapore’s 2040 land transport master plan: 20-minute towns and a 45-minute city .
+
+ International Journal of Sustainable Transportation Technology 5 ( 1 ), pp. 1–11 .
+
+ Cited by: Table 10 .
+
+ Marchigiani and Bonfantini (2022) 
+ E. Marchigiani and B. Bonfantini 
+
+ Urban transition and the return of neighbourhood planning. questioning the proximity syndrome and the 15-minute city .
+
+ Sustainability 14 ( 9 ), pp. 5468 .
+
+ Cited by: Table 10 ,
+ Table 12 .
+
+ Marquet and Miralles-Guasch (2015) 
+ O. Marquet and C. Miralles-Guasch 
+
+ The walkable city and the importance of the proximity environments for barcelona’s everyday mobility .
+
+ Cities 42 , pp. 258–266 .
+
+ External Links: ISSN 0264-2751 ,
+ Document 
+
+ Cited by: Table 11 .
+
+ Marquet et al. (2024) 
+ O. Marquet, L. Mojica, M. Fernández-Núñez, and M. Maciejewska 
+
+ Pathways to 15-minute city adoption: can our understanding of climate policies’ acceptability explain the backlash towards x-minute city programs? .
+
+ Cities 148 , pp. 104878 .
+
+ External Links: ISSN 0264-2751 ,
+ Document 
+
+ Cited by: Table 12 .
+
+ Moral-Muñoz et al. (2020) 
+ J. A. Moral-Muñoz, E. Herrera-Viedma, A. Santisteban-Espejo, and M. J. Cobo 
+
+ Software tools for conducting bibliometric analysis in science: an up-to-date review .
+
+ Profesional de la Información 29 ( 1 ).
+
+ Cited by: §1.1 ,
+ §1 ,
+ §1 .
+
+ Moreno et al. (2021) 
+ C. Moreno, Z. Allam, D. Chabaud, C. Gall, and F. Pratlong 
+
+ Introducing the “15-minute city”: sustainability, resilience and place identity in future post-pandemic cities .
+
+ Smart cities 4 ( 1 ), pp. 93–111 .
+
+ Cited by: Table 10 ,
+ Table 11 ,
+ Table 12 ,
+ §4 .
+
+ Nabil and Eldayem (2015) 
+ N. A. Nabil and G. E. A. Eldayem 
+
+ Influence of mixed land-use on realizing the social capital .
+
+ HBRC Journal 11 ( 2 ), pp. 285–298 .
+
+ External Links: ISSN 1687-4048 ,
+ Document ,
+ Link 
+
+ Cited by: Table 11 .
+
+ Ng et al. (2001) 
+ A. Y. Ng, M. I. Jordan, and Y. Weiss 
+
+ On spectral clustering: analysis and an algorithm .
+
+ In Advances in Neural Information Processing Systems ,
+
+ Vol. 14 .
+
+ Cited by: Table 3 .
+
+ Papadopoulos et al. (2023) 
+ E. Papadopoulos, A. Sdoukopoulos, and I. Politis 
+
+ Measuring compliance with the 15-minute city concept: state-of-the-art, major components and further requirements .
+
+ Sustainable Cities and Society , pp. 104875 .
+
+ Cited by: §4.5 ,
+ Table 10 .
+
+ Pereira et al. (2025) 
+ V. Pereira, M. P. Basilio, and C. H. T. Santos 
+
+ PyBibX – a python library for bibliometric and scientometric analysis powered with artificial intelligence tools .
+
+ Data Technologies and Applications 59 ( 2 ), pp. 302–337 .
+
+ External Links: Document ,
+ ISSN 2514-9288, 2514-9318 
+
+ Cited by: §1.1 ,
+ §1.1 ,
+ §1 ,
+ §4.2 .
+
+ Poorthuis and Zook (2023) 
+ A. Poorthuis and M. Zook 
+
+ Moving the 15-minute city beyond the urban core: the role of accessibility and public transport in the netherlands .
+
+ Journal of Transport Geography 110 , pp. 103629 .
+
+ External Links: ISSN 0966-6923 ,
+ Document 
+
+ Cited by: Table 10 .
+
+ Pozoukidou and Chatziyiannaki (2021) 
+ G. Pozoukidou and Z. Chatziyiannaki 
+
+ 15-minute city: decomposing the new urban planning eutopia .
+
+ Sustainability 13 ( 2 ), pp. 928 .
+
+ Cited by: Table 10 ,
+ Table 12 .
+
+ Priem et al. (2022) 
+ J. Priem, H. Piwowar, and R. Orr 
+
+ OpenAlex: a fully-open index of scholarly works, authors, venues, institutions, and concepts .
+
+ arXiv preprint arXiv:2205.01833 .
+
+ Cited by: §1.1 ,
+ §3.2 .
+
+ Rossetto et al. (2018) 
+ D. E. Rossetto, R. C. Bernardes, F. M. Borini, and C. C. Gattaz 
+
+ Structure and evolution of innovation research in the last 60 years: review and future trends in the field of business through the citations and co-citations analysis .
+
+ Scientometrics 115 ( 3 ), pp. 1329–1363 .
+
+ Cited by: §1 .
+
+ Rosvall and Bergstrom (2008) 
+ M. Rosvall and C. T. Bergstrom 
+
+ Maps of random walks on complex networks reveal community structure .
+
+ Proceedings of the National Academy of Sciences 105 ( 4 ), pp. 1118–1123 .
+
+ Cited by: §1.1 ,
+ Table 3 .
+
+ Ruffo et al. (2023) 
+ G. Ruffo, A. Semeraro, A. Giachanou, and P. Rosso 
+
+ Studying fake news spreading, polarisation dynamics, and manipulation by bots: a tale of networks and language .
+
+ Computer science review 47 , pp. 100531 .
+
+ Cited by: §1 .
+
+ Ruiz-Rosero et al. (2019) 
+ J. Ruiz-Rosero, G. Ramirez-Gonzalez, and J. Viveros-Delgado 
+
+ Software survey: scientopy, a scientometric tool for topics trend analysis in scientific publications .
+
+ Scientometrics 121 ( 2 ), pp. 1165–1188 .
+
+ External Links: ISSN 0138-9130 
+
+ Cited by: §1.1 ,
+ §4.2 .
+
+ Salman et al. (2025) 
+ H. A. Salman, M. A. Ahmad, R. Ibrahim, and J. Mahmood 
+
+ Systematic analysis of generative ai tools integration in academic research and peer review .
+
+ Online Journal of Communication and Media Technologies .
+
+ External Links: Link 
+
+ Cited by: §1 .
+
+ Tosi (2025) 
+ D. Tosi 
+
+ Comparing generative ai literature reviews versus human-led systematic literature reviews: a case study on big data research .
+
+ IEEE Access 13 , pp. 56210–56219 .
+
+ External Links: Link 
+
+ Cited by: §1 .
+
+ Tunger and Eulerich (2018) 
+ D. Tunger and M. Eulerich 
+
+ Bibliometric analysis of corporate governance research in german-speaking countries: applying bibliometrics to business research using a custom-made database .
+
+ Scientometrics 117 , pp. 2041–2059 .
+
+ Cited by: §1 .
+
+ Van Eck and Waltman (2014) 
+ N. J. Van Eck and L. Waltman 
+
+ Visualizing bibliometric networks .
+
+ In Measuring scholarly impact: Methods and practice ,
+
+ pp. 285–320 .
+
+ Cited by: §1 .
+
+ Van Eck and Waltman (2010) 
+ N. Van Eck and L. Waltman 
+
+ Software survey: vosviewer, a computer program for bibliometric mapping .
+
+ scientometrics 84 ( 2 ), pp. 523–538 .
+
+ Cited by: §1 ,
+ §4.2 .
+
+ Weng et al. (2019) 
+ M. Weng, N. Ding, J. Li, X. Jin, H. Xiao, Z. He, and S. Su 
+
+ The 15-minute walkable neighborhoods: measurement, social inequalities and implications for building healthy communities in urban china .
+
+ Journal of Transport & Health 13 , pp. 259–273 .
+
+ External Links: ISSN 2214-1405 ,
+ Document 
+
+ Cited by: Table 11 .
+
+ Willberg et al. (2023) 
+ E. Willberg, C. Fink, and T. Toivonen 
+
+ The 15-minute city for all? – measuring individual and temporal variations in walking accessibility .
+
+ Journal of Transport Geography 106 , pp. 103521 .
+
+ External Links: ISSN 0966-6923 ,
+ Document 
+
+ Cited by: Table 10 ,
+ Table 12 .
+
+ Experimental support, please
+ view the build logs 
+ for errors. Generated by
+
+ L
+ A 
+ T
+ E 
+
+ xml 
+
+ .
+
+ Instructions for reporting errors
+
+ We are continuing to improve HTML versions of papers, and your feedback helps enhance accessibility and mobile
+ support. To report errors in the HTML that will help us improve conversion and rendering, choose any of the
+ methods listed below:
+
+ Click the "Report Issue" ( 
+
+ ) button, located in the page header.
+
+ Tip: You can select the relevant text first, to include it in your report.
+
+ Our team has already identified the following issues . We appreciate your time reviewing and reporting rendering errors we
+ may not have found yet. Your efforts will help us improve the HTML versions for all readers, because disability
+ should not be a barrier to accessing research. Thank you for your continued support in championing open access for
+ all.
+
+ Have a free development cycle? Help support accessibility at arXiv! Our collaborators at LaTeXML maintain a list of packages that need conversion , and welcome developer contributions .
+
+ We gratefully acknowledge support from
+ our major funders ,
+ member institutions , ,
+ and all contributors.
+
+ About 
+ · 
+ Help 
+ · 
+ Contact 
+ · 
+ Subscribe 
+ · 
+ Copyright 
+ · 
+ Privacy 
+ · 
+ Accessibility 
+ · 
+ Operational Status (opens in new tab) 
+
+ Major funding support from

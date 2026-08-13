@@ -1,0 +1,48 @@
+{
+ "preregistration": "decisions/2026-08-13-select-report-audit-preregistration.md",
+ "amendment": "decisions/2026-08-13-audit-rubric-amendment.md",
+ "scope": "in a sample of arXiv-indexed papers, 2019-2026, matching nine frozen queries on emerging-topic detection and forecasting",
+ "pool": 225,
+ "screened_in": 22,
+ "screen_fails_on_full_text": 7,
+ "confirmed_in_frame": 15,
+ "has_selection": {
+  "unstated": 2,
+  "yes": 11,
+  "no": 2
+ },
+ "calls": {
+  "n/a": 4,
+  "aligned": 8,
+  "undetermined": 2,
+  "no_reported_functional": 1
+ },
+ "n_mismatch": 0,
+ "n_aligned": 8,
+ "denominator": 8,
+ "rate": 0.0,
+ "wilson95": [
+  0.0,
+  0.32440756488388023
+ ],
+ "inconclusive": false,
+ "low_rate_branch": true,
+ "no_reported_functional": [
+  "2209.10224"
+ ],
+ "undetermined": [
+  "2111.03496",
+  "2508.20514"
+ ],
+ "unstated_selection": [
+  "1907.09395",
+  "1911.02890"
+ ],
+ "upstream_selection": [
+  "2106.12875",
+  "2211.15334",
+  "2606.27394"
+ ],
+ "no_evaluation_at_all": 8,
+ "agreement": null
+}
