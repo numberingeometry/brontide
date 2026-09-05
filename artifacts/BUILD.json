@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "build_id": "5c109a0eca2aa866",
+  "corpus_start": "2007-01",
+  "corpus_end": "2026-06",
+  "n_papers": 2754799,
+  "embed_model": "allenai/specter2_base",
+  "embed_adapter": "allenai/specter2",
+  "embed_dim": 768,
+  "pca_dim": 50,
+  "n_regions": 1024,
+  "n_superregions": 64,
+  "ids_are_build_scoped": true,
+  "note": "Row indices address the memmaps of THIS build; region and super-region ids are the labels of THIS k-means fit. Both are renumbered by any rebuild on a changed corpus. Compare build_id before reusing either.",
+  "artifacts": {
+    "papers.parquet": {
+      "bytes": 1225755118,
+      "sha256": "25222acece7934e25d4e5815647d8d5376b6b8b27bf1802c280b1f5c8036767b",
+      "digest": "quick",
+      "path": "data/papers.parquet",
+      "present": true,
+      "mtime_ns": 1788615799929135600
+    },
+    "embeddings.f16.memmap": {
+      "bytes": 4231371264,
+      "sha256": "d81f82fa8b3df9ecb05f691b58c666212a22abf4ebbf7a08c9c3004f27dec4a9",
+      "digest": "quick",
+      "path": "data/embeddings.f16.memmap",
+      "present": true,
+      "mtime_ns": 1788615819747375500
+    },
+    "pca50.f32.memmap": {
+      "bytes": 550959800,
+      "sha256": "4f8523dc1184fab4fccf56614ed452a92dd870e003e7d960c8e71dbe29735b5b",
+      "digest": "quick",
+      "path": "data/pca50.f32.memmap",
+      "present": true,
+      "mtime_ns": 1788616739336250100
+    },
+    "umap2.f32.memmap": {
+      "bytes": 22038392,
+      "sha256": "6a7deafc3367cbb245ba94ff7b245b99a9f8dad550f88e52e6b886c80e0a59fe",
+      "digest": "full",
+      "path": "data/umap2.f32.memmap",
+      "present": true,
+      "mtime_ns": 1788618339961333700
+    },
+    "centroids.f32.npy": {
+      "bytes": 204928,
+      "sha256": "f58a6b726ae7280cfd35dac77ec3aa4fe68a0ce981fd850291fc2dbf4b906abf",
+      "digest": "full",
+      "path": "artifacts/centroids.f32.npy",
+      "present": true,
+      "mtime_ns": 1786501330134148200
+    },
+    "super_region.i16.npy": {
+      "bytes": 2176,
+      "sha256": "08f5bf7278a6459a542101715176d23380786b36841c59ddc659b0ba5507ae6f",
+      "digest": "full",
+      "path": "artifacts/super_region.i16.npy",
+      "present": true,
+      "mtime_ns": 1786501330201608800
+    },
+    "linkage.f64.npy": {
+      "bytes": 32864,
+      "sha256": "38b08acd5e7d7ac3da4226471daf6fba437327e70d1ba2f2ac4e8dd749d34476",
+      "digest": "full",
+      "path": "artifacts/linkage.f64.npy",
+      "present": true,
+      "mtime_ns": 1786501330186357300
+    },
+    "region_names.json": {
+      "bytes": 3367,
+      "sha256": "614e3b4c2cbae206cf9fae06b6e699b43a1e7150a05397721553ab7ba30bcd66",
+      "digest": "full",
+      "path": "artifacts/region_names.json",
+      "present": true,
+      "mtime_ns": 1786501330193603200
+    },
+    "regions_summary.json": {
+      "bytes": 339,
+      "sha256": "0ff1eaaa2266c1316b8e609ab12f67690d3a49999c363d11fe951b0d0462c761",
+      "digest": "full",
+      "path": "artifacts/regions_summary.json",
+      "present": true,
+      "mtime_ns": 1786501330200584100
+    }
+  },
+  "generation": 1,
+  "frozen_result": {
+    "corpus_end": "2026-06",
+    "n_papers": 2705992,
+    "note": "the corpus the pre-registered validation was scored on; the scored artifacts under artifacts/ are never recomputed by an append"
+  },
+  "live": {
+    "corpus_end": "2026-09",
+    "n_papers": 2754799,
+    "last_append": "2026-09-05T10:25:43",
+    "appended_rows": 48732,
+    "umap_mode": "knn"
+  }
+}

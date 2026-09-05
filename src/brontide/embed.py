@@ -18,6 +18,8 @@ re-running picks up at the last completed row instead of starting over.
 """
 from __future__ import annotations
 
+import os
+
 import json
 import time
 from pathlib import Path
@@ -42,8 +44,18 @@ def _progress_path(out: Path) -> Path:
 def _load_progress(out: Path, n_total: int) -> int:
     """Rows already embedded, or 0 to start fresh.
 
-    Restarts from scratch if the sidecar describes a different run (row count or
-    dimension changed), since the memmap layout would no longer line up.
+    A GROWN corpus is an append, not a different run. update.py appends new papers to the
+    END of the parquet and never reorders, so rows [0, n_done) still hold the embeddings of
+    exactly the papers they held before and only the tail is missing.
+
+    Treating any change in n_total as "different run" was correct while the only way to get
+    here was a fresh build, and became a 14-hour bug the moment appends existed: adding 75
+    papers to 2.7M made n_total differ, which restarted the embed from row 0. Caught by a
+    75-paper trial rather than by the 3-month catch-up, which is the whole point of trying
+    the small one first.
+
+    What still forces a restart is a change that invalidates the layout or the meaning of a
+    row: a different dimension, a different model or adapter, or a corpus that SHRANK.
     """
     p = _progress_path(out)
     if not (p.exists() and out.exists()):
@@ -52,11 +64,25 @@ def _load_progress(out: Path, n_total: int) -> int:
         state = json.loads(p.read_text())
     except (OSError, json.JSONDecodeError):
         return 0
-    if state.get("n_total") != n_total or state.get("dim") != config.EMBED_DIM:
-        print(f"  progress sidecar is for a different run "
-              f"(n_total={state.get('n_total')}, dim={state.get('dim')}) -- starting fresh")
+
+    prev_total = state.get("n_total")
+    if state.get("dim") != config.EMBED_DIM:
+        print(f"  embedding dim changed ({state.get('dim')} -> {config.EMBED_DIM})"
+              " -- starting fresh")
         return 0
-    return int(state.get("n_done", 0))
+    if state.get("model") not in (None, config.EMBED_MODEL) or             state.get("adapter") not in (None, _ADAPTER):
+        print(f"  model/adapter changed ({state.get('model')} + {state.get('adapter')})"
+              " -- starting fresh")
+        return 0
+    if not isinstance(prev_total, int) or prev_total > n_total:
+        print(f"  corpus shrank or sidecar unusable (n_total={prev_total} -> {n_total})"
+              " -- starting fresh")
+        return 0
+    n_done = int(state.get("n_done", 0))
+    if prev_total < n_total:
+        print(f"  corpus grew {prev_total:,} -> {n_total:,} (append); "
+              f"{n_done:,} rows already embedded are still valid")
+    return min(n_done, n_total)
 
 
 def _save_progress(out: Path, n_total: int, n_done: int) -> None:
@@ -119,6 +145,28 @@ def run(sample: int | None = None,
         print("  already complete -- nothing to do")
         return out
 
+    # A "w+" memmap TRUNCATES. That is correct for a first build and catastrophic for
+    # anything else, and on 2026-09-04 it was catastrophic: an append made _load_progress
+    # return 0 (see the note there), mode became "w+", and opening the memmap zeroed 4.16 GB
+    # -- 14 hours of GPU -- in one call, silently, before a single paper was embedded.
+    #
+    # The resume bug is fixed above. This is the guard that makes the failure impossible
+    # rather than merely unlikely: never truncate a file that already holds data unless the
+    # caller says so in as many words. A restart that really does need to start over passes
+    # BRONTIDE_EMBED_TRUNCATE=1, and then it is a decision rather than an accident.
+    if mode == "w+" and out.exists() and out.stat().st_size > 0:
+        if os.environ.get("BRONTIDE_EMBED_TRUNCATE") != "1":
+            raise RuntimeError(
+                f"refusing to truncate {out.name} ({out.stat().st_size / 1e9:.2f} GB of "
+                f"existing embeddings) to start from row 0." + "\n" +
+                f"  If a full re-embed is genuinely intended, set "
+                f"BRONTIDE_EMBED_TRUNCATE=1." + "\n" +
+                f"  If this is an APPEND, the progress sidecar should have resumed -- check "
+                f"n_total/dim/model in {_progress_path(out).name}."
+            )
+        print(f"  BRONTIDE_EMBED_TRUNCATE=1 -- discarding "
+              f"{out.stat().st_size / 1e9:.2f} GB and starting from row 0")
+
     tok, model = _load_model()
     mm = np.memmap(out, dtype=np.float16, mode=mode, shape=(n_total, config.EMBED_DIM))
 
@@ -127,8 +175,33 @@ def run(sample: int | None = None,
     t0 = time.perf_counter()
     last_ckpt = n_done
 
+    # Skip whole ROW GROUPS that are entirely below n_done rather than reading and
+    # discarding them. iter_batches from row 0 decompresses every title and abstract on the
+    # way to the resume point: measured appending 75 papers to a 2.7M corpus, that was
+    # ~14 minutes of CPU to reach the first row that needed work. A monthly append pays it
+    # every time, for nothing. Row groups carry their own row counts in the footer, so the
+    # skip is metadata-only.
+    start_group = 0
+    if n_done:
+        cum = 0
+        for gi in range(pf.num_row_groups):
+            g = pf.metadata.row_group(gi).num_rows
+            if cum + g > n_done:
+                break
+            cum += g
+            start_group = gi + 1
+        row = cum
+        if start_group:
+            print(f"  skipping {start_group} row group(s) = {cum:,} rows already embedded")
+
+    def _batches():
+        for gi in range(start_group, pf.num_row_groups):
+            t = pf.read_row_group(gi, columns=["title", "abstract"])
+            for b in t.to_batches(max_chunksize=_READ_CHUNK):
+                yield b
+
     try:
-        for chunk in pf.iter_batches(batch_size=_READ_CHUNK, columns=["title", "abstract"]):
+        for chunk in _batches():
             if row >= n_total:
                 break
             titles = chunk.column("title").to_pylist()
@@ -136,7 +209,14 @@ def run(sample: int | None = None,
 
             for i in range(0, len(titles), config.EMBED_BATCH):
                 lo = row + i
-                hi = min(lo + config.EMBED_BATCH, n_total)
+                # Clamp to the rows ACTUALLY IN THIS CHUNK, not just to n_total. The old
+                # reader handed back chunks of exactly _READ_CHUNK (a multiple of
+                # EMBED_BATCH), so `titles[i:i+k]` was always full and this was fine by
+                # accident. Reading per ROW GROUP makes the last batch of each group short,
+                # and then k said 128 while only 32 texts existed -- numpy caught it as
+                # "could not broadcast (32,768) into (128,768)" after the model had already
+                # run. Three-way min, so the slice, the texts and k can never disagree.
+                hi = min(lo + config.EMBED_BATCH, n_total, row + len(titles))
                 if hi <= lo:
                     break
                 if hi <= n_done:            # already embedded on a previous run

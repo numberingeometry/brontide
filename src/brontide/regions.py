@@ -86,8 +86,18 @@ def run(sample: int | None = None,
     np.save(out_dir / "centroids.f32.npy", centroids)
     np.save(out_dir / "linkage.f64.npy", z)
     np.save(out_dir / "super_region.i16.npy", super_of_region)  # region -> super
+    # centroids.f32.npy / super_region.i16.npy / linkage.f64.npy are .npy and therefore
+    # self-describing about SHAPE -- but not about which space they live in or which fit
+    # numbered them. Both matter downstream: a centroid is only meaningful in the PCA
+    # basis of the same build, and the ids are this fit's labels, not stable names.
     (out_dir / "regions_summary.json").write_text(json.dumps({
         "n_papers": int(n), "k_regions": k, "n_super": config.N_SUPERREGIONS,
+        "pca_dim": config.PCA_DIM,
+        "corpus_end": config.CORPUS_END,
+        "kmeans_random_state": 0,
+        "ids_are_build_scoped": ("region and super-region ids are the labels of THIS fit; "
+                                 "seeded, so reproducible on identical input, but renumbered "
+                                 "by any rebuild on a changed corpus"),
         "fit_on": "all" if fit_mask is None else int(fit_mask.sum()),
         "region_size_min": int(region_sizes.min()), "region_size_max": int(region_sizes.max()),
         "region_size_mean": float(region_sizes.mean()), "region_size_median": float(np.median(region_sizes)),

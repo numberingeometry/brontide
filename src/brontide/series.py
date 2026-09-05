@@ -138,12 +138,41 @@ def run_shares(sample: int | None = None,
     t_end = score_through or t0                                 # realized side may extend past T0 (leak-safe)
     labels_all, super_of_region, n_s = _load_regions(regions_dir)
 
-    months_all = pq.read_table(config.RAW_PARQUET, columns=["month"]).column("month").to_pylist()
+    _cols = ["month"]
+    _names = pq.ParquetFile(config.RAW_PARQUET).schema_arrow.names
+    if "source" in _names:
+        _cols.append("source")
+    _tbl = pq.read_table(config.RAW_PARQUET, columns=_cols)
+    months_all = _tbl.column("month").to_pylist()
     if sample is not None:
         months_all = months_all[:sample]
         labels_all = labels_all[:sample]
     if len(months_all) != len(labels_all):
         raise RuntimeError(f"row-order invariant broken: {len(months_all)} months vs {len(labels_all)} labels")
+
+    # THE SCORED STATISTIC IS A SHARE OVER ARXIV MONTHS.
+    #
+    # The corpus is allowed to grow past arXiv -- journal-only work in the focus areas is
+    # navigable and useful -- but a non-arXiv paper must never reach here. It would land in
+    # C[region, month] as a numerator AND in M_t as a denominator, so every one of the 1,024
+    # regions' shares would shift, and the pre-registered forecast numbers would move
+    # because of an ingest decision rather than because of anything about research. There is
+    # deliberately no flag to turn this off.
+    #
+    # On the frozen corpus every row is arXiv, so this is a no-op and the published numbers
+    # are bit-identical -- which is how it is tested.
+    if "source" in _names:
+        src_all = _tbl.column("source").to_pylist()
+        if sample is not None:
+            src_all = src_all[:sample]
+        arx = np.fromiter((str(x) == "arxiv" for x in src_all), dtype=bool,
+                          count=len(src_all))
+        n_drop = int((~arx).sum())
+        if n_drop:
+            print(f"  series: excluding {n_drop:,} non-arXiv rows from the scored share "
+                  f"(navigation only; see update.series_mask)")
+            months_all = [m for m, k in zip(months_all, arx) if k]
+            labels_all = labels_all[arx]
 
     midx, month_labels = _month_index(months_all, config.CORPUS_START, t_end)   # papers month > t_end -> -1
     keep = midx >= 0

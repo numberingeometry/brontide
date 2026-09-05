@@ -21,6 +21,8 @@ writing). It is not clear whether that is billed or informational. Run with --li
 """
 from __future__ import annotations
 
+import os
+
 import argparse
 import json
 import pathlib
@@ -38,8 +40,16 @@ sys.path.insert(0, str(REPO / "src"))
 from brontide import config                                              # noqa: E402
 
 OUT = REPO / "data" / "openalex_topics.parquet"
-MAILTO = "contact@example.invalid"          # polite pool
+# OpenAlex asks callers to identify themselves for its "polite pool" (faster, more
+# reliable rate limits). Taken from the environment, never committed: this repo is
+# public, and a hardcoded address here is a permanent, scrapeable one.
+MAILTO = os.environ.get("OPENALEX_MAILTO", "")
 BATCH, SLEEP, CKPT = 50, 0.60, 40
+
+if not MAILTO:
+    print("note: OPENALEX_MAILTO is unset -- requests go to the anonymous pool,\n"
+          "      which is rate-limited harder. Set it to an address you are happy\n"
+          "      to send to OpenAlex.")
 
 
 def fetch(batch, retries=6):

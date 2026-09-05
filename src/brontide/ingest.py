@@ -163,6 +163,23 @@ def run(sample: int | None = None, out: Path = config.RAW_PARQUET) -> Path:
         writer.close()
 
     n_rows = pq.ParquetFile(out).metadata.num_rows
+
+    # Sidecar. Every other large artifact writes one; the corpus did not, and the corpus
+    # is the one file everything else is ROW-INDEXED against -- embeddings, pca50 and
+    # umap2 are all addressed by position in this table. A consumer holding a cached row
+    # number has no way to notice it was rebuilt underneath them without it.
+    (out.with_suffix(out.suffix + ".meta.json")).write_text(json.dumps({
+        "n": int(n_rows),
+        "corpus_start": config.CORPUS_START,
+        "corpus_end": config.CORPUS_END,
+        "month_min": month_lo,
+        "month_max": month_hi,
+        "columns": ["id", "month", "categories", "title", "abstract"],
+        "sample": config.resolve_sample(sample),
+        "row_order": ("snapshot order, filtered; row index is the address used by "
+                      "embeddings/pca50/umap2 and is valid only for this build"),
+    }, indent=2) + "\n")
+
     print(
         f"\ningest[{config.resolve_sample(sample)}] -> {out}\n"
         f"  rows kept : {n_rows:,}  (read {n_read:,} records)\n"

@@ -122,6 +122,21 @@ def run_pca(sample: int | None = None,
     del outmm
     os.replace(tmp, out)
 
+    # --- persist the BASIS, not just the projection ---------------------------
+    # Saving only the projected memmap makes the transform unrepeatable: a paper that
+    # arrives tomorrow cannot be put into this space at all, which is why the whole
+    # pipeline had no incremental path and why a downstream consumer ended up recovering
+    # these components by least squares. `basis` is what eigh produced; `affine` is the
+    # same map in the augmented form `[x, 1] @ affine`, which is what that consumer
+    # already expects, so both callers are served by one file and neither has to
+    # reconstruct anything.
+    basis_path = out.with_name(out.name.replace(".f32.memmap", "") + "_basis.npz")
+    affine = np.vstack([comps, (-mu @ comps)[None, :]]).astype(np.float32)
+    np.savez(basis_path, mean=mu.astype(np.float64), components=comps.astype(np.float64),
+             affine=affine, eigenvalues=top_evals.astype(np.float64),
+             dim=np.int64(config.PCA_DIM), embed_dim=np.int64(d),
+             fit_rows=np.int64(n_fit))
+
     total_s = time.perf_counter() - t0
     fit_desc = "all" if fit_mask is None else f"{n_fit:,}"
     # R4 — headerless memmap: record N/dim so consumers can assert on join width.
@@ -132,6 +147,7 @@ def run_pca(sample: int | None = None,
         "explained_variance_ratio_top10": [float(x) for x in evr[:10]],
         "total_explained": float(evr.sum()),
         "expected_bytes": int(n) * config.PCA_DIM * 4,
+        "basis": basis_path.name,
     }, indent=2))
 
     print(f"\nreduce.run_pca[{config.resolve_sample(sample)}] -> {out}\n"
@@ -139,6 +155,7 @@ def run_pca(sample: int | None = None,
           f"  size        : {out.stat().st_size / 1e6:.1f} MB\n"
           f"  fit_on      : {fit_desc} rows (exact cov eigh, deterministic)\n"
           f"  EVR[0]      : {evr[0]:.4f}   top-{config.PCA_DIM} total: {evr.sum():.4f}\n"
+          f"  basis       : {basis_path.name} (mean + {config.PCA_DIM} components + affine)\n"
           f"  timing      : fit {fit_s:.0f}s, total {total_s:.0f}s")
     return out
 
@@ -183,6 +200,23 @@ def run_umap(sample: int | None = None,
     reducer.fit(x_fit)
     fit_s = time.perf_counter() - t0
 
+    # --- persist the fitted reducer -------------------------------------------
+    # This is the one artifact whose absence made the map non-incremental. Without it a
+    # new paper cannot be placed on THIS map at all: you have to refit, and a refit with
+    # init="random" and no seed moves every one of the 2.7M coordinates arbitrarily. With
+    # it, `transform` puts a paper arriving tomorrow where this projection would have put
+    # it, which is the difference between appending to the map and rebuilding it.
+    #
+    # It carries the fit sample and its neighbour index, so it is large (tens to hundreds
+    # of MB) and lives in data/ with the rest of the host-only intermediates. `transform`
+    # is a fresh optimisation against that index rather than a lookup, so it reproduces
+    # stored coordinates closely but not bit-exactly -- reduce.check_transforms() measures
+    # by how much instead of assuming.
+    import joblib
+    red_path = out.with_name(out.name.replace(".f32.memmap", "") + "_reducer.joblib")
+    joblib.dump(reducer, red_path, compress=3)
+    print(f"  reducer     : {red_path.name} ({red_path.stat().st_size / 1e6:.0f} MB)")
+
     tmp = out.with_suffix(out.suffix + ".tmp")
     out.parent.mkdir(parents=True, exist_ok=True)
     outmm = np.memmap(tmp, dtype=np.float32, mode="w+", shape=(n, 2))
@@ -198,7 +232,14 @@ def run_umap(sample: int | None = None,
         "n": int(n), "dim": 2, "dtype": "float32", "init": "random",
         "fit_sample": int(fit_idx.size), "stratified_by": "super_region",
         "expected_bytes": int(n) * 2 * 4,
+        "reducer": red_path.name,
+        # Which rows the fit saw. transform() on these re-optimises a point the fit already
+        # placed, so they are the WRONG rows to measure fidelity on; check_transforms()
+        # samples outside this set.
+        "fit_rows_first": int(fit_idx[0]), "fit_rows_last": int(fit_idx[-1]),
     }, indent=2))
+    np.save(out.with_name(out.name.replace(".f32.memmap", "") + "_fit_rows.npy"),
+            fit_idx.astype(np.int64))
     print(f"\nreduce.run_umap[{config.resolve_sample(sample)}] -> {out}\n"
           f"  shape/dtype : ({n:,}, 2) float32   fit_sample={fit_idx.size:,} (stratified)\n"
           f"  timing      : fit {fit_s:.0f}s, total {time.perf_counter() - t0:.0f}s")
