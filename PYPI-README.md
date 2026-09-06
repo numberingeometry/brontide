@@ -47,11 +47,11 @@ negative criterion: 0/3 (need >=2) -> region-level emergence is momentum-dominat
 OK: all 18 published rows reproduce exactly.
 ```
 
-The pre-registration ordering is checkable too — thresholds at `c351507` (2026-07-22), results appended at `7caf249` (2026-07-23), with every intervening edit an addition:
+The pre-registration ordering is checkable too — thresholds at `c351507` (2026-07-22), results appended at `95968ce` (2026-07-23), with every intervening edit an addition:
 
 ```sh
 git log --follow --format='%h %ad %s' --date=short -- artifacts/validation.md
-git diff --numstat c351507 1c6b559 -- artifacts/validation.md   # 18 insertions, 0 deletions
+git diff --numstat c351507 9bfee13 -- artifacts/validation.md   # 18 insertions, 0 deletions
 ```
 
 ## The interactive dashboard
