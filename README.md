@@ -4,34 +4,67 @@
 
 > *brontide* (n.) — the low rumble of thunder from a storm still beyond the horizon.
 
-Which regions of the arXiv embedding cloud are **emerging**, and which are **saturating**? 2.7M papers → SPECTER2 embeddings → 1,024 microregions → 24-month share forecasts, held to a **pre-committed, multi-cutoff out-of-time harness** with a published negative result.
+[![verify](https://github.com/numberingeometry/brontide/actions/workflows/verify.yml/badge.svg)](https://github.com/numberingeometry/brontide/actions/workflows/verify.yml)
+[![PyPI](https://img.shields.io/pypi/v/brontide)](https://pypi.org/project/brontide/)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
+**Which corners of science are about to grow?** brontide places 2.7 million arXiv papers in a
+semantic map, splits it into 1,024 research microregions, forecasts each region's share of
+new papers 24 months ahead, and judges itself with a test that was frozen before any data
+was touched. The test failed, and the repository says so on its first page, with the reason.
+
+**[Open the live map](https://numberingeometry.github.io/brontide/)** · [Verify the headline in two seconds](#verify-it-yourself-in-two-seconds) · [What the result does and does not license](LIMITATIONS.md)
 
 ![The arXiv research frontier igniting, 2007–2026](figures/map-evolution.gif)
 
-**2,705,992 papers · 2007-01 → 2026-06 · 234 months · 1,024 microregions → 64 Ward super-regions · 768→50 exact PCA · 24-month horizon · 3 masked cutoffs**
+| | |
+|---|---|
+| **Corpus** | 2,705,992 arXiv papers (titles and abstracts), 2007-01 → 2026-06, 234 months |
+| **Representation** | SPECTER2 with its proximity adapter (14 GPU-hours), exact streamed PCA 768 → 50 |
+| **Regions** | 1,024 k-means microregions → 64 Ward super-regions, LLM-named for display only |
+| **Forecasts** | six-model roster (AutoETS, AutoARIMA, AutoTheta, three baselines), 24-month horizon |
+| **Evaluation** | three masked cutoffs (2017-12, 2020-12, 2022-12); thresholds frozen 2026-07-22, scored 2026-07-23 |
+| **Headline** | pre-registered criterion **not met (0/3)**; every non-naive model still beats chance |
 
-`PyTorch` · `transformers` + `adapters` (SPECTER2 + proximity adapter) · `scikit-learn` (MiniBatchKMeans) · `NumPy`/`SciPy` (exact streamed-covariance PCA, Ward linkage) · `UMAP` · `statsforecast` (AutoETS / AutoARIMA / AutoTheta) · `pandas`/`pyarrow` · Python 3.11
+## What it found
 
----
-
-## Headline result — the criterion was not met
-
-The go/no-go was frozen at repo scaffold on **2026-07-22**, before any data was touched, and scored on **2026-07-23**. It failed, and the failure is reported verbatim:
+**1. The pre-registered test failed.** The go/no-go was committed at repo scaffold, before
+any data existed, and scored the next day. It is reported verbatim:
 
 > **Roster beat SmoothedMomentum on precision@50 in 0/3 cutoffs (need ≥2).
 > Verdict: region-level emergence is momentum-dominated at 24m.**
 
+**2. The models have signal; the step that picks between them lost it.** A fixed AutoETS
+reaches **0.613** mean precision@50 against a **0.101** chance rate (6×), while the
+cross-validated selector scored **0.413**. Two of the three "losses" were the selector
+picking the baseline itself, so the test compared `0.240 > 0.240`. The 0.200 gap splits
+exactly into two parts: choosing the best model per cutoff *with hindsight* would have added
+only **0.020** over always using AutoETS, and the selector gave up **0.220**. The harness
+selected on point accuracy and was scored on the top of a ranking; those are different
+losses.
+
 ![precision@50 by model and cutoff against the chance rate](figures/validation-precision.png)
 
-**But the verdict needs its scope note, and I found the reason myself before anyone read it.** At two of three cutoffs the cross-validation selected `SmoothedMomentum` — the baseline — so the test evaluated `0.240 > 0.240` and `0.300 > 0.300`, false by identity. At the third, an asymmetric minimum-train guard gave the baseline **zero CV folds**. Meanwhile a fixed AutoETS scored **0.613 mean precision@50** against a **0.101** chance rate, versus momentum's 0.433 with 3.5× the dispersion.
+**3. Two follow-ups, each pre-registered before it was scored.**
 
-So the null is about **model selection, not absent signal**: the harness selected on point accuracy (MASE + Spearman) and was scored on the top 5% of a ranking. Those are not the same loss. Every non-Naive model clears chance at every cutoff.
+- *Does the novelty stream add skill beyond the forecast?* **Yes, by the frozen criterion:**
+  positive partial rank correlation with realised growth at 2 of 3 cutoffs
+  ($\rho = 0.44$ and $0.38$, $p < 0.01$; $-0.08$ at 2020-12).
+- *Are the published 80% intervals calibrated?* **No:** coverage lands in
+  $[0.75, 0.85]$ in 3 of 9 model-cutoff cells (median 0.86). The diagnosis: they are
+  calibrated against the raw share (9 of 9 cells) and over-cover the smoothed series they
+  were fitted on, with heavier-than-normal tails.
 
-The frozen sentence stands unedited. The full defect disclosure, the four defensible readings of that sentence (one of which flips the verdict to 2/3), the chance-rate arithmetic, and what the result does and does not license are in **[LIMITATIONS.md](LIMITATIONS.md)**.
+The scope note on finding 1, the three harness defects, the four readings of the frozen
+sentence (one of which flips it, and why that reading is indefensible), and the paired
+tests are in **[LIMITATIONS.md](LIMITATIONS.md)**. The frozen sentence is never edited:
+`validate.py` hashes the pre-registration, and the hash `dea6cc0db2ae1e83` still verifies.
 
 ## Verify it yourself in two seconds
 
-Every published number regenerates from committed artifacts — no raw corpus, no GPU, no network:
+Every published number regenerates from committed artifacts: no raw corpus, no GPU, no
+network.
 
 ```sh
 git clone https://github.com/numberingeometry/brontide && cd brontide
@@ -46,34 +79,51 @@ negative criterion: 0/3 (need >=2) -> region-level emergence is momentum-dominat
 OK: all 18 published rows reproduce exactly.
 ```
 
-The pre-registration ordering is checkable too — thresholds at `c351507` (2026-07-22), results appended at `95968ce` (2026-07-23), with every intervening edit an addition:
+The pre-registration ordering is checkable in git: thresholds at `c351507` (2026-07-22),
+results appended at `95968ce` (2026-07-23), and every intervening edit an addition:
 
 ```sh
 git log --follow --format='%h %ad %s' --date=short -- artifacts/validation.md
 git diff --numstat c351507 9bfee13 -- artifacts/validation.md   # 18 insertions, 0 deletions
 ```
 
-## The interactive dashboard
+Continuous integration re-runs the headline, the selection decomposition, the two
+follow-up criteria and a public-safety scan on every push.
 
-**[`dashboard.html`](dashboard.html)** — one self-contained file (no server, no CDN, no network). Scrub the year to watch the frontier fill in, hover for the region under the cursor, click any region for its share history and forecast, and sort all 64 super-regions by forecast growth.
+## How the rigour is enforced
 
-```sh
-python scripts/run_dashboard.py && open dashboard.html   # or just open the committed file
-```
+| Mechanism | What it prevents |
+|---|---|
+| Thresholds committed before data, content-hashed | moving the goalposts after seeing results |
+| Masked refits at each cutoff (PCA, k-means, smoothing, novelty threshold fit on pre-cutoff data only) | look-ahead leakage through the geometry |
+| Deterministic exact PCA (streamed covariance + `eigh`) | irreproducible masked runs |
+| Every follow-up pre-registered in [`decisions/`](decisions/README.md) before scoring | post-hoc analyses dressed as planned ones |
+| `scripts/verify_*.py` recompute published numbers from committed artifacts | numbers that only exist in prose |
+| `scripts/check_public_safe.py` | personal data or private material leaking into a public repo |
 
-## What the map actually looks like
+## The interactive map
+
+**[numberingeometry.github.io/brontide](https://numberingeometry.github.io/brontide/)** opens
+[`dashboard.html`](dashboard.html): one self-contained file (no server, no CDN). Scrub the year
+to watch the frontier fill in, hover for the region under the cursor, click any region for its
+share history and forecast, and sort all 64 super-regions by forecast growth.
 
 ![The arXiv frontier with the largest super-regions labelled](figures/frontier-map.png)
 
-Region names are LLM-generated from each super-region's c-TF-IDF terms and sample titles ([`name_regions.py`](src/brontide/name_regions.py), output committed to [`artifacts/region_names.json`](artifacts/region_names.json) so nothing downstream needs an API key). They are **cosmetic**: names never enter the forecast, the emergence statistic, or the scored validation.
+Region names are LLM-generated from each super-region's c-TF-IDF terms and sample titles
+([`name_regions.py`](src/brontide/name_regions.py), output committed to
+[`artifacts/region_names.json`](artifacts/region_names.json)). They are **cosmetic**: names
+never enter the forecast, the emergence statistic, or the scored validation.
 
-The hierarchy is unsupervised all the way down — nothing told it that computation and the physical sciences are different:
+The hierarchy is unsupervised all the way down; nothing told it that computation and the
+physical sciences are different:
 
 ![Ward linkage over the 1,024 microregions](figures/region-hierarchy.png)
 
-## Forecast against ground truth
+## Forecasts against ground truth
 
-At the 2020-12 cutoff, with everything after it masked — the cutoff where CV picked the baseline itself:
+At the 2020-12 cutoff, with everything after it masked (the cutoff where cross-validation
+picked the baseline itself):
 
 ![History, forecast band, and realized path for six super-regions](figures/forecast-vs-realized.png)
 
@@ -82,6 +132,17 @@ And what the model says at the production origin (2026-06):
 ![Super-regions ranked by forecast growth](figures/emerging-regions.png)
 
 ## Pipeline
+
+```mermaid
+flowchart LR
+  A[arXiv metadata<br/>2.7M papers] --> B[SPECTER2 + adapter<br/>768-d embeddings]
+  B --> C[exact PCA<br/>768 → 50]
+  C --> D[k-means K=1024<br/>+ Ward tree → 64]
+  D --> E[EB-smoothed<br/>monthly shares]
+  E --> F[6-model roster<br/>24-month forecasts]
+  F --> G[emergence ranking]
+  G --> H[masked 3-cutoff<br/>validation]
+```
 
 | # | Stage | Module | Where | Output |
 |---|---|---|---|---|
@@ -96,7 +157,9 @@ And what the model says at the production origin (2026-06):
 | 9 | Labels | `labels.py`, `name_regions.py` | CPU-only environment | c-TF-IDF terms, then LLM names per super-region |
 | 10 | Export | `export_map.py`, `export_figs.py`, `export_dashboard.py` | CPU-only environment | map binaries, 7 figures, dashboard |
 
-Every numeric knob is frozen in **[`src/brontide/config.py`](src/brontide/config.py)** and mirrored, dated, into **[`artifacts/validation.md`](artifacts/validation.md)** *before* any scoring run. Determinism is load-bearing: the harness refits PCA, k-means, κ, and the novelty threshold at each cutoff on ≤T₀ data only, so an order-dependent solver would make the masked runs irreproducible.
+Every numeric knob is frozen in **[`src/brontide/config.py`](src/brontide/config.py)** and
+mirrored, dated, into **[`artifacts/validation.md`](artifacts/validation.md)** *before* any
+scoring run.
 
 ### Three tiers of reproduction
 
@@ -112,48 +175,64 @@ conda env create -f environment.yml && conda activate brontide
 pip install -e .
 ```
 
-Every stage takes `--sample N` so the whole chain can be smoke-tested before a full run. `data/` is gitignored and compute host-only; see [`data/README.md`](data/README.md) for what belongs there and how to rebuild it.
+Every stage takes `--sample N` so the whole chain can be smoke-tested before a full run.
+`data/` is gitignored; see [`data/README.md`](data/README.md) for what belongs there and how
+to rebuild it. Keeping the corpus current without disturbing the published result is
+described in [`UPDATE-PLAN.md`](UPDATE-PLAN.md).
 
 ## Data and model provenance
 
-- **Corpus** — arXiv metadata (titles + abstracts), 2007-01 → 2026-06. arXiv metadata is distributed under CC0; the underlying papers remain under their authors' licenses and arXiv's Terms of Use. Check the licence stated on the snapshot you download before redistributing.
-- **Embeddings** — [`allenai/specter2_base`](https://huggingface.co/allenai/specter2_base) with the `allenai/specter2` proximity adapter (Singh et al., SciRepEval). Apache-2.0; see the model cards.
-- **What is committed here** — region-level *aggregates* (share series, forecasts, emergence ranks), a 149,994-point display sample of 2-D coordinates, and 256 sample titles for labelling. No abstracts and no per-paper records are redistributed.
+- **Corpus**: arXiv metadata (titles + abstracts), 2007-01 → 2026-06. arXiv metadata is
+  distributed under CC0; the underlying papers remain under their authors' licenses and
+  arXiv's Terms of Use.
+- **Embeddings**: [`allenai/specter2_base`](https://huggingface.co/allenai/specter2_base)
+  with the `allenai/specter2` proximity adapter (Singh et al., SciRepEval). Apache-2.0.
+- **What is committed here**: region-level *aggregates* (share series, forecasts, emergence
+  ranks), a 149,994-point display sample of 2-D coordinates, and 256 sample titles for
+  labelling. No abstracts and no per-paper records are redistributed.
 - Region names are LLM-generated; the exact prompt is in `name_regions.build_prompt`.
+
+## Prior art
+
+Large-scale research maps already exist. **Klavans, Boyack & Murdick** (PLOS ONE 2020) and the
+deployed **CSET/ETO Map of Science** own scale and deployment (38–43M documents, ~15× the corpus
+here), and **PreScience v2** (arXiv:2602.20459v2, Ai2 + UChicago) defines the share-change target
+publicly. This project claims **no new formulation** and no priority. What it adds is the
+pre-committed multi-cutoff out-of-time harness and an honest null. Full comparison in
+**[RELATED-WORK.md](RELATED-WORK.md)**.
+
+> **Renamed 2026-08-11.** This project was developed under the internal codename *lacuna*,
+> which collides with arXiv:2606.26246 (Mila), an unrelated static research map. Commits
+> before the rename refer to the old name.
 
 ## Status
 
 - Pipeline complete on the full corpus; all three cutoffs scored 2026-07-23.
-- Map export is real (149,994 sampled points, `synthetic: false`) and committed.
-- Figures, dashboard, and the reproduction script land 2026-08-11.
-- Open: a test suite and CI. The name is settled (see below).
-- **Not built:** the agentic grader and the persistent-homology layer that earlier drafts described. Neither exists in `src/`; both were dropped rather than quietly carried.
-
-Next, pre-registered separately before any scoring: novelty-stream incremental skill, and 80% interval coverage / PIT for the three auto-models. Both signals are already computed at all three cutoffs and have never been scored — a clean pre-registration is still available there.
-
-## Prior art
-
-Large-scale research maps already exist. **Klavans, Boyack & Murdick** (PLOS ONE 2020) and the deployed **CSET/ETO Map of Science** own scale and deployment — 38–43M documents, ~15× the corpus here — and **PreScience v2** (arXiv:2602.20459v2, Ai2 + UChicago) defines the share-change target publicly. This project claims **no new formulation** and no priority; scale is not a claim. What it adds is the pre-committed multi-cutoff out-of-time harness and an honest null.
-
-Full comparison, the PreScience v1/v2 version trap, and the honest scoping of the word "pre-registered" are in **[RELATED-WORK.md](RELATED-WORK.md)**.
-
-> **Renamed 2026-08-11.** This project was developed under the internal codename *lacuna*, which collides with arXiv:2606.26246 (Mila) — an unrelated static research map. The name was chosen from a vetted candidate set; `brontide` is free on PyPI and unclaimed in ML. Commits before the rename refer to the old name.
+- Figures, dashboard and the reproduction script landed 2026-08-11; continuous integration
+  and the hosted map 2026-10-20.
+- Follow-ups pre-registered 2026-08-12/13 ([`decisions/`](decisions/README.md)): the novelty
+  and interval-coverage criteria are scored above and re-checked in CI. The scale-spectrum and
+  human-hierarchy controls read the full corpus in `data/`, which is not redistributed.
+- The corpus can now absorb new papers without touching any scored artifact
+  ([`UPDATE-PLAN.md`](UPDATE-PLAN.md)). Open item: the analysis scripts that read `data/`
+  assume the frozen 2,705,992-row corpus and still need to select that slice after an append.
+- **Not built:** the agentic grader and the persistent-homology layer that earlier drafts
+  described. Neither exists in `src/`; both were dropped rather than quietly carried.
 
 ## Layout
 
 ```
-src/brontide/    ingest embed reduce regions series forecast emergence validate
-               labels name_regions export_map export_figs export_dashboard  + config.py
-scripts/       run_<stage>.py thin runners · verify_results.py · smoke_test.py
+src/brontide/  ingest embed reduce regions series forecast emergence validate
+               labels name_regions export_map export_figs export_dashboard + config.py
+scripts/       run_<stage>.py thin runners · verify_*.py · smoke_test.py · check_public_safe.py
 artifacts/     committed outputs + validation.md (the pre-registration record)
-figures/       generated — regenerate with scripts/run_figs.py
+figures/       generated; regenerate with scripts/run_figs.py
 decisions/     dated ADRs, immutable (index in decisions/README.md)
 blueprint/     claims.yaml → LEDGER.md, plus the check.py gate
-data/          gitignored — big intermediates, compute host only
+data/          gitignored: big intermediates
+index.html     the project page served at numberingeometry.github.io/brontide
 ```
-
-`LEDGER.md` is generated from [`blueprint/claims.yaml`](blueprint/claims.yaml); `python blueprint/check.py` is the gate.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT; see [LICENSE](LICENSE).
