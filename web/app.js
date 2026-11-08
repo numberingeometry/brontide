@@ -23,11 +23,8 @@ async function getFile(name, binary = false) {
   if (!response.ok) throw new Error(`Could not load ${name} (${response.status}).`);
   return binary ? response.arrayBuffer() : response.json();
 }
-function hsl(h, s, l) {
-  const f = (n) => { const k = (n + h * 12) % 12; return l - s * Math.min(l, 1 - l) * Math.max(-1, Math.min(k - 3, 9 - k, 1)); };
-  return [f(0), f(8), f(4)];
-}
-function regionColor(id) { return hsl((.43 + id * .61803398875) % 1, .57, .67); }
+const palette = ['#2b8376','#a2974d','#608e9b','#7a9b62','#af8b56','#7f8eac','#8d87a2','#557f77'];
+function regionColor(id) { const hex = palette[(id * 5) % palette.length]; return [1,3,5].map((i) => parseInt(hex.slice(i,i+2),16)/255); }
 function cssColor(id) { return `rgb(${regionColor(id).map((v) => Math.round(v * 255)).join(',')})`; }
 function readURL() {
   const previousParent = state.selected;
@@ -78,8 +75,8 @@ function setView(mode) {
 function selectRegion(id, { announce = true } = {}) {
   state.selected = id !== null && byId.has(Number(id)) ? Number(id) : null; state.micro = null;
   $('subarea-content').hidden = true; $('subarea-toggle').setAttribute('aria-expanded', 'false');
-  updateTopicList(); updateDetails(); renderer.request(); writeURL();
-  if (announce && state.selected !== null && innerWidth < 1000) notify(`${byId.get(state.selected).name} selected. Details are below the map.`);
+  updateTopicList(); updateDetails(); collapseBrowser(true); renderer.request(); writeURL();
+  if (announce) $(state.selected !== null ? 'detail-name' : 'atlas-canvas').focus({preventScroll:true});
 }
 function updateControls() {
   document.querySelectorAll('[data-view]').forEach((b) => { const active = b.dataset.view === state.mode; b.classList.toggle('active', active); b.setAttribute('aria-pressed', String(active)); });
@@ -88,8 +85,8 @@ function updateControls() {
   $('year-from').setAttribute('aria-valuetext', String(year0 + state.from)); $('year-to').setAttribute('aria-valuetext', String(year0 + state.to));
   $('window-label').textContent = `${year0 + state.from} — ${year0 + state.to}`;
   $('compare-toggle').checked = state.compare;
-  $('view-caption').textContent = state.mode === 'space' ? 'VERTICAL AXIS · PUBLICATION YEAR' : state.mode === 'terrain' ? 'HEIGHT · RELATIVE SAMPLE DENSITY' : 'FIXED SEMANTIC PROJECTION · 2D';
-  $('gesture-caption').textContent = state.mode === 'map' ? 'Drag to pan · scroll to zoom' : 'Drag to orbit · scroll to zoom';
+  $('view-caption').textContent = state.mode === 'space' ? 'HEIGHT · PUBLICATION YEAR' : state.mode === 'terrain' ? 'HEIGHT · SAMPLE DENSITY' : 'SEMANTIC MAP · 2D';
+  $('gesture-caption').textContent = state.mode === 'map' ? 'Hover to discover · drag to pan' : 'Hover to discover · drag to orbit';
   const visible = pointYears.reduce((n, y) => n + (y <= state.to && (state.compare || y >= state.from) ? 1 : 0), 0);
   $('visible-points').textContent = `${compact.format(visible)} sampled dots`;
   const totalByYear = Array.from({ length: yearMax + 1 }, () => 0);
@@ -98,7 +95,7 @@ function updateControls() {
   $('timeline').innerHTML = totalByYear.map((v, y) => {
     const x = y * (760 / totalByYear.length), w = 760 / totalByYear.length - 5, h = v / max * 30;
     const active = y >= state.from && y <= state.to, old = state.compare && y < state.from;
-    return `<rect x="${x.toFixed(2)}" y="${34-h}" width="${w}" height="${h}" rx="1" fill="${active ? '#8dd9b8' : old ? '#53696e' : '#24333e'}" opacity="${active ? '.65' : '.6'}"/>`;
+    return `<rect x="${x.toFixed(2)}" y="${34-h}" width="${w}" height="${h}" rx="3" fill="${active ? '#729d82' : old ? '#b9c8b8' : '#e2e6da'}" opacity="${active ? '.72' : '.65'}"/>`;
   }).join('');
 }
 function updateTopicList() {
@@ -114,10 +111,15 @@ function updateDetails() {
   const r = micro || region, indices = monthIndices();
   const count = sum(indices.map((i) => r ? r.raw_counts[i] : data.monthly_totals[i]));
   const denominator = sum(indices.map((i) => data.monthly_totals[i]));
+  $('inspector').hidden = !region;
+  const actionHost = $(region ? 'selection-actions' : 'story-toolbar');
+  for (const id of ['share-view','export-image']) if ($(id).parentElement !== actionHost) actionHost.append($(id));
+  document.querySelector('.atlas').classList.toggle('detail-open', Boolean(region));
   $('clear-selection').hidden = !region;
+  renderer?.resize();
   $('detail-kicker').textContent = micro ? `MICROREGION ${micro.id} · STATISTICS` : region ? `TERRITORY ${String(region.id + 1).padStart(2,'0')} / ${regions.length}` : 'THE BIG PICTURE';
   $('detail-name').textContent = micro ? `${region.name} / ${micro.name}` : region?.name || 'A world of research';
-  $('detail-description').textContent = micro ? 'A statistical subarea of this territory. The map continues to highlight its parent; individual point assignments are unavailable.' : region ? `${integer.format(region.n_papers)} corpus papers in ${region.microregion_count} microregions. Explore the observed history and its experimental projection.` : state.mode === 'space' ? 'Every point is a sampled paper. Related work forms a territory; height reveals when it appeared.' : state.mode === 'terrain' ? 'Peaks reveal concentrations of the display sample in your time window. Choose a territory to inspect its monthly history.' : 'Related papers share a neighborhood. Choose a territory to follow its history through the corpus.';
+  $('detail-description').textContent = micro ? 'Subarea statistics. The map keeps its parent territory highlighted.' : region ? `${integer.format(region.n_papers)} corpus papers · ${region.microregion_count} microregions` : state.mode === 'space' ? 'Every point is a sampled paper. Related work forms a territory; height reveals when it appeared.' : state.mode === 'terrain' ? 'Peaks reveal concentrations of the display sample in your time window. Choose a territory to inspect its monthly history.' : 'Related papers share a neighborhood. Choose a territory to follow its history through the corpus.';
   $('detail-terms').innerHTML = region && !micro ? region.terms.slice(0,6).map((t) => `<span>${esc(t)}</span>`).join('') : '';
   $('stat-one').textContent = compact.format(count); $('stat-one').title = integer.format(count);
   $('stat-two-label').textContent = r ? 'WINDOW SHARE' : 'OBSERVED PERIOD';
@@ -150,7 +152,7 @@ function drawChart(r) {
   const max = Math.max(...values) * 1.08 || 1, X = (i) => L + i / (values.length-1) * (width-L-R), Y = (v) => height-B-v/max*(height-T-B);
   const line = (a, start = 0) => a.map((v,i) => `${i ? 'L' : 'M'}${X(i+start).toFixed(2)},${Y(v).toFixed(2)}`).join(' ');
   const indices = monthIndices(), first = indices[0] || 0, last = indices.at(-1) || 0;
-  let html = '<defs><linearGradient id="chart-gradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#a7edcf" stop-opacity=".14"/><stop offset="100%" stop-color="#a7edcf" stop-opacity="0"/></linearGradient></defs>';
+  let html = '<defs><linearGradient id="chart-gradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#257e70" stop-opacity=".14"/><stop offset="100%" stop-color="#257e70" stop-opacity="0"/></linearGradient></defs>';
   html += `<rect class="chart-window" x="${X(first)}" y="${T}" width="${Math.max(1,X(last)-X(first))}" height="${height-T-B}"/>`;
   for(let k=0;k<3;k++){const v=max*k/2,y=Y(v);html+=`<line class="chart-grid" x1="${L}" x2="${width-R}" y1="${y}" y2="${y}"/><text class="chart-axis" x="${L-7}" y="${y+4}" text-anchor="end">${r ? v.toFixed(v<1?2:1) : compact.format(v)}</text>`;}
   html += `<path class="chart-area" d="${line(historyValues)} L${X(historyValues.length-1)},${height-B} L${L},${height-B}Z"/><path class="chart-history" d="${line(historyValues)}"/>`;
@@ -159,7 +161,7 @@ function drawChart(r) {
   html += `<text class="chart-axis" x="${L}" y="${height-4}">${year0}</text>`;
   if(r){const origin=X(historyValues.length-1);html+=`<text class="chart-origin" x="${origin-6}" y="${height-B-7}" transform="rotate(-90 ${origin-6} ${height-B-7})">JUN 2026 · FORECAST ORIGIN</text><text class="chart-axis" x="${width-R}" y="${height-4}" text-anchor="end">${data.forecast_months.at(-1)}</text>`;}
   else html+=`<text class="chart-axis" x="${width-R}" y="${height-4}" text-anchor="end">${manifest.frozen_result.corpus_end}</text>`;
-  html += '<g id="chart-hover" style="display:none"><line stroke="#d7f3e4" stroke-width="1" y1="8" y2="134"/><circle r="3" fill="#d7f3e4"/><rect y="0" height="23" rx="3" fill="#19382e"/><text y="16" fill="#d1e9de" font-size="12" font-family="monospace"/></g>';
+  html += '<g id="chart-hover" style="display:none"><line stroke="#004b49" stroke-width="1" y1="8" y2="134"/><circle r="3" fill="#004b49"/><rect y="0" height="23" rx="3" fill="#004b49"/><text y="16" fill="#fcfaf5" font-size="12" font-family="monospace"/></g>';
   $('history-chart').innerHTML = html;
   $('history-chart').setAttribute('aria-label', r ? `${r.name}: smoothed monthly share, observed ${data.months[0]} through ${data.months.at(-1)}; experimental ${data.selected_model} forecast through ${data.forecast_months.at(-1)}.` : `Monthly corpus publications from ${data.months[0]} to ${data.months.at(-1)}.`);
   chartSeries = { values, X, Y, months:[...data.months,...(r?data.forecast_months:[])], observed:historyValues.length, unit:r?'%':' papers', L, width:width-L-R };
@@ -212,12 +214,12 @@ class AtlasRenderer {
   initGL(){
     const gl=this.gl;
     this.pointsProgram=this.program(`precision highp float;attribute vec3 a_pos;attribute vec3 a_color;attribute float a_id;attribute float a_year;attribute float a_density;uniform float u_mode;uniform vec2 u_window;uniform float u_selected;uniform float u_compare;uniform float u_dpr;uniform float u_zoom;uniform float u_detail;varying vec3 v_color;varying float v_alpha;${projectionGLSL}
-    void main(){vec3 p=a_pos;p.y=u_mode<.5?a_pos.y*1.65-.65:u_mode<1.5?a_density*.85-.65:-.15;gl_Position=project(p);float active=step(u_window.x,a_year)*step(a_year,u_window.y);float prior=(1.0-step(u_window.x,a_year))*step(a_year,u_window.y)*u_compare;float focus=u_selected<0.0?1.0:abs(a_id-u_selected)<.1?1.0:.22;v_alpha=(active*.56+prior*.12)*focus*u_detail;v_color=prior>.5?vec3(.36,.48,.51):a_color;float selected=u_selected>=0.0&&abs(a_id-u_selected)<.1?1.0:0.0;gl_PointSize=(1.25+.6*u_detail+selected*.65)*u_dpr*sqrt(u_zoom);if(active+prior<.5)gl_Position=vec4(2.,2.,2.,1.);}`,
+    void main(){vec3 p=a_pos;p.y=u_mode<.5?a_pos.y*1.65-.65:u_mode<1.5?a_density*.85-.65:-.15;gl_Position=project(p);float active=step(u_window.x,a_year)*step(a_year,u_window.y);float prior=(1.0-step(u_window.x,a_year))*step(a_year,u_window.y)*u_compare;float focus=u_selected<0.0?1.0:abs(a_id-u_selected)<.1?1.0:.13;v_alpha=(active*.42+prior*.08)*focus*u_detail;v_color=prior>.5?vec3(.55,.62,.55):a_color;float selected=u_selected>=0.0&&abs(a_id-u_selected)<.1?1.0:0.0;gl_PointSize=(1.25+.6*u_detail+selected*.65)*u_dpr*sqrt(u_zoom);if(active+prior<.5)gl_Position=vec4(2.,2.,2.,1.);}`,
     `precision mediump float;varying vec3 v_color;varying float v_alpha;void main(){float d=length(gl_PointCoord-vec2(.5))*2.;if(d>1.)discard;float glow=exp(-d*d*3.8);gl_FragColor=vec4(v_color,v_alpha*glow);}`);
     this.flatProgram=this.program(`precision highp float;attribute vec3 a_pos;attribute vec4 a_color;varying vec4 v_color;${projectionGLSL}void main(){v_color=a_color;gl_Position=project(a_pos);}`,
     `precision mediump float;varying vec4 v_color;void main(){gl_FragColor=v_color;}`);
     this.pointBuffer=gl.createBuffer();this.flatBuffer=gl.createBuffer();
-    gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.disable(gl.DEPTH_TEST);
+    gl.enable(gl.BLEND);gl.blendFuncSeparate(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA,gl.ONE,gl.ONE_MINUS_SRC_ALPHA);gl.disable(gl.DEPTH_TEST);
     this.canvas.addEventListener('webglcontextlost',(e)=>{e.preventDefault();stopPlayback();notify('The graphics context was interrupted. Reload to restore the map. Topic statistics remain available.');});
     this.canvas.addEventListener('webglcontextrestored',()=>{this.initGL();this.uploadPoints();this.request();});
   }
@@ -235,21 +237,21 @@ class AtlasRenderer {
     this.heightGrid=Float32Array.from(smooth,(v)=>Math.log1p(v)/Math.log1p(peak));
     for(let i=0;i<pointYears.length;i++){const x=clamp((positions[i*2]/this.extentX+1)*.5*(N-1),0,N-1),z=clamp((positions[i*2+1]+1)*.5*(N-1),0,N-1),x0=Math.floor(x),z0=Math.floor(z),x1=Math.min(N-1,x0+1),z1=Math.min(N-1,z0+1),tx=x-x0,tz=z-z0;this.density[i]=(1-tz)*((1-tx)*this.heightGrid[z0*N+x0]+tx*this.heightGrid[z0*N+x1])+tz*((1-tx)*this.heightGrid[z1*N+x0]+tx*this.heightGrid[z1*N+x1]);}
     const terrain=[],wire=[];
-    const vertex=(x,z,alpha)=>{const j=z*N+x,h=this.heightGrid[j];return[(x/(N-1)*2-1)*this.extentX,h*.85-.65,z/(N-1)*2-1,.12+h*.14,.4+h*.22,.43+h*.12,alpha*(.13+h*.55)];};
-    for(let z=0;z<N-1;z++)for(let x=0;x<N-1;x++){for(const [dx,dz]of[[0,0],[1,0],[0,1],[1,0],[1,1],[0,1]])terrain.push(...vertex(x+dx,z+dz,.18));if(x%2===0){wire.push(...vertex(x,z,.22),...vertex(x,z+1,.22));}if(z%2===0){wire.push(...vertex(x,z,.22),...vertex(x+1,z,.22));}}
+    const vertex=(x,z,alpha)=>{const j=z*N+x,h=this.heightGrid[j];return[(x/(N-1)*2-1)*this.extentX,h*.85-.65,z/(N-1)*2-1,.32+h*.12,.56+h*.13,.45+h*.12,alpha*(.12+h*.35)];};
+    for(let z=0;z<N-1;z++)for(let x=0;x<N-1;x++){for(const [dx,dz]of[[0,0],[1,0],[0,1],[1,0],[1,1],[0,1]])terrain.push(...vertex(x+dx,z+dz,.20));if(x%2===0){wire.push(...vertex(x,z,.18),...vertex(x,z+1,.18));}if(z%2===0){wire.push(...vertex(x,z,.18),...vertex(x+1,z,.18));}}
     this.terrain=new Float32Array(terrain);this.wire=new Float32Array(wire);this.uploadPoints();this.makeGround();
   }
   get extentX(){const b=manifest.sample.bbox;return(b[2]-b[0])/(b[3]-b[1]);}
   makeGround(){
     const a=[],E=this.extentX+.05,levels=state.mode==='space'?[0,.5,1]:[0];
-    const add=(p,q,alpha=.12)=>a.push(...p,.19,.45,.48,alpha,...q,.19,.45,.48,alpha);
-    for(const t of levels){const y=state.mode==='map'?-.16:t*1.65-.65;add([-E,y,-1.05],[E,y,-1.05],.25);add([E,y,-1.05],[E,y,1.05],.25);add([E,y,1.05],[-E,y,1.05],.25);add([-E,y,1.05],[-E,y,-1.05],.25);if(t===0)for(let k=-1;k<=1.001;k+=.2){add([-E,y,k],[E,y,k],.12);add([k*E,y,-1.05],[k*E,y,1.05],.12);}}
-    if(state.mode==='space')for(const x of[-E,E])for(const z of[-1.05,1.05])add([x,-.65,z],[x,1,z],.22);
+    const add=(p,q,alpha=.06)=>a.push(...p,.3,.48,.4,alpha,...q,.3,.48,.4,alpha);
+    for(const t of levels){const y=state.mode==='map'?-.16:t*1.65-.65;add([-E,y,-1.05],[E,y,-1.05],.10);add([E,y,-1.05],[E,y,1.05],.10);add([E,y,1.05],[-E,y,1.05],.10);add([-E,y,1.05],[-E,y,-1.05],.10);if(t===0)for(let k=-1;k<=1.001;k+=.4){add([-E,y,k],[E,y,k],.055);add([k*E,y,-1.05],[k*E,y,1.05],.055);}}
+    if(state.mode==='space')for(const x of[-E,E])for(const z of[-1.05,1.05])add([x,-.65,z],[x,1,z],.10);
     this.ground=new Float32Array(a);
   }
   resize(){
     const bounds=$('scene').getBoundingClientRect();this.width=bounds.width;this.height=bounds.height;this.dpr=Math.min(devicePixelRatio||1,1.8);this.canvas.width=Math.round(this.width*this.dpr);this.canvas.height=Math.round(this.height*this.dpr);
-    const desktop=this.width>1000,left=desktop?(this.width>1600?315:this.width>1200?280:240):18,right=desktop?(this.width>1600?375:this.width>1200?330:290):40,top=desktop?105:this.width<620?225:155,bottom=desktop?230:220;
+    const desktop=this.width>1000,left=desktop?70:12,right=desktop?(state.selected!==null?365:70):12,top=this.width<620?195:155,bottom=this.width<620?185:desktop?150:180;
     this.viewport={x:left,y:top,width:Math.max(100,this.width-left-right),height:Math.max(100,this.height-top-bottom)};this.aspect=this.viewport.width/this.viewport.height;this.scale=Math.min(state.mode==='space'?.70:.88,this.aspect*.65);this.request();
   }
   project(x,y,z){
@@ -275,7 +277,7 @@ class AtlasRenderer {
   }
   render2D(){
     const ctx=this.ctx;ctx.setTransform(this.dpr,0,0,this.dpr,0,0);ctx.clearRect(0,0,this.width,this.height);ctx.save();const v=this.viewport;ctx.beginPath();ctx.rect(v.x,v.y,v.width,v.height);ctx.clip();
-    for(let i=0;i<pointYears.length;i+=2){const year=pointYears[i];if(year>state.to||(!state.compare&&year<state.from))continue;const[x,y]=this.project(positions[i*2],-.15,positions[i*2+1]);ctx.globalAlpha=(year<state.from?.1:.55)*(state.selected===null||pointClusters[i]===state.selected?1:.2);ctx.fillStyle=cssColor(pointClusters[i]);ctx.fillRect(x,y,1.6,1.6);}ctx.restore();ctx.globalAlpha=1;
+    for(let i=0;i<pointYears.length;i+=2){const year=pointYears[i];if(year>state.to||(!state.compare&&year<state.from))continue;const[x,y]=this.project(positions[i*2],-.15,positions[i*2+1]);ctx.globalAlpha=(year<state.from?.08:.42)*(state.selected===null||pointClusters[i]===state.selected?1:.2);ctx.fillStyle=cssColor(pointClusters[i]);ctx.fillRect(x,y,1.6,1.6);}ctx.restore();ctx.globalAlpha=1;
   }
   makeLabels(){
     $('map-labels').replaceChildren();
@@ -283,7 +285,7 @@ class AtlasRenderer {
   }
   renderLabels(){
     const v=this.viewport,occupied=[],ranked=[...this.labels].sort((a,b)=>(b.r.id===state.selected?1:0)-(a.r.id===state.selected?1:0)||b.r.n_papers-a.r.n_papers);let shown=0;
-    for(const{r,el}of ranked){const selected=r.id===state.selected,c=r._center;const y=state.mode==='space'?((state.from+state.to)/2/yearMax)*1.65-.65:state.mode==='terrain'?(r._density||.35)*.85-.65:-.15;const[x,yy]=this.project(c[0],y,c[1]);const max=innerWidth<620?3:6;const collision=occupied.some(([a,b])=>Math.abs(x-a)<125&&Math.abs(yy-b)<42);const visible=(selected||shown<max&&!collision)&&x>v.x+45&&x<v.x+v.width-45&&yy>v.y+15&&yy<v.y+v.height-15;el.hidden=!visible;if(visible){el.style.left=`${x}px`;el.style.top=`${yy-12}px`;el.classList.toggle('selected',selected);occupied.push([x,yy]);shown++;}}
+    for(const{r,el}of ranked){const selected=r.id===state.selected,c=r._center;const y=state.mode==='space'?((state.from+state.to)/2/yearMax)*1.65-.65:state.mode==='terrain'?(r._density||.35)*.85-.65:-.15;const[x,yy]=this.project(c[0],y,c[1]);const max=state.selected===null?0:1;const collision=occupied.some(([a,b])=>Math.abs(x-a)<125&&Math.abs(yy-b)<42);const visible=(selected||shown<max&&!collision)&&x>v.x+45&&x<v.x+v.width-45&&yy>v.y+15&&yy<v.y+v.height-15;el.hidden=!visible;if(visible){el.style.left=`${x}px`;el.style.top=`${yy-12}px`;el.classList.toggle('selected',selected);occupied.push([x,yy]);shown++;}}
     $('axis-labels').innerHTML='';
     if(state.mode==='space'){for(const t of[0,.5,1]){const[x,y]=this.project(-this.extentX-.04,t*1.65-.65,1.05);if(x<v.x+25||x>v.x+v.width-15||y<v.y+12||y>v.y+v.height-12)continue;const el=document.createElement('span');el.className='axis-label';el.textContent=String(Math.round(year0+t*yearMax));el.style.left=`${x-13}px`;el.style.top=`${y}px`;$('axis-labels').append(el);}}
   }
@@ -301,7 +303,7 @@ class AtlasRenderer {
       if(pointers.has(e.pointerId))pointers.set(e.pointerId,[e.clientX,e.clientY]);
       if(pointers.size===2){const a=[...pointers.values()],next=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]);if(pinch>0)targetCamera.zoom=clamp(targetCamera.zoom*next/pinch,.45,5);pinch=next;this.request();return;}
       if(drag&&pointers.has(e.pointerId)){const dx=e.clientX-drag.x,dy=e.clientY-drag.y;drag.x=e.clientX;drag.y=e.clientY;if(drag.pan||state.mode==='map'){targetCamera.panX+=dx/this.viewport.width*2;targetCamera.panY-=dy/this.viewport.height*2;}else{targetCamera.yaw+=dx*.006;targetCamera.pitch=clamp(targetCamera.pitch+dy*.005,.08,1.56);}this.request();return;}
-      if(e.pointerType==='touch'||performance.now()-lastHover<85)return;lastHover=performance.now();const bounds=c.getBoundingClientRect(),x=e.clientX-bounds.left,y=e.clientY-bounds.top,hit=this.pick(x,y),tip=$('map-tooltip');tip.hidden=!hit;if(hit){tip.innerHTML=`${esc(byId.get(hit.id)?.name||'Unassigned')}<small>Sampled paper · ${hit.year} · click to explore territory</small>`;tip.style.left=`${clamp(x+14,8,this.width-250)}px`;tip.style.top=`${Math.min(y+15,this.height-70)}px`;}
+      if(e.pointerType==='touch'||performance.now()-lastHover<85)return;lastHover=performance.now();const bounds=c.getBoundingClientRect(),x=e.clientX-bounds.left,y=e.clientY-bounds.top,hit=this.pick(x,y),tip=$('map-tooltip');tip.hidden=!hit;if(hit){tip.innerHTML=`<strong>${esc(byId.get(hit.id)?.name||'Unassigned')}</strong><small>Sampled paper · ${hit.year}<br>Click to explore this field</small>`;tip.style.left=`${clamp(x+14,8,this.width-250)}px`;tip.style.top=`${Math.min(y+15,this.height-70)}px`;}
     });
     const finish=(e)=>{if(drag&&pointers.size===1&&Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)<5&&e.type!=='pointercancel'){const bounds=c.getBoundingClientRect(),hit=this.pick(e.clientX-bounds.left,e.clientY-bounds.top);if(hit&&byId.has(hit.id))selectRegion(hit.id);}pointers.delete(e.pointerId);drag=null;pinch=0;writeURL();};
     c.addEventListener('pointerup',finish);c.addEventListener('pointercancel',finish);c.addEventListener('pointerleave',()=>$('map-tooltip').hidden=true);
@@ -317,13 +319,13 @@ function togglePlayback(){
 }
 function updateWindow(){updateControls();updateDetails();if($('topic-sort').value==='change')updateTopicList();renderer.updateDensity();renderer.request();writeURL();}
 function story(step){
-  if(step>3){closeStory();return;}state.tour=clamp(step,0,3);stopPlayback();$('story-card').hidden=false;$('topic-browser').classList.toggle('collapsed',innerWidth<1000);$('browser-toggle').setAttribute('aria-expanded',String(innerWidth>=1000));
+  if(step>3){closeStory();return;}state.tour=clamp(step,0,3);stopPlayback();$('story-card').hidden=false;collapseBrowser(true);
   const largest=[...regions].sort((a,b)=>b.n_papers-a.n_papers)[0];const growing=[...regions].sort((a,b)=>(yearShare(b,year0+yearMax)-yearShare(b,year0+11))-(yearShare(a,year0+yearMax)-yearShare(a,year0+11)))[0];
   const steps=[
-    ['Ideas have a landscape.',`${integer.format(manifest.sample.n_points)} real sampled papers, arranged by their semantic embeddings. Height adds publication year; orbit the map to see time unfold.`,'space',null,0,yearMax,false],
-    ['Find a neighborhood.',`${largest.name} contains ${integer.format(largest.n_papers)} corpus papers. In 2D, related work becomes a neighborhood you can inspect, search, and revisit.`,'map',largest.id,0,yearMax,false],
-    ['Look for a changing footprint.',`Compare ${year0+11}–${year0+yearMax}: earlier papers become a muted baseline. Density reveals concentration in the selected sample; the chart and counts use the monthly aggregate data.`,'terrain',growing.id,11,yearMax,true],
-    ['Follow evidence into the future.','The solid line is observed smoothed share. The dashed line is an experimental forecast from June 2026. Its selection procedure missed the frozen criterion at all three historical cutoffs; read the methods before using it.','space',growing.id,0,yearMax,false]
+    ['Ideas have a landscape.','Each dot is a sampled paper. Height adds publication year. Drag gently to see another perspective.','space',null,0,yearMax,false],
+    ['Find a neighborhood.','Hover over a paper, or search for a field. Select a neighborhood to open its history and smaller research areas.','map',largest.id,0,yearMax,false],
+    ['Look for a changing footprint.','Move through the years. Compare keeps earlier papers as a quiet backdrop; the timeline follows the selected window.','terrain',growing.id,11,yearMax,true],
+    ['Follow evidence into the future.','The solid line follows observed activity. Dashes mark an experimental forecast. Open the guide for its methods and limits.','space',growing.id,0,yearMax,false]
   ];
   const[title,description,mode,id,from,to,compare]=steps[state.tour];state.mode=renderer.fallback?'map':mode;state.selected=id;state.micro=null;state.from=from;state.to=to;state.compare=compare;$('subarea-content').hidden=true;$('subarea-toggle').setAttribute('aria-expanded','false');$('microregion-select').replaceChildren();resetCamera();updateTopicList();updateWindow();
   $('story-step').textContent=`0${state.tour+1} / 04`;$('story-title').textContent=title;$('story-description').textContent=description;$('story-previous').disabled=state.tour===0;$('story-next').innerHTML=(state.tour===3?'Explore on your own':'Next chapter')+' <svg class="inline-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h12m-5-5 5 5-5 5"/></svg>';
@@ -331,25 +333,27 @@ function story(step){
 function closeStory(){state.tour=-1;$('story-card').hidden=true;}
 function wrapText(ctx,text,x,y,maxWidth,lineHeight){let line='';for(const word of text.split(' ')){const next=line?`${line} ${word}`:word;if(ctx.measureText(next).width>maxWidth&&line){ctx.fillText(line,x,y);line=word;y+=lineHeight;}else line=next;}if(line)ctx.fillText(line,x,y);return y;}
 async function exportImage(){
+  await document.fonts.ready;
   Object.assign(camera,targetCamera);renderer.render();
   const v=renderer.viewport,W=Math.round(Math.max(1000,Math.min(1800,v.width*1.5))),scale=W/v.width,plotH=Math.round(v.height*scale),H=plotH+190;
   const out=document.createElement('canvas');out.width=W;out.height=H;const ctx=out.getContext('2d');
-  ctx.fillStyle='#080d16';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#fcfaf5';ctx.fillRect(0,0,W,H);
   ctx.drawImage(renderer.canvas,v.x*renderer.dpr,v.y*renderer.dpr,v.width*renderer.dpr,v.height*renderer.dpr,0,78,W,plotH);
-  ctx.fillStyle='#e5f2e9';ctx.font='26px Helvetica,Arial,sans-serif';ctx.fillText('brontide.  The research atlas',30,38);
-  ctx.fillStyle='#a7edcf';ctx.font='12px monospace';ctx.textAlign='right';ctx.fillText(`${state.mode==='space'?'Space-time':state.mode==='terrain'?'Sample density':'2D map'} · ${year0+state.from}–${year0+state.to}${state.compare?' · compare':''}`,W-30,35);ctx.textAlign='left';
-  for(const{r,el}of renderer.labels){if(el.hidden)continue;ctx.font='13px Helvetica,Arial,sans-serif';ctx.fillStyle=r.id===state.selected?'#c5fbe0':'#b7cbd2';const x=(parseFloat(el.style.left)-v.x)*scale,y=(parseFloat(el.style.top)-v.y)*scale+78;wrapText(ctx,r.name,x-65,y,175,16);}
-  document.querySelectorAll('.axis-label').forEach((el)=>{ctx.font='11px monospace';ctx.fillStyle='#92b4aa';ctx.fillText(el.textContent,(parseFloat(el.style.left)-v.x)*scale,(parseFloat(el.style.top)-v.y)*scale+78);});
-  ctx.fillStyle='#c7ddd4';ctx.font='17px Helvetica,Arial,sans-serif';ctx.fillText(state.selected===null?'The frozen arXiv research landscape':byId.get(state.selected).name,30,plotH+112);
+  ctx.fillStyle='#004b49';ctx.font='700 25px Comfortaa,sans-serif';ctx.fillText('brontide.  The research atlas',30,38);
+  ctx.fillStyle='#004b49';ctx.font='12px monospace';ctx.textAlign='right';ctx.fillText(`${state.mode==='space'?'Space-time':state.mode==='terrain'?'Sample density':'2D map'} · ${year0+state.from}–${year0+state.to}${state.compare?' · compare':''}`,W-30,35);ctx.textAlign='left';
+  for(const{r,el}of renderer.labels){if(el.hidden)continue;ctx.font='13px Nunito,sans-serif';ctx.fillStyle=r.id===state.selected?'#004b49':'#5a726f';const x=(parseFloat(el.style.left)-v.x)*scale,y=(parseFloat(el.style.top)-v.y)*scale+78;wrapText(ctx,r.name,x-65,y,175,16);}
+  document.querySelectorAll('.axis-label').forEach((el)=>{ctx.font='11px monospace';ctx.fillStyle='#5a726f';ctx.fillText(el.textContent,(parseFloat(el.style.left)-v.x)*scale,(parseFloat(el.style.top)-v.y)*scale+78);});
+  ctx.fillStyle='#004b49';ctx.font='700 17px Nunito,sans-serif';ctx.fillText(state.selected===null?'The frozen arXiv research landscape':byId.get(state.selected).name,30,plotH+112);
   const visible=pointYears.reduce((n,y)=>n+(y<=state.to&&(state.compare||y>=state.from)?1:0),0);
-  ctx.fillStyle='#78929e';ctx.font='11px monospace';wrapText(ctx,`${integer.format(visible)} visible sampled dots · corpus through ${manifest.frozen_result.corpus_end} · fixed full-corpus UMAP · ${state.mode==='space'?'height: publication year':state.mode==='terrain'?'height: relative sample density':'2D display projection'}`,30,plotH+138,W-60,16);
-  ctx.fillStyle='#576e7c';ctx.font='10px monospace';ctx.fillText(`numberingeometry.github.io/brontide · ${manifest.build_id}`,30,H-20);
+  ctx.fillStyle='#5a726f';ctx.font='11px monospace';wrapText(ctx,`${integer.format(visible)} visible sampled dots · corpus through ${manifest.frozen_result.corpus_end} · fixed full-corpus UMAP · ${state.mode==='space'?'height: publication year':state.mode==='terrain'?'height: relative sample density':'2D display projection'}`,30,plotH+138,W-60,16);
+  ctx.fillStyle='#788a80';ctx.font='10px monospace';ctx.fillText(`numberingeometry.github.io/brontide · ${manifest.build_id}`,30,H-20);
   out.toBlob((blob)=>{if(!blob){notify('Image export could not complete.');return;}const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`brontide-${state.mode}-${year0+state.from}-${year0+state.to}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);notify('Saved your view as a PNG with data provenance.');},'image/png');
 }
 function bindUI(){
   document.querySelectorAll('[data-view]').forEach((b)=>b.addEventListener('click',()=>setView(b.dataset.view)));
-  $('topic-search').addEventListener('input',updateTopicList);$('topic-sort').addEventListener('change',updateTopicList);
-  $('topic-list').addEventListener('click',(e)=>{const b=e.target.closest('[data-region]');if(b){selectRegion(Number(b.dataset.region));if(innerWidth<1000)collapseBrowser(true);}});
+  $('topic-search').addEventListener('input',()=>{collapseBrowser(false);updateTopicList();});
+  $('topic-search').addEventListener('focus',()=>collapseBrowser(false));$('topic-sort').addEventListener('change',updateTopicList);
+  $('topic-list').addEventListener('click',(e)=>{const b=e.target.closest('[data-region]');if(b){selectRegion(Number(b.dataset.region));}});
   $('clear-selection').addEventListener('click',()=>selectRegion(null));
   $('year-from').addEventListener('input',()=>{stopPlayback();state.from=Number($('year-from').value);state.to=Math.max(state.from,state.to);updateWindow();});
   $('year-to').addEventListener('input',()=>{stopPlayback();state.to=Number($('year-to').value);state.from=Math.min(state.from,state.to);updateWindow();});
@@ -363,11 +367,12 @@ function bindUI(){
   $('share-view').addEventListener('click',async()=>{writeURL(true);try{await navigator.clipboard.writeText(location.href);notify('View link copied. It restores the topic, time window, view, and camera.');}catch{const input=document.createElement('textarea');input.value=location.href;document.body.append(input);input.select();const copied=document.execCommand('copy');input.remove();notify(copied?'View link copied.':'The address bar contains your saved view. Copy its URL to share.');}});
   $('export-image').addEventListener('click',exportImage);
   $('history-chart').addEventListener('pointermove',(e)=>{if(!chartSeries)return;const b=e.currentTarget.getBoundingClientRect(),x=(e.clientX-b.left)/b.width*500,s=chartSeries,i=clamp(Math.round((x-s.L)/s.width*(s.values.length-1)),0,s.values.length-1),g=$('chart-hover');if(!g)return;g.style.display='';const px=s.X(i),py=s.Y(s.values[i]),label=`${s.months[i]}: ${s.values[i].toFixed(s.unit==='%'?3:0)}${s.unit}${i>=s.observed?' (forecast)':''}`,boxWidth=label.length*7.2+12,tx=clamp(px-boxWidth/2,5,495-boxWidth);g.querySelector('line').setAttribute('x1',px);g.querySelector('line').setAttribute('x2',px);g.querySelector('circle').setAttribute('cx',px);g.querySelector('circle').setAttribute('cy',py);const rect=g.querySelector('rect');rect.setAttribute('x',tx);rect.setAttribute('width',boxWidth);const text=g.querySelector('text');text.setAttribute('x',tx+6);text.textContent=label;});$('history-chart').addEventListener('pointerleave',()=>{const g=$('chart-hover');if(g)g.style.display='none';});
-  document.addEventListener('keydown',(e)=>{if(e.key==='/'&&!['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)&&!$('method-dialog').open){e.preventDefault();collapseBrowser(false);$('topic-search').focus();}if(e.key==='Escape'&&!$('method-dialog').open){closeStory();selectRegion(null);}});
+  document.addEventListener('keydown',(e)=>{if(e.key==='/'&&!['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)&&!$('method-dialog').open){e.preventDefault();collapseBrowser(false);$('topic-search').focus();}if(e.key==='Escape'&&!$('method-dialog').open){closeStory();collapseBrowser(true);selectRegion(null);}});
+  document.addEventListener('pointerdown',(e)=>{if(!$('topic-browser').contains(e.target))collapseBrowser(true);});
   window.addEventListener('hashchange',async()=>{stopPlayback();readURL();updateControls();updateTopicList();updateDetails();renderer.updateDensity();renderer.request();if(state.micro!==null)await openMicroregions(true);});
   document.addEventListener('visibilitychange',()=>{if(document.hidden)stopPlayback();});
 }
-function collapseBrowser(collapsed){$('topic-browser').classList.toggle('collapsed',collapsed);$('browser-toggle').setAttribute('aria-expanded',String(!collapsed));$('browser-toggle').textContent=collapsed?'+':'−';}
+function collapseBrowser(collapsed){$('topic-browser').classList.toggle('collapsed',collapsed);$('browser-toggle').setAttribute('aria-expanded',String(!collapsed));}
 async function init(){
   try{
     manifest=await getFile('manifest.json');year0=manifest.sample.year0;yearMax=manifest.sample.year1-year0;
@@ -379,7 +384,7 @@ async function init(){
     for(let i=0;i<pointYears.length;i++){positions[i*2]=xy.getInt16(i*4,true)/offset*aspect;positions[i*2+1]=xy.getInt16(i*4+2,true)/offset;colors.set(regionColor(pointClusters[i]),i*3);const c=centers.get(pointClusters[i]);if(c){c[0]+=positions[i*2];c[1]+=positions[i*2+1];c[2]++;}}
     for(const r of regions){const c=centers.get(r.id);r._center=c[2]?[c[0]/c[2],c[1]/c[2]]:[0,0];}
     readURL();for(const id of['year-from','year-to'])$(id).max=yearMax;
-    renderer=new AtlasRenderer($('atlas-canvas'));bindUI();if(innerWidth<=1000)collapseBrowser(true);
+    renderer=new AtlasRenderer($('atlas-canvas'));bindUI();collapseBrowser(true);
     $('corpus-size').textContent=compact.format(manifest.frozen_result.n_papers);$('territory-count').textContent=regions.length;
     const date=new Date(`${manifest.frozen_result.corpus_end}-01T00:00:00Z`).toLocaleDateString('en-US',{year:'numeric',month:'long',timeZone:'UTC'});$('footer-date').textContent=date;
     $('method-sample').textContent=`${integer.format(manifest.sample.n_points)} dots form a stratified display sample of ${integer.format(manifest.frozen_result.n_papers)} indexed papers, through ${date}. Monthly aggregates cover ${integer.format(manifest.monthly_series.n_papers)} records; the source artifacts do not identify ${integer.format(manifest.monthly_series.corpus_records_outside_series)} corpus records outside the monthly table. Window statistics use that table, not dot counts.`;

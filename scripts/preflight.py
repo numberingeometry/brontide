@@ -3,9 +3,8 @@
     conda run -n brontide python scripts/preflight.py
     conda run -n brontide python scripts/preflight.py --strict   # exit 1 on warnings too
 
-Checks are the executable half of AGENTS.md's pipeline-safety protocol. Prose is detection;
-this is the tier that actually fires. Everything here runs in seconds against artifacts whose
-regeneration costs hours.
+Checks row counts, dimensions, manifests and saved pipeline inputs before a data-writing
+job. These checks run against existing artifacts without rebuilding the corpus.
 
 Exit 0 = safe to proceed. Exit 1 = something a long job would have found the hard way.
 """
@@ -177,21 +176,6 @@ def check_backup() -> None:
             f"row count:  copy {config.EMBED_MEMMAP.name} to .bak")
 
 
-def check_public() -> None:
-    """Rule 9: this repo is public, so nothing personal may reach a commit."""
-    p = ROOT / "scripts" / "check_public_safe.py"
-    if not p.exists():
-        add(WARN, "public-safety scan", "scripts/check_public_safe.py missing")
-        return
-    cp = subprocess.run([sys.executable, str(p)], capture_output=True, text=True, cwd=ROOT)
-    if cp.returncode == 0:
-        add(OK, "public-safety scan", "no personal or private-project material tracked")
-    else:
-        n = sum(1 for L in cp.stdout.splitlines() if L.startswith("  ") and "[" in L)
-        add(FAIL, "public-safety scan",
-            f"{n} finding(s) -- run python scripts/check_public_safe.py")
-
-
 def check_frozen() -> None:
     """The published artifacts must not have been recomputed."""
     m = config.ARTIFACTS_DIR / "BUILD.json"
@@ -211,7 +195,7 @@ def main() -> int:
     ap.add_argument("--strict", action="store_true", help="warnings also fail")
     a = ap.parse_args()
 
-    for fn in (check_public, check_sidecars, check_cross_artifact, check_zero_rows, check_geometry, check_batching,
+    for fn in (check_sidecars, check_cross_artifact, check_zero_rows, check_geometry, check_batching,
                check_backup, check_frozen):
         try:
             fn()

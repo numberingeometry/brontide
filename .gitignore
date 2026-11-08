@@ -35,7 +35,6 @@ region_labels.i16.npy
 .claude/
 *_LINK.md
 
-# Repo notes left the tree 2026-08-11 (ADR decisions/2026-08-11-notes-leave-the-repo.md).
 # Their science lives in LIMITATIONS.md + RELATED-WORK.md; originals are kept privately.
 notes/
 
@@ -51,3 +50,11 @@ notes/
 # Generated browser-map exports and local privacy screening rules
 /exports/
 .public-safe-patterns
+
+# Local workspace configuration
+AGENTS.md
+CLAUDE.md
+BRAIN_LINK.md
+.claude/
+.codex/
+.agents/

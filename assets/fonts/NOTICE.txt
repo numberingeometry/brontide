@@ -1,0 +1,4 @@
+Nunito and Comfortaa web fonts from @fontsource/nunito and @fontsource/comfortaa 5.3.0.
+Fonts retain their SIL Open Font License; see accompanying license files.
+https://fontsource.org/fonts/nunito
+https://fontsource.org/fonts/comfortaa

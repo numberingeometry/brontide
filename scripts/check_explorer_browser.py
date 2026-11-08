@@ -150,6 +150,8 @@ def main() -> int:
         assert not page.locator("#forecast-legend").is_visible()
         assert page.locator("#chart-unit").inner_text() == "papers"
 
+        # Open the on-demand territory browser before choosing another field.
+        page.locator("#topic-search").focus()
         # A tour changes the parent territory; stale microregion options must not survive.
         page.locator(f'#topic-list button[data-region="{region["id"]}"]').click()
         page.locator("#subarea-toggle").click()

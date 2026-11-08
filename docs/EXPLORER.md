@@ -3,14 +3,12 @@
 [Open Brontide](https://numberingeometry.github.io/brontide/). The atlas runs entirely
 in the browser from a frozen, versioned data bundle.
 
-[Watch the recorded showcase](https://numberingeometry.github.io/brontide/assets/atlas-showcase.mp4)
-for a short introduction to the views and controls.
-
 ## Start with a field
 
-Search a territory name or descriptive keyword in the topic browser. Select a territory
+Focus the search box to open the topic browser, then search a territory name or descriptive keyword.
+Hover over the landscape for a quick label. Select a territory
 to highlight its sampled papers and inspect its monthly publication share, terms and
-representative title. The title opens an arXiv search; it is a corpus example and need
+representative title in the detail drawer. The title opens an arXiv search; it is a corpus example and need
 not fall inside the selected time window.
 
 The list can be sorted by corpus size, observed change or name. Counts in the inspector
@@ -70,6 +68,7 @@ evaluation cutoffs. Read [the methods and results](FORECASTING.md) and
 
 **Take a short tour** steps through the views with explanatory captions. **Share view**
 copies a URL that restores the selected scene. **Save image** downloads a PNG of the map.
+These actions move into the drawer when a territory is selected.
 The application respects reduced-motion preferences and retains manual controls.
 
 To run a local copy, serve the repository with `python -m http.server 8000` and open
