@@ -48,7 +48,7 @@ def main() -> int:
     # production the query is a paper that is NOT in the corpus, so self-exclusion is what
     # reproduces the real situation.
     def knn_excluding_self(k: int) -> np.ndarray:
-        host = np.memmap(config.PCA_MEMMAP, dtype=np.float32, mode="r",
+        PC = np.memmap(config.PCA_MEMMAP, dtype=np.float32, mode="r",
                        shape=(n, config.PCA_DIM))
         out = np.zeros((len(idx), 2), dtype=np.float64)
         NB = 400_000
@@ -56,7 +56,7 @@ def main() -> int:
             bd = np.full(k, np.inf); bi = np.zeros(k, dtype=np.int64)
             for r0 in range(0, n, NB):
                 r1 = min(r0 + NB, n)
-                B = np.asarray(host[r0:r1], dtype=np.float32)
+                B = np.asarray(PC[r0:r1], dtype=np.float32)
                 d = np.linalg.norm(B - v, axis=1)
                 if r0 <= row < r1:
                     d[row - r0] = np.inf                  # the row itself

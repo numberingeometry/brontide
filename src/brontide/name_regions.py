@@ -1,4 +1,4 @@
-"""Stage 9b — Human-readable names for the 64 super-regions (CPU-only environment).
+"""Stage 9b — Human-readable names for the 64 super-regions .
 
 `labels.py` produces c-TF-IDF term lists per super-region — accurate but not readable:
 ``pose, depth, scene, reconstruction, rendering`` is a fingerprint, not a name. Every figure,

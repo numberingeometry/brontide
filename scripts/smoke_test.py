@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Whole-pipeline smoke test on a --sample (CPU-only environment, before the host full run).
+"""Whole-pipeline smoke test on a --sample (before a full corpus run).
 
 Runs every stage end-to-end on a small sample so interface/shape bugs surface on
-the CPU-only environment, not 6 hours into a host embed. Default sample = 50k.
+a bounded run, before expensive embedding. Default sample = 50k.
 """
 from brontide import (cli, embed, emergence, export_dashboard, export_figs, export_map,
                     forecast, ingest, labels, reduce, regions, series, validate)

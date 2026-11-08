@@ -1,4 +1,4 @@
-"""Stage 3 — Reduce (host).
+"""Stage 3 — Reduce.
 
 Two independent reductions:
 
@@ -38,7 +38,7 @@ def run_pca(sample: int | None = None,
             out: Path = config.PCA_MEMMAP) -> Path:
     """Exact streaming PCA 768→``PCA_DIM``. Returns a float32 (N, PCA_DIM) memmap.
 
-    Solver (CPU-only environment-directed 2026-07-23, replaces IncrementalPCA — see the
+    Solver (registered 2026-07-23, replaces IncrementalPCA — see the
     validation.md clarification): accumulate the row count, first moment Σx and
     second moment Σxxᵀ in float64 over the *fit set* in streamed batches, form the
     centered covariance ``C = Σxxᵀ/n_fit − μμᵀ`` (μ = Σx/n_fit), and take the top
@@ -47,8 +47,7 @@ def run_pca(sample: int | None = None,
     load-bearing for the refit-per-cutoff validation), and faster; d=768 ≪ N makes
     the 768×768 covariance trivial. A fixed sign convention (each component's
     max-abs loading forced positive) keeps raw coordinates reproducible across runs.
-    NB: ``eigh``/GEMM here are the LAPACK/BLAS calls the host's MKL_THREADING_LAYER=TBB
-    fix protects — launch via ``conda run -n brontide``, never a hard interpreter path.
+    Use the configured numerical environment for consistent LAPACK/BLAS behavior.
 
     ``fit_mask`` (bool, length = processed N) restricts the fit set to papers
     ``<= T0`` for the masked validation run — the mean AND covariance are both
@@ -165,7 +164,7 @@ def run_umap(sample: int | None = None,
              out: Path = config.UMAP_MEMMAP) -> Path:
     """UMAP ``PCA_DIM``→2, sample-fit + transform-rest. Display only. Returns memmap.
 
-    Display-only (the metric space is PCA-50; this is just the map). On this 16 GB
+    Display-only (the metric space is PCA-50; this is just the map). With bounded memory,
     box the ~7.4 GB spectral-init peak is the pipeline's RAM ceiling AND a silent-
     failure hotspot (umap catches ArpackError and quietly returns a random layout),
     so init="random" is used deliberately — lower, predictable RAM; UMAP's SGD
@@ -208,7 +207,7 @@ def run_umap(sample: int | None = None,
     # it, which is the difference between appending to the map and rebuilding it.
     #
     # It carries the fit sample and its neighbour index, so it is large (tens to hundreds
-    # of MB) and lives in data/ with the rest of the host-only intermediates. `transform`
+    # of MB) and lives in data/ with the other regenerable intermediates. `transform`
     # is a fresh optimisation against that index rather than a lookup, so it reproduces
     # stored coordinates closely but not bit-exactly -- reduce.check_transforms() measures
     # by how much instead of assuming.

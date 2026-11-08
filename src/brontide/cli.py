@@ -1,7 +1,7 @@
 """Shared CLI plumbing for the stage runners.
 
-Every stage supports ``--sample N`` so the storage-limited CPU-only environment can smoke-test
-the whole pipeline before the host full run.
+Every stage supports ``--sample N`` so bounded trial runs can exercise
+the whole pipeline before full corpus processing.
 """
 from __future__ import annotations
 

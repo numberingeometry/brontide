@@ -1,4 +1,4 @@
-"""Stage 10a — Export map (CPU-only environment).
+"""Stage 10a — Export map.
 
 Write the portfolio site's existing binary contract from REAL coordinates, so the
 map page needs **zero changes** (it already reads these four files). Replaces the

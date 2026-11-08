@@ -42,9 +42,9 @@ from pathlib import Path
 
 from . import config
 
-# artifacts/, not data/: `/data/*` is gitignored (host-only intermediates), and the whole
-# point of this file is that a machine WITHOUT the corpus -- the CPU-only environment, or a reader of
-# the GitHub repo -- can still tell which build the ids and coordinates it holds came
+# artifacts/, not data/: `/data/*` is gitignored (regenerable intermediates), and the whole
+# point of this file is that an installation without the raw corpus -- including a reader of
+# the GitHub repository -- can still tell which build the ids and coordinates it holds came
 # from. It is ~2 KB and describes the build, not the device; artifacts missing locally
 # are recorded `present: false` rather than omitted.
 MANIFEST = config.ARTIFACTS_DIR / "BUILD.json"

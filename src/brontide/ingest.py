@@ -1,4 +1,4 @@
-"""Stage 1 — Ingest (host, ~1h).
+"""Stage 1 — Ingest.
 
 Download the arXiv Kaggle snapshot (~2.6M papers, abstracts included) via
 ``kagglehub``, stream-parse the JSON, and write a tidy parquet:
@@ -65,8 +65,8 @@ def _month_of(record: dict) -> str | None:
 def _locate_snapshot() -> Path:
     """Download (or reuse the cached) Kaggle snapshot; return the JSON path.
 
-    Needs Kaggle credentials -- [configured directory] or KAGGLE_USERNAME +
-    KAGGLE_KEY. Without them kagglehub tries to prompt, which fails outright in
+    Needs Kaggle credentials configured through KAGGLE_USERNAME and KAGGLE_KEY.
+    Without them kagglehub tries to prompt, which fails outright in
     an unattended run.
     """
     import kagglehub

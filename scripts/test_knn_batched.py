@@ -21,10 +21,10 @@ import numpy as np  # noqa: E402
 from brontide import config, geometry  # noqa: E402
 
 
-def naive(p: np.ndarray, host: np.ndarray, U, k: int) -> np.ndarray:
+def naive(p: np.ndarray, PC: np.ndarray, U, k: int) -> np.ndarray:
     out = np.zeros((len(p), 2), dtype=np.float32)
     for i, v in enumerate(p):
-        d = np.linalg.norm(host - v, axis=1)
+        d = np.linalg.norm(PC - v, axis=1)
         near = np.argpartition(d, k)[:k]
         near = near[np.argsort(d[near])]
         w = 1.0 / (d[near].astype(np.float64) + 1e-6)
@@ -42,7 +42,7 @@ def main() -> int:
 
     # A real subset as the corpus, so the naive comparison is affordable.
     SUB = 300_000
-    host = np.asarray(PCmm[:SUB], dtype=np.float32)
+    PC = np.asarray(PCmm[:SUB], dtype=np.float32)
     U = np.asarray(Umm[:SUB], dtype=np.float32)
 
     rng = np.random.default_rng(0)
@@ -50,7 +50,7 @@ def main() -> int:
     print(f"corpus subset {SUB:,}   queries {len(q)}   k=8")
 
     t0 = time.perf_counter()
-    want = naive(q, host, U, 8)
+    want = naive(q, PC, U, 8)
     t_naive = time.perf_counter() - t0
 
     # Point the module at the same subset by monkeypatching its row lookups.

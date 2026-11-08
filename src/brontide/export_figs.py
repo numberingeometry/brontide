@@ -1,4 +1,4 @@
-"""Stage 10b — Figures and the dashboard payload (CPU-only environment).
+"""Stage 10b — Figures and the dashboard payload.
 
 Everything here is built from **committed artifacts only** — no raw corpus, no embeddings
 memmap, no GPU, no network. That is the point: a reader who clones the repo can regenerate

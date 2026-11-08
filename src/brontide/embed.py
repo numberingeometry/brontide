@@ -1,4 +1,4 @@
-"""Stage 2 — Embed (host GPU, ~4–8h).
+"""Stage 2 — Embed (GPU embedding).
 
 Local SPECTER2: ``allenai/specter2_base`` + the proximity adapter
 (``allenai/specter2``). Input = ``title [SEP] abstract``, fp16, max 256 tokens,
@@ -8,7 +8,7 @@ Report throughput (papers/sec) so we can trigger the fallback: if GPU
 throughput disappoints, download S2 bulk embeddings matched on arXiv IDs
 (bigger download, no GPU) instead.
 
-Measured on the host's GTX 1060 6GB (sm_61): **52.8 papers/sec fp16** (fp32 is
+Reference benchmark on a GTX 1060 6GB (sm_61): **52.8 papers/sec fp16** (fp32 is
 30.7 -- fp16 wins ~1.7x because this workload is memory-bandwidth bound, not
 FP16-ALU bound, so Pascal's crippled native fp16 rate does not bite). That puts
 2.7M rows at ~14h, which is why this run is designed to be RESUMABLE: a 14-hour

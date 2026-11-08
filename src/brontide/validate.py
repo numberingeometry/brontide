@@ -1,4 +1,4 @@
-"""Stage 8 — Out-of-time validation (CPU-only environment). THE headline artifact.
+"""Stage 8 — Out-of-time validation . THE headline artifact.
 
 Three replicates at ``config.VALIDATION_CUTOFFS`` = (2017-12, 2020-12, 2022-12):
 one quiet window + two regime-shift stress tests (COVID, the LLM explosion).
@@ -21,7 +21,7 @@ the writeup says so plainly ("region-level emergence is momentum-dominated at
 24m") — the harness, map, and novelty stream remain the résumé artifact.
 
 Sprint 1 ships the pure scoring functions below (unit-tested). ``run`` (the masked
-Run B orchestration) is Sprint 2 — it needs the host (the ≤T0 re-fits require the
+Run B orchestration) is Sprint 2 — it needs the complete corpus (the ≤T0 re-fits require the
 embeddings memmap).
 """
 from __future__ import annotations
@@ -168,7 +168,7 @@ def run(cutoffs: tuple[str, ...] = config.VALIDATION_CUTOFFS,
     IMPORTANT: the thresholds section of validation.md must already be committed
     (dated, content-hashed) BEFORE this scoring run — pre-registration discipline.
 
-    host-executed: the per-cutoff ≤T0 re-fits (steps 1–2) need the embeddings memmap.
+    Full validation: the per-cutoff ≤T0 re-fits (steps 1–2) need the embeddings memmap.
     Every cutoff uses cutoff-scoped paths — the production all-data memmaps/centroids
     are never reused, so PCA, k-means, κ, and τ are all fit on ≤T0 only.
     """

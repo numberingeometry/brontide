@@ -2,7 +2,7 @@
 
     conda run -n brontide python scripts/rebuild_region_labels.py
 
-`region_labels.i16.npy` is the per-paper microregion assignment. It is a host-only
+`region_labels.i16.npy` is the per-paper microregion assignment. It is an untracked
 intermediate (gitignored, ~5.4 MB) that `regions.run` writes alongside the small committed
 region artifacts — and it is **absent on this machine**, which matters because two things
 need it:

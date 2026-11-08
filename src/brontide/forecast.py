@@ -1,4 +1,4 @@
-"""Stage 6 — Forecast (host/CPU-only environment, ~30min CPU).
+"""Stage 6 — Forecast (CPU forecasting).
 
 ``statsforecast`` (Nixtla) roster from ``config.FORECAST_MODELS``; the serious
 baseline is **SmoothedMomentum** (trailing-12m vs prior-12m share growth, carried

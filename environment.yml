@@ -1,14 +1,7 @@
-# Conda environment for brontide. Matches arxiv-heatmap's conda lineage; conda-first
-# because the compute host installs CUDA torch here (most robust on Windows).
-#
-#   conda env create -f environment.yml
-#   conda activate brontide
-#   pip install -e .            # makes `import brontide` work
-#
-# GPU note (compute host): the pip `torch` below is CPU/default. On the compute host, after creating
-# the env, install the CUDA build explicitly, e.g.:
-#   pip install torch --index-url https://download.pytorch.org/whl/cu124
-# The CPU-only environment only ever runs `--sample` smoke tests, so CPU torch is fine there.
+# Portable environment for the pipeline and its CPU verification tools.
+# GPU embedding requires a torch build compatible with the available CUDA runtime.
+# Create with: conda env create -f environment.yml
+# Then activate brontide and install the appropriate torch wheel if GPU support is needed.
 name: brontide
 channels:
   - conda-forge
@@ -25,7 +18,7 @@ dependencies:
   - pip:
       - umap-learn
       - statsforecast        # Nixtla — Naive/SeasonalNaive/AutoETS/AutoARIMA/AutoTheta
-      - torch                # CPU default; compute host overrides with the CUDA wheel (see note above)
+      - torch                # install a compatible CUDA build when GPU embedding is needed
       - transformers
       - adapters             # SPECTER2 proximity adapter (allenai/specter2)
       - kagglehub            # arXiv Kaggle snapshot download

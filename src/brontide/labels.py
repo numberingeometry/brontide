@@ -1,4 +1,4 @@
-"""Stage 9 — Labels (host, minutes).
+"""Stage 9 — Labels.
 
 c-TF-IDF top terms per super-region (class-based TF-IDF over the 64 super-region
 document-aggregates), plus nearest-centroid paper titles as a sanity check.

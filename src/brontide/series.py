@@ -1,4 +1,4 @@
-"""Stage 5 — Series (host, minutes).
+"""Stage 5 — Series .
 
 Two signals per (micro-region × month), ``CORPUS_START``→``CORPUS_END`` (the last
 COMPLETE month; the trailing partial month is dropped — its raw count deflates the
@@ -70,7 +70,7 @@ def _estimate_kappa(trailing_counts: np.ndarray, super_of_region: np.ndarray) ->
     """Symmetric Dirichlet-Multinomial concentration (per-region prior count) by
     method-of-moments, ONE global pool over within-super trailing-12m counts.
 
-    Reading (flagged for CPU-only environment review — config/validation.md fix the *form*
+    Reading (requiring independent review — config/validation.md fix the *form*
     w_r=n_r/(n_r+kappa) and "symmetric-DM MoM, single global pool", not the closed
     form): treat each super S's micro-region counts as symmetric DM(N_S; kappa·1_{n_S}).
     Per super, the Pearson-vs-uniform statistic G_S = Σ_i (x_i − N_S/n_S)² / (N_S/n_S)

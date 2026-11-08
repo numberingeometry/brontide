@@ -8,11 +8,12 @@ first scoring run (pre-registration discipline — see the v1 plan).
 """
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 # --- paths ------------------------------------------------------------------
 REPO_ROOT = Path(__file__).resolve().parents[2]
-DATA_DIR = REPO_ROOT / "data"          # gitignored — big intermediates live here (host only)
+DATA_DIR = REPO_ROOT / "data"          # gitignored regenerable intermediates
 ARTIFACTS_DIR = REPO_ROOT / "artifacts"  # small committed outputs (parquet/json/map/reports)
 
 RAW_PARQUET = DATA_DIR / "papers.parquet"          # ingest -> id, date, categories, title, abstract
@@ -24,7 +25,7 @@ UMAP_MEMMAP = DATA_DIR / "umap2.f32.memmap"        # reduce -> float32 (N, 2) di
 EMBED_MODEL = "allenai/specter2_base"      # + proximity adapter "allenai/specter2"
 EMBED_DIM = 768
 EMBED_MAX_TOKENS = 256
-EMBED_BATCH = 128                          # host GPU; tune to VRAM
+EMBED_BATCH = 128                          # tune to available VRAM
 CORPUS_START = "2007-01"                   # first monthly bin
 CORPUS_END = "2026-06"                     # last COMPLETE monthly bin = production forecast origin T0.
 # A data-window marker (mirror of CORPUS_START), NOT a scored threshold: the trailing
@@ -98,11 +99,10 @@ MAP_YEAR0 = 2007
 MAP_DOWNSAMPLE = 150_000                     # proportional per micro-region, min 20/region
 MAP_BUDGET_MB = 5.0                          # transferred before first zoom (DevTools check)
 
-# Site repo (sibling under [configured directory] — export_map.py writes here directly.
-# The site slug is still the old codename; renaming it is a site-side follow-up
-# (see decisions/2026-08-11-renamed-to-brontide.md), so this path tracks reality, not the new name.
-SITE_MAP_DATA_DIR = (REPO_ROOT.parent / "numberingeometry.github.io"
-                     / "projects" / "lacuna" / "map" / "data")
+# Optional map export directory; defaults to a generated directory in this repository.
+# Set BRONTIDE_MAP_OUTPUT_DIR or pass out_dir= to export_map.run for another destination.
+SITE_MAP_DATA_DIR = Path(os.environ.get("BRONTIDE_MAP_OUTPUT_DIR", str(REPO_ROOT / "exports" / "map")))
+
 
 
 def resolve_sample(sample: int | None) -> str:

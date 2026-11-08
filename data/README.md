@@ -4,9 +4,9 @@ status: active
 opened: 2026-08-01
 ---
 
-# data/ — compute host-only bulk intermediates (gitignored)
+# data/ — locally generated bulk intermediates (gitignored)
 
-**Nothing here is committed, and nothing here is required to read the results.** This directory is `device-local: true` in the `structure:` block: the heavy stages run on the compute host, and only the small derived outputs cross the wire in [`../artifacts/`](../artifacts/). An ignored directory still documents its shape and its rebuild command — an unexplained empty dir is indistinguishable from an oversight (repository setup, repository organization).
+**Bulk files here are untracked and are not required to read the published results.** This directory is `device-local: true` in the `structure:` block: the heavy stages generate local intermediate files, and only the small derived outputs cross the wire in [`../artifacts/`](../artifacts/). An ignored directory still documents its shape and its rebuild command.
 
 ## What belongs here
 
@@ -23,7 +23,7 @@ opened: 2026-08-01
 python scripts/run_ingest.py && python scripts/run_embed.py && python scripts/run_reduce.py && python scripts/run_regions.py
 ```
 
-CPU-only environment smoke test without the bulk: every stage accepts `--sample N` (see the repo README).
+Small-scale smoke test without the bulk: every stage accepts `--sample N` (see the repo README).
 
 ## Why it is ignored
 

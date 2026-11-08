@@ -1,140 +1,86 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>brontide · forecasting the research frontier</title>
-<meta name="description" content="2.7 million arXiv papers, 1,024 research regions, 24-month forecasts, and a pre-registered test that failed, with the reason.">
-<link rel="icon" href="assets/brontide-logo.svg" type="image/svg+xml">
-<style>
-:root { --bg:#0d1117; --panel:#161b22; --line:#232a34; --ink:#e6edf3; --ink2:#9aa4b2; --ink3:#6b7280;
-  --blue:#3987e5; --orange:#d95926; --aqua:#199e70; }
-* { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--ink);
-  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Inter, sans-serif; }
-a { color: var(--blue); }
-.wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
-.hero { padding: 56px 0 28px; display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: center; }
-@media (max-width: 720px) { .hero { grid-template-columns: 1fr; padding-top: 32px; } .hero img.logo { display: none; } }
-.kicker { color: var(--ink3); font-size: 14px; letter-spacing: .04em; margin: 0 0 10px; }
-.kicker em { color: var(--ink2); }
-h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.12; margin: 0 0 14px; letter-spacing: -.02em; }
-.lead { font-size: 18px; color: var(--ink2); max-width: 680px; margin: 0 0 22px; }
-.cta { display: flex; gap: 10px; flex-wrap: wrap; }
-.btn { display: inline-block; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600;
-  border: 1px solid var(--line); color: var(--ink); background: var(--panel); }
-.btn.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
-.logo { width: 150px; height: 150px; }
-.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 8px 0 36px; }
-.stat { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
-.stat b { display: block; font-size: 22px; font-variant-numeric: tabular-nums; }
-.stat span { color: var(--ink3); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
-figure { margin: 0 0 40px; }
-figure img { width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--line); background: #0a0e14; display: block; }
-figcaption { color: var(--ink3); font-size: 13px; margin-top: 8px; }
-h2 { font-size: 24px; margin: 0 0 16px; letter-spacing: -.01em; }
-.findings { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-bottom: 44px; }
-.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
-.card h3 { margin: 0 0 8px; font-size: 17px; }
-.card p { margin: 0 0 8px; color: var(--ink2); font-size: 15px; }
-.tag { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
-  padding: 2px 8px; border-radius: 999px; margin-bottom: 10px; }
-.tag.fail { background: #3b1d14; color: #f0a07e; } .tag.ok { background: #0f2e24; color: #6fd3ab; } .tag.note { background: #13243b; color: #8fbcf0; }
-.num { color: var(--ink); font-weight: 650; font-variant-numeric: tabular-nums; }
-pre { background: #0a0e14; border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; overflow-x: auto;
-  font: 13.5px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--ink); margin: 0 0 12px; }
-.ok-line { color: #6fd3ab; }
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-@media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
-footer { border-top: 1px solid var(--line); margin-top: 40px; padding: 22px 0 40px; color: var(--ink3); font-size: 14px; }
-footer a { color: var(--ink2); }
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080d16">
+  <meta name="description" content="Explore the shape of research. An interactive atlas of 2.7 million arXiv papers, with semantic territories, publication timelines, and a space-time view.">
+  <title>brontide — the research atlas</title>
+  <link rel="icon" href="assets/brontide-logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="web/styles.css">
 </head>
 <body>
-<div class="wrap">
-  <section class="hero">
-    <div>
-      <p class="kicker"><em>brontide</em> (n.): the low rumble of thunder from a storm still beyond the horizon.</p>
-      <h1>Which corners of science are about to grow?</h1>
-      <p class="lead">brontide maps 2.7 million arXiv papers into 1,024 research regions, forecasts each region's
-        share of new work 24 months ahead, and grades itself with a test frozen before any data was touched.
-        The test failed, and the project says why.</p>
-      <div class="cta">
-        <a class="btn primary" href="dashboard.html">Open the live map</a>
-        <a class="btn" href="https://github.com/numberingeometry/brontide">Code and data</a>
-        <a class="btn" href="#verify">Verify in two seconds</a>
+  <a class="skip-link" href="#explorer">Skip to research atlas</a>
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="brontide home"><img src="assets/brontide-logo.svg" alt="" width="34" height="34"><span>brontide<span class="brand-dot">.</span></span></a>
+    <div class="header-description">THE RESEARCH ATLAS</div>
+    <nav aria-label="Main navigation">
+      <button class="text-button" id="method-open">How to read the map <span aria-hidden="true"><svg class="inline-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8"/></svg></span></button>
+      <a class="source-link" href="https://github.com/numberingeometry/brontide" target="_blank" rel="noopener">Source <span aria-hidden="true"><svg class="inline-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8"/></svg></span></a>
+    </nav>
+  </header>
+  <main id="explorer">
+    <section class="atlas" aria-label="Interactive research atlas">
+      <div class="scene" id="scene">
+        <canvas id="atlas-canvas" tabindex="0" aria-label="Research map. Drag to orbit, shift-drag to pan, scroll to zoom. Arrow keys orbit; plus and minus zoom; Home resets. Select a topic from the topic list for an accessible alternative."></canvas>
+        <div class="map-labels" id="map-labels" aria-hidden="true"></div>
+        <div class="axis-labels" id="axis-labels" aria-hidden="true"></div>
+        <div class="map-tooltip" id="map-tooltip" hidden></div>
+        <div class="loading-screen" id="loading" role="status"><span class="loading-orbit" aria-hidden="true"></span><span>Opening the research landscape…</span><small>Real papers. A fixed semantic frame.</small></div>
       </div>
-    </div>
-    <img class="logo" src="assets/brontide-logo.svg" alt="">
-  </section>
-
-  <div class="stats">
-    <div class="stat"><span>Papers</span><b>2,705,992</b></div>
-    <div class="stat"><span>Months</span><b>234</b></div>
-    <div class="stat"><span>Microregions</span><b>1,024</b></div>
-    <div class="stat"><span>Masked cutoffs</span><b>3</b></div>
-    <div class="stat"><span>Frozen criterion</span><b>0 / 3</b></div>
-    <div class="stat"><span>Best model vs chance</span><b>6&times;</b></div>
-  </div>
-
-  <figure>
-    <img src="figures/map-evolution.gif" alt="The arXiv research frontier filling in, 2007 to 2026" loading="lazy">
-    <figcaption>Every dot is a paper, placed by its SPECTER2 embedding and coloured by super-region; the map accumulates year by year.</figcaption>
-  </figure>
-
-  <h2>What it found</h2>
-  <div class="findings">
-    <div class="card">
-      <span class="tag fail">Pre-registered · not met</span>
-      <h3>The frozen test failed</h3>
-      <p>The cross-validated forecaster beat a momentum baseline on precision@50 at <span class="num">0 of 3</span>
-        cutoffs (2 needed). The sentence written before the data existed is reported verbatim.</p>
-    </div>
-    <div class="card">
-      <span class="tag note">Diagnosed</span>
-      <h3>Signal was there; selection lost it</h3>
-      <p>A fixed AutoETS reached <span class="num">0.613</span> precision@50 against a <span class="num">0.101</span>
-        chance rate; the selector scored <span class="num">0.413</span>. Hindsight per-cutoff choice would add only
-        <span class="num">0.020</span>; the selector gave up <span class="num">0.220</span>.</p>
-    </div>
-    <div class="card">
-      <span class="tag ok">Pre-registered follow-ups</span>
-      <h3>Novelty adds skill; intervals are miscalibrated</h3>
-      <p>The novelty stream adds rank skill beyond the forecast at <span class="num">2 of 3</span> cutoffs, meeting
-        its frozen bar. The 80% intervals do not: in band at <span class="num">3 of 9</span> cells. They match the
-        raw share but over-cover the smoothed series they were fitted on.</p>
-    </div>
-  </div>
-
-  <div class="grid2">
-    <figure>
-      <img src="figures/validation-precision.png" alt="precision@50 by model and cutoff against the chance rate" loading="lazy">
-      <figcaption>precision@50 for every model at every cutoff, against chance.</figcaption>
-    </figure>
-    <figure>
-      <img src="figures/forecast-vs-realized.png" alt="History, forecast band and realised path for six super-regions" loading="lazy">
-      <figcaption>Forecasts made at 2020-12 with the future masked, against what happened.</figcaption>
-    </figure>
-  </div>
-
-  <h2 id="verify">Verify it yourself</h2>
-  <pre>git clone https://github.com/numberingeometry/brontide && cd brontide
-pip install -e .
-python scripts/verify_results.py
-
-<span class="ok-line">negative criterion: 0/3 (need >=2) -> region-level emergence is momentum-dominated at 24m
-OK: all 18 published rows reproduce exactly.</span></pre>
-  <p style="color:var(--ink2)">No corpus, no GPU, no network: every published number regenerates from committed artifacts,
-    and the git history proves the thresholds were committed a day before the results.
-    What the verdict does and does not license is in
-    <a href="https://github.com/numberingeometry/brontide/blob/main/LIMITATIONS.md">LIMITATIONS.md</a>;
-    prior art is in <a href="https://github.com/numberingeometry/brontide/blob/main/RELATED-WORK.md">RELATED-WORK.md</a>.</p>
-
-  <footer>
-    brontide · MIT licence ·
-    <a href="https://github.com/numberingeometry/brontide">GitHub</a> ·
-    <a href="https://pypi.org/project/brontide/">PyPI</a>
-  </footer>
-</div>
+      <div class="stage-heading">
+        <div class="eyebrow"><span class="status-dot"></span> A LANDSCAPE OF IDEAS</div>
+        <h1>Science,<br><span>in motion.</span></h1>
+        <p>Find a field. Follow its trajectory.<br>See how research takes shape.</p>
+        <div class="corpus-line"><strong id="corpus-size">2.7M</strong> papers <span> / </span> <strong id="territory-count">64</strong> territories</div>
+      </div>
+      <div class="view-controls" role="group" aria-label="Visualization mode">
+        <button data-view="space" class="active" aria-pressed="true"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m10 2 7 4v8l-7 4-7-4V6Zm0 0v8m7-4-7 4-7-4m7 4v8"/></svg>Space-time</button>
+        <button data-view="terrain" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m2 15 5-8 3 5 3-8 5 11ZM5 15l2-3 3 3m1-8 3 5 2-1"/></svg>Density</button>
+        <button data-view="map" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m2 5 5-2 6 2 5-2v12l-5 2-6-2-5 2Zm5-2v12m6-10v12"/></svg>2D map</button>
+      </div>
+      <aside class="topic-browser" id="topic-browser" aria-label="Browse research territories">
+        <div class="browser-heading"><span>EXPLORE A TERRITORY</span><button class="icon-button browser-toggle" id="browser-toggle" aria-label="Show or hide topic list" aria-expanded="true">−</button></div>
+        <div class="browser-body" id="browser-body">
+          <label class="search-field" for="topic-search"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg><input id="topic-search" type="search" placeholder="Search topics or keywords" autocomplete="off"><span class="keycap" aria-hidden="true">/</span></label>
+          <div class="list-heading"><span id="topic-list-caption">ALL TERRITORIES</span><select id="topic-sort" aria-label="Sort territories"><option value="size">By corpus size</option><option value="change">By observed change</option><option value="name">A to Z</option></select></div>
+          <div id="topic-list" class="topic-list" role="list" aria-label="Research territories"></div>
+          <p class="search-note" id="search-note">Searches territory names and descriptive terms.</p>
+        </div>
+      </aside>
+      <aside class="inspector" id="inspector" aria-label="Selected research territory">
+        <div class="inspector-top"><span class="eyebrow" id="detail-kicker">THE BIG PICTURE</span><button class="icon-button" id="clear-selection" aria-label="Clear selected territory" hidden>×</button></div>
+        <h2 id="detail-name">A world of research</h2>
+        <p class="detail-description" id="detail-description">Every point is a sampled paper. Related work forms a territory; height reveals when it appeared.</p>
+        <div id="detail-terms" class="term-list"></div>
+        <div class="detail-stats"><div><span id="stat-one-label">PAPERS IN WINDOW</span><strong id="stat-one">—</strong></div><div><span id="stat-two-label">OBSERVED PERIOD</span><strong id="stat-two">—</strong></div></div>
+        <div class="chart-heading"><span id="chart-title">Monthly publications</span><span id="chart-unit">papers</span></div>
+        <svg id="history-chart" class="history-chart" viewBox="0 0 500 160" role="img" aria-label="Monthly publication history"></svg>
+        <div class="chart-legend"><span><i class="observed-key"></i>Observed</span><span id="forecast-legend" hidden><i class="forecast-key"></i>Forecast</span><span id="chart-date-label">2007 — 2026</span></div>
+        <div class="comparison-note" id="comparison-note" hidden></div>
+        <div class="representative" id="representative" hidden><span class="small-label">A REPRESENTATIVE PAPER</span><p id="representative-title"></p><span class="representative-note">A corpus example, not filtered by the time window.</span></div>
+        <div class="subarea-section" id="subarea-section" hidden><button id="subarea-toggle" class="subarea-toggle" aria-expanded="false">Explore microregions <span id="subarea-count"></span><span aria-hidden="true"><svg class="inline-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8"/></svg></span></button><div id="subarea-content" hidden><p class="micro-note">Statistical subareas within this territory. Point-level assignments are not included in the public map.</p><label class="sr-only" for="microregion-select">Choose a microregion</label><select id="microregion-select"></select><p id="microregion-description" class="micro-note"></p></div></div>
+        <div class="inspector-footer"><span class="tiny-dot"></span><span id="detail-provenance">Frozen corpus · through June 2026</span></div>
+      </aside>
+      <div class="scene-tools" role="group" aria-label="Map tools">
+        <button class="icon-button" id="zoom-in" aria-label="Zoom in" title="Zoom in">+</button><button class="icon-button" id="zoom-out" aria-label="Zoom out" title="Zoom out">−</button><span></span><button class="icon-button" id="reset-camera" aria-label="Reset camera" title="Reset camera"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7a6.5 6.5 0 1 1 0 6M4 3v4h4"/></svg></button>
+      </div>
+      <div class="view-caption"><span id="view-caption">VERTICAL AXIS · PUBLICATION YEAR</span><span id="gesture-caption">Drag to orbit · scroll to zoom</span></div>
+      <div class="time-dock">
+        <div class="time-dock-top"><div><span class="small-label">PUBLICATION WINDOW</span><strong id="window-label">2007 — 2026</strong></div><div class="time-actions"><label class="compare-control"><input type="checkbox" id="compare-toggle"><span>Compare</span></label><button class="play-button" id="play" aria-label="Play publication timeline"><span id="play-icon" class="play-glyph" aria-hidden="true"></span></button><label class="sr-only" for="playback-speed">Playback speed</label><select id="playback-speed" aria-label="Playback speed"><option value="1000">1×</option><option value="500">2×</option><option value="2000">½×</option></select></div></div>
+        <svg id="timeline" viewBox="0 0 760 34" preserveAspectRatio="none" aria-hidden="true"></svg>
+        <div class="range-controls"><label for="year-from">From <output id="year-from-label">2007</output><input id="year-from" type="range" min="0" max="19" value="0"></label><label for="year-to">To <output id="year-to-label">2026</output><input id="year-to" type="range" min="0" max="19" value="19"></label></div>
+        <div class="timeline-foot"><span id="time-resolution">Points: annual · statistics: monthly</span><span id="visible-points">Loading sample</span></div>
+      </div>
+      <div class="story-toolbar"><button id="story-start"><span class="tour-glyph" aria-hidden="true"></span> Take a short tour</button><span></span><button id="share-view" title="Copy a link to this view">Share view <span aria-hidden="true"><svg class="inline-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8"/></svg></span></button><button id="export-image" title="Download this view as an image">Save image <svg class="inline-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v10m-4-4 4 4 4-4M3 14h10"/></svg></button></div>
+      <div class="story-card" id="story-card" hidden aria-live="polite"><div class="story-top"><span id="story-step">01 / 04</span><button class="icon-button" id="story-close" aria-label="Close tour">×</button></div><h3 id="story-title"></h3><p id="story-description"></p><div class="story-bottom"><button id="story-previous" class="text-button"><svg class="inline-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M14 8H2m5-5-5 5 5 5"/></svg> Back</button><button id="story-next">Next chapter <svg class="inline-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h12m-5-5 5 5-5 5"/></svg></button></div></div>
+    </section>
+    <section class="context-strip" aria-label="About this atlas"><div><span class="context-number">01</span><div><h2>Meaning gives it shape.</h2><p>SPECTER2 embeddings group related papers. The map is a 2D projection of that semantic space, held fixed as you move through time.</p></div></div><div><span class="context-number">02</span><div><h2>Time adds perspective.</h2><p>Space-time lifts papers by publication year. Density shows the relative concentration of the display sample, rather than a measure of scientific importance.</p></div></div><div><span class="context-number">03</span><div><h2>The evidence stays visible.</h2><p>Monthly histories come from corpus aggregates. Experimental forecasts are dated, distinguished from observations, and accompanied by their evaluation.</p><button class="inline-link" id="evidence-open">Methods, data &amp; limitations <svg class="inline-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8"/></svg></button><p><a class="inline-link" href="assets/atlas-showcase.mp4">Watch the 90-second showcase</a></p></div></div></section>
+  </main>
+  <footer class="site-footer"><span>brontide<span class="brand-dot">.</span> <span class="footer-descriptor">An open research atlas.</span></span><span>Frozen map: <span id="footer-date">June 2026</span> · <a href="https://github.com/numberingeometry/brontide" target="_blank" rel="noopener">Code &amp; reproducibility <svg class="inline-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8"/></svg></a></span></footer>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <dialog id="method-dialog" aria-labelledby="method-title"><div class="dialog-heading"><span class="eyebrow">A FIELD GUIDE</span><button class="icon-button" id="method-close" aria-label="Close map guide">×</button></div><h2 id="method-title">Read the landscape.</h2><p class="dialog-lead">A visual tool for exploring the research corpus, with a separate, reproducible forecasting experiment.</p><div class="method-grid"><section><h3>What the axes mean</h3><p>Horizontal position is a fixed PCA → UMAP projection of SPECTER2 paper embeddings. Nearby dots often describe related work, but projected distances and apparent gaps are not calibrated semantic measurements. Clustering uses the 50-dimensional PCA space.</p><p>In <b>space-time</b>, height is publication year. In <b>density</b>, height is a smoothed, normalized concentration of the sampled points in the selected window. Density is neither paper quality nor a forecast.</p></section><section><h3>What you are seeing</h3><p id="method-sample">The map displays a stratified sample of the frozen arXiv corpus. Counts and monthly histories use aggregate artifacts, not dot counts.</p><p>Map points have annual dates; charts retain monthly resolution. The final year is partial. Topic names are generated descriptions, not an authoritative taxonomy. Representative titles may come from outside the selected window.</p><p>Microregion series can be inspected within a territory. The public point sample has only superregion assignments, so microregion selection does not relabel or relocate dots.</p></section><section><h3>Window and comparison</h3><p>The sliders filter publication years. Compare retains papers before the selected window as a muted baseline and highlights papers in the window. The chart marks the same window; percentage-point changes compare mean observed monthly shares in the endpoint years.</p><p>This is retrospective exploration: the display projection was fitted using the full frozen corpus. Moving the year does not create a historically refitted model.</p></section><section><h3>Forecasts and evaluation</h3><p>Forecasts begin after June 2026 and use the committed production model, SmoothedMomentum. They are independent projections, not jointly normalized across regions, and are experimental extrapolations rather than promises. The pre-registered selection procedure beat its momentum baseline at <b>0 of 3</b> masked cutoffs, missing its ≥2 criterion.</p><p>Published 80% intervals failed the calibration criterion; the explorer does not present them as calibrated uncertainty. The frozen result and its scope remain in the repository.</p><a href="https://github.com/numberingeometry/brontide/blob/main/LIMITATIONS.md" target="_blank" rel="noopener">Read evaluation &amp; limitations <svg class="inline-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8"/></svg></a></section></div><div class="controls-guide"><strong>Make it yours</strong><span>Drag: orbit · Shift/right-drag: pan · Scroll/pinch: zoom · Arrows: orbit · +/−: zoom · Home: reset · /: search · Escape: clear selection</span></div><p class="build-note" id="build-note"></p></dialog>
+  <noscript><div class="noscript-notice">This interactive atlas needs JavaScript. <a href="figures/frontier-map.png">View the static research map</a> or <a href="https://github.com/numberingeometry/brontide">read the methods and reproducible results</a>.</div></noscript>
+  <script type="module" src="web/app.js"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-"""Stage 4 — Regions (host, ~30min).
+"""Stage 4 — Regions.
 
 MiniBatchKMeans **K=1024** microclusters on the 50-D PCA space
 (~2.6k papers/region ⇒ ~11 papers/region/month — enough signal). K-means over
@@ -82,7 +82,7 @@ def run(sample: int | None = None,
     super_sizes = np.bincount(super_of_region[labels], minlength=config.N_SUPERREGIONS)
 
     out_dir.mkdir(parents=True, exist_ok=True)
-    np.save(out_dir / "region_labels.i16.npy", labels)          # per paper (big; host-only when out_dir=data/)
+    np.save(out_dir / "region_labels.i16.npy", labels)          # per paper (big; untracked when out_dir=data/)
     np.save(out_dir / "centroids.f32.npy", centroids)
     np.save(out_dir / "linkage.f64.npy", z)
     np.save(out_dir / "super_region.i16.npy", super_of_region)  # region -> super

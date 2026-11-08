@@ -1,4 +1,4 @@
-"""Stage 7 — Emergence (CPU-only environment).
+"""Stage 7 — Emergence.
 
 Pre-registered rules (ALL numbers in ``config.py`` + frozen in
 ``artifacts/validation.md`` before any scoring run):

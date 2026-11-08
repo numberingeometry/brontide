@@ -1,10 +1,9 @@
-# Big intermediates live in data/ (compute host only) — never committed.
+# Regenerable bulk intermediates live in data/ — never committed.
 # NB: ignore the CONTENTS, not the dir itself — git never descends into an
 # ignored directory, so a negation inside one can never fire.
 /data/*
 !/data/.gitkeep
-# the shape-and-rebuild README IS tracked (repository setup, repository organization: an ignored dir
-# still documents what belongs in it and the command that rebuilds it).
+# the shape-and-rebuild README IS tracked; document the directory layout and rebuild commands.
 !/data/README.md
 
 # Model / HF caches, memmaps
@@ -28,12 +27,11 @@ dist/
 /artifacts/*.memmap
 /artifacts/embeddings*
 # Per-paper region labels (~5.4 MB) co-locate with the small region artifacts so
-# series/export find them via one regions_dir, but they're a compute host-only intermediate,
-# not a scored artifact (super_region.i16 IS scored and stays committed). CPU-only environment
-# pre-approved this belt-and-suspenders ignore in implementation review.
+# series/export find them via one regions_dir, but they are regenerable intermediates,
+# not a scored artifact (super_region.i16 IS scored and stays committed).
 region_labels.i16.npy
 
-# local editor configuration (device-local; never push to the remote)
+# Local editor and assistant configuration
 .claude/
 *_LINK.md
 
@@ -49,3 +47,7 @@ notes/
 # a public checker that hardcodes the strings it screens for publishes them.
 # See .public-safe-names.example.
 .public-safe-names
+
+# Generated browser-map exports and local privacy screening rules
+/exports/
+.public-safe-patterns

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stage 2 runner — SPECTER2 embeddings (host GPU). Prints papers/sec (fallback trigger)."""
+"""Stage 2 runner — SPECTER2 embeddings (GPU embedding). Prints papers/sec (fallback trigger)."""
 from brontide import cli, embed
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-"""Stage 10c — the self-contained interactive dashboard (CPU-only environment).
+"""Stage 10c — the self-contained interactive dashboard.
 
 Emits a single ``dashboard.html`` with every byte of data inlined (base64 for the point
 arrays, JSON for the series), so it opens from ``file://`` with no server, no network, and no
