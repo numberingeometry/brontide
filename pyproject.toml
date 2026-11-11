@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "brontide"
 version = "0.1.1"
-description = "Forecasting the research frontier: which regions of the arXiv embedding cloud are emerging vs saturating."
+description = "An interactive atlas of research activity, structure, and change over time."
 # PyPI renders the description in isolation, so relative paths break and raw <img>
 # tags are stripped. PYPI-README.md is generated from README.md with absolute URLs
 # by scripts/make_pypi_readme.py — regenerate it whenever README.md changes.
@@ -13,7 +13,7 @@ readme = "PYPI-README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "Bobby Zhang" }]
-keywords = ["forecasting", "scientometrics", "embeddings", "time-series", "arxiv", "research-trends"]
+keywords = ["visualization", "scientometrics", "embeddings", "time-series", "arxiv", "research-trends"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",

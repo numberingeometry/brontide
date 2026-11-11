@@ -9,6 +9,9 @@ from the CPU-only scientific verification job.
 from __future__ import annotations
 
 import argparse
+import base64
+import re
+import tempfile
 import json
 import math
 import shutil
@@ -37,6 +40,156 @@ def slider(page, element_id: str, value: int) -> None:
         "(el, value) => {el.value = value; el.dispatchEvent(new Event('input', {bubbles: true}));}",
         str(value),
     )
+
+
+def check_currents(page, browser, url: str, data: dict, errors: list[str]) -> None:
+    """Check rendered composition against independent sums of the frozen counts."""
+    page.goto(url.split("#", 1)[0], wait_until="networkidle")
+    page.wait_for_function("Boolean(window.__BRONTIDE__)")
+    assert page.evaluate("window.__BRONTIDE__.getState().mode") == "currents"
+    assert not page.evaluate("window.__BRONTIDE__.getState().playing")
+    model = page.evaluate("window.__BRONTIDE__.getCurrents()")
+    records = {r["id"]: r for r in data["regions"]}
+    assert model["months"] == data["months"]
+    assert model["order"] == sorted(records)
+    assert model["windowMonths"] == 12 and model["forecast"] is False
+    assert page.locator("#currents-interaction path").count() == len(records)
+    for month, date in enumerate(data["months"]):
+        first = max(0, month - 11)
+        denominator = sum(data["monthly_totals"][first:month + 1])
+        assert model["windowStarts"][month] == data["months"][first]
+        assert model["totals"][month] == denominator
+        assert abs(sum(row[month] for row in model["shares"]) - 100) < 1e-10
+        for row, region_id in enumerate(model["order"]):
+            count = sum(records[region_id]["raw_counts"][first:month + 1])
+            assert model["counts"][row][month] == count
+            assert abs(model["shares"][row][month] - count / denominator * 100) < 1e-11
+    # Check actual SVG hit geometry, not only the exported composition model.
+    paths = page.locator("#currents-interaction path").evaluate_all("nodes => nodes.map(n => n.getAttribute('d'))")
+    for row, path in enumerate(paths):
+        coordinates = [float(v) for v in re.findall(r"-?\d+(?:\.\d+)?", path)]
+        drawn_thickness = coordinates[-1] - coordinates[1]
+        expected_thickness = model["layout"]["thickness"] * model["shares"][row][0] / 100
+        assert abs(drawn_thickness - expected_thickness) < 0.021
+
+    # Keyboard exploration exposes the available early-2007 windows and raw months.
+    first_id = model["order"][0]
+    ribbon = page.locator(f'[data-current-region="{first_id}"]')
+    ribbon.focus()
+    page.keyboard.press("Home")
+    assert "2007-01 — 2007-01 · 1 month" in page.locator("#map-tooltip").inner_text(), page.locator("#map-tooltip").inner_text()
+    page.keyboard.press("ArrowRight")
+    text = page.locator("#map-tooltip").inner_text()
+    assert "2007-01 — 2007-02 · 2 months" in text
+    assert "Raw month" in text and "Ribbon" in text
+    page.keyboard.press("ArrowDown")
+    assert page.locator(f'[data-current-region="{model["order"][1]}"]').evaluate("el => el === document.activeElement")
+    page.keyboard.press("Enter")
+    assert page.evaluate("window.__BRONTIDE__.getState().selected") == model["order"][1]
+    page.locator("#clear-selection").click()
+    page.locator("#theme-summary").focus()
+
+    # Hit a real ribbon at a known observed month and check both displayed statistics.
+    region_id = max(records, key=lambda i: records[i]["n_papers"])
+    row = model["order"].index(region_id)
+    month = 120
+    layout = model["layout"]
+    bounds = page.locator("#currents-interaction").bounding_box()
+    x = bounds["x"] + layout["x"] + month / (len(data["months"]) - 1) * layout["width"]
+    y = bounds["y"] + layout["centers"][month] + (sum(values[month] for values in model["shares"][:row]) + model["shares"][row][month] / 2 - 50) / 100 * layout["thickness"]
+    page.mouse.move(x, y)
+    page.locator("#map-tooltip").wait_for(state="visible")
+    text = page.locator("#map-tooltip").inner_text()
+    record = records[region_id]
+    assert record["name"] in text
+    assert f'{model["shares"][row][month]:.2f}%' in text
+    assert f'{record["raw_counts"][month] / data["monthly_totals"][month] * 100:.2f}%' in text
+    assert f'{record["raw_counts"][month]:,} of {data["monthly_totals"][month]:,} papers' in text
+    page.mouse.move(5, 5)
+
+    # Theme choice preserves the scientific state and affects actual pixels and PNGs.
+    previous = page.evaluate("window.__BRONTIDE__.getState()")
+    rendered = []
+    backgrounds = {"paper": [252, 250, 245], "sage": [231, 235, 212], "night": [16, 29, 32]}
+    with tempfile.TemporaryDirectory() as directory:
+        for theme, expected_rgb in backgrounds.items():
+            page.locator("#theme-summary").click()
+            page.locator(f'button[data-theme="{theme}"]').click()
+            page.wait_for_timeout(80)
+            assert page.evaluate("document.documentElement.dataset.theme") == theme
+            assert page.evaluate("localStorage.getItem('brontide-theme')") == theme
+            after = page.evaluate("window.__BRONTIDE__.getState()")
+            for key in ("mode", "from", "to", "selected", "micro", "compare", "camera", "observation"):
+                assert previous[key] == after[key]
+            rendered.append(page.locator("#currents-canvas").evaluate("c => c.toDataURL()"))
+            with page.expect_download() as download:
+                page.locator("#export-image").click()
+            output = Path(directory) / f"{theme}.png"
+            download.value.save_as(output)
+            encoded = base64.b64encode(output.read_bytes()).decode()
+            pixel = page.evaluate("""async encoded => {
+                const im = new Image(); im.src = 'data:image/png;base64,' + encoded;
+                await im.decode(); const c = document.createElement('canvas'); c.width = c.height = 1;
+                const ctx = c.getContext('2d'); ctx.drawImage(im, 0, 0);
+                return Array.from(ctx.getImageData(0, 0, 1, 1).data).slice(0, 3);
+            }""", encoded)
+            assert pixel == expected_rgb, (theme, pixel)
+    assert len(set(rendered)) == 3
+    page.reload(wait_until="networkidle")
+    page.wait_for_function("Boolean(window.__BRONTIDE__)")
+    assert page.evaluate("window.__BRONTIDE__.getState().theme") == "night"
+    for mode in ("space", "terrain", "map", "currents"):
+        page.locator(f'[data-view="{mode}"]').click()
+        assert page.evaluate("window.__BRONTIDE__.getState().mode") == mode
+    slider(page, "year-to", 2013 - 2007)
+    assert page.evaluate("window.__BRONTIDE__.getCurrents().endpoint") == data["months"].index("2013-12")
+    assert page.evaluate("window.__BRONTIDE__.getCurrents().order") == model["order"]
+    page.locator("#share-view").click()
+    shared = page.url
+    page.goto(shared, wait_until="networkidle")
+    page.wait_for_function("Boolean(window.__BRONTIDE__)")
+    assert page.evaluate("window.__BRONTIDE__.getState().mode") == "currents"
+    assert page.evaluate("window.__BRONTIDE__.getState().to") == 6
+
+    # Touch selection and the complete temporal view also work without WebGL.
+    fallback = browser.new_context(viewport={"width": 390, "height": 844}, has_touch=True,
+                                   is_mobile=True, reduced_motion="reduce")
+    mobile = fallback.new_page()
+    mobile.on("pageerror", lambda exc: errors.append(str(exc)))
+    mobile.add_init_script("""const getContext = HTMLCanvasElement.prototype.getContext;
+        HTMLCanvasElement.prototype.getContext = function(type, ...args) {
+            return type.includes('webgl') ? null : getContext.call(this, type, ...args);
+        };""")
+    mobile.goto(url.split("#", 1)[0], wait_until="networkidle")
+    mobile.wait_for_function("Boolean(window.__BRONTIDE__)")
+    assert mobile.evaluate("window.__BRONTIDE__.getState().webgl") is False
+    assert mobile.evaluate("window.__BRONTIDE__.getState().mode") == "currents"
+    assert mobile.locator('[data-view="space"]').is_disabled()
+    assert mobile.locator('[data-view="terrain"]').is_disabled()
+    assert mobile.evaluate("document.documentElement.scrollWidth <= innerWidth")
+    mobile_model = mobile.evaluate("window.__BRONTIDE__.getCurrents()")
+    layout = mobile_model["layout"]
+    bounds = mobile.locator("#currents-interaction").bounding_box()
+    x = bounds["x"] + layout["x"] + month / (len(data["months"]) - 1) * layout["width"]
+    y = bounds["y"] + layout["centers"][month] + (sum(values[month] for values in model["shares"][:row]) + model["shares"][row][month] / 2 - 50) / 100 * layout["thickness"]
+    mobile.touchscreen.tap(x, y)
+    assert mobile.evaluate("window.__BRONTIDE__.getState().selected") == region_id
+    observation_text = mobile.locator("#current-observation").inner_text()
+    assert "Raw month" in observation_text and "Ribbon" in observation_text
+    assert f'{record["raw_counts"][month]:,} of {data["monthly_totals"][month]:,} papers' in observation_text
+    assert mobile.evaluate("window.__BRONTIDE__.getState().observation") == month
+    mobile.locator("#share-view").click()
+    assert "at=2017-01" in mobile.url
+    mobile.reload(wait_until="networkidle")
+    mobile.wait_for_function("Boolean(window.__BRONTIDE__)")
+    assert mobile.evaluate("window.__BRONTIDE__.getState().observation") == month
+    assert mobile.locator("#current-observation").inner_text() == observation_text
+    mobile.locator("#share-view").click(trial=True)
+    mobile.locator("#export-image").click(trial=True)
+    mobile.locator("#clear-selection").click()
+    mobile.locator('[data-view="map"]').click()
+    assert mobile.evaluate("window.__BRONTIDE__.getState().mode") == "map"
+    fallback.close()
 
 
 def main() -> int:
@@ -180,11 +333,13 @@ def main() -> int:
         recovered_count = sum(n for n, year in zip(data["monthly_totals"], years)
                               if year0 + recovered["from"] <= year <= year0 + recovered["to"])
         assert_count(page, recovered_count)
+        check_currents(page, browser, args.url, data, errors)
         assert not errors, errors
         browser.close()
     print("PASS: exact window counts and shares, annual sample filtering, comparison math, "
           "microregion statistics, representative links, shared-view restoration, "
-          "and malformed-URL recovery")
+          "malformed-URL recovery, exact trailing-year composition, raw hover values, "
+          "keyboard/touch access, theme persistence, themed PNG export, and 2D fallback")
     return 0
 
 

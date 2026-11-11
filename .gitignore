@@ -35,16 +35,15 @@ region_labels.i16.npy
 .claude/
 *_LINK.md
 
-# Their science lives in LIMITATIONS.md + RELATED-WORK.md; originals are kept privately.
+# Local scratch work
 notes/
+research/
 
 # Build artifacts (pip/twine)
 /dist/
 /build/
 
-# Personal names screened by scripts/check_public_safe.py. Never committed --
-# a public checker that hardcodes the strings it screens for publishes them.
-# See .public-safe-names.example.
+# Local screening configuration
 .public-safe-names
 
 # Generated browser-map exports and local privacy screening rules

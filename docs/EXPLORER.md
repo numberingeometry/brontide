@@ -16,11 +16,21 @@ come from aggregate records. The number of dots on screen is a display sample.
 
 ## Choose a view
 
+**Currents** follows all 64 territories across the full monthly history. Ribbon
+thickness is a territory's share of papers over the trailing 12 months (shorter
+at the start of 2007). Hover, focus or tap to inspect that window and the raw
+monthly observation. The year controls highlight a window while retaining the
+surrounding history. Arrow keys move between fields and months; Enter opens details.
+The ribbons describe publication composition, not movement or citation links.
+
 | View | Horizontal position | Height |
 |---|---|---|
 | Space-time | Fixed semantic projection | Publication year |
 | Density | The same projection | Smoothed relative concentration of displayed points |
 | 2D map | The same projection | None |
+
+Choose **Paper**, **Sage** or **Night** in the header. The theme is remembered
+locally and also applies to downloaded images.
 
 Drag to orbit the 3D scene, shift-drag or right-drag to pan, and scroll or pinch to zoom.
 The map tools provide zoom and reset buttons. Arrow keys orbit, `+` and `−` zoom, and
@@ -61,7 +71,7 @@ forecast independently: the forecast shares are **not jointly normalized to sum 
 The explorer does not show the archived intervals as calibrated uncertainty.
 
 The registered selection procedure met its forecasting criterion at zero of three
-evaluation cutoffs. Read [the methods and results](FORECASTING.md) and
+evaluation cutoffs. Read [the data and methods](DATA.md) and
 [the full limitations](../LIMITATIONS.md) for the scientific interpretation.
 
 ## Tour, share and export

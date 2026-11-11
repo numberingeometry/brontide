@@ -1,30 +1,28 @@
----
-type: readme
-status: active
-opened: 2026-08-01
----
+# Rebuilding the atlas data
 
-# data/ — locally generated bulk intermediates (gitignored)
-
-**Bulk files here are untracked and are not required to read the published results.** This directory is `device-local: true` in the `structure:` block: the heavy stages generate local intermediate files, and only the small derived outputs cross the wire in [`../artifacts/`](../artifacts/). An ignored directory still documents its shape and its rebuild command.
-
-## What belongs here
-
-| path | what | size (order) | produced by |
-|---|---|---|---|
-| `papers.parquet` | one row per arXiv paper: id, month, categories, title, abstract | ~4 GB | `python scripts/run_ingest.py` |
-| `embeddings/*.f16.memmap` | SPECTER2 embeddings, `N×768` float16 | ~3.8 GB | `python scripts/run_embed.py` (GPU) |
-| `reduced/` | exact PCA 768→50 (metric) + UMAP 2-D (display only) | ~1 GB | `python scripts/run_reduce.py` |
-| `regions/` | KMeans K=1024 microclusters + Ward tree | small | `python scripts/run_regions.py` |
-
-## Rebuild
+The website runs from the committed bundle in `artifacts/explorer/`; no bulk
+corpus download is needed. Check that bundle against its source artifacts with:
 
 ```sh
-python scripts/run_ingest.py && python scripts/run_embed.py && python scripts/run_reduce.py && python scripts/run_regions.py
+python -m pip install -e .
+python scripts/build_explorer.py --check
 ```
 
-Small-scale smoke test without the bulk: every stage accepts `--sample N` (see the repo README).
+A full pipeline rebuild needs separately acquired arXiv metadata and the optional
+`pipeline` dependencies. Its large intermediates stay in this ignored directory:
 
-## Why it is ignored
+| Output | Stage |
+|---|---|
+| `papers.parquet` — identifiers, dates, categories, titles and abstracts | `scripts/run_ingest.py` |
+| `embeddings/` — SPECTER2 representations | `scripts/run_embed.py` |
+| `reduced/` — PCA metric space and UMAP display | `scripts/run_reduce.py` |
+| `regions/` — microregions and hierarchy | `scripts/run_regions.py` |
 
-Regenerable from code plus the public arXiv corpus; the artifacts that record a decision (region series, forecasts, the pre-registration in `artifacts/validation.md`) are committed instead. The distinction is *record vs regenerable intermediate*, not size.
+After those stages, the series and export runners build the aggregate tables and
+browser data. Read the runners' command-line help and `src/brontide/config.py`
+before running them. A complete rebuild requires multi-GB storage and substantial
+embedding compute; it is not part of serving or verifying the included snapshot.
+
+Keep new corpus generations separate from the frozen inputs. A wider date range
+needs matching date encodings, embeddings, groups and aggregate counts; changing
+only the visible axis would misrepresent coverage. [Data and methods](../docs/DATA.md).

@@ -17,11 +17,7 @@ jobs:
           python-version: "3.11"
       - name: Install (committed-artifact checks need no GPU and no corpus)
         run: python -m pip install -e .
-      - name: Headline - all 18 published rows reproduce exactly
+      - name: Archived forecast evaluation reproduces exactly
         run: python scripts/verify_results.py
       - name: Explorer data reproduces from the frozen artifacts
         run: python scripts/build_explorer.py --check
-      - name: Selection decomposition (A - Lambda identity)
-        run: python scripts/verify_selectionconsistency.py
-      - name: Pre-registered follow-ups (novelty skill, interval coverage)
-        run: python scripts/verify_coverage.py

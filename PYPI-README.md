@@ -5,10 +5,10 @@ A visual atlas of 2.7 million arXiv papers.
 
 [![Explore research through space and time](https://raw.githubusercontent.com/numberingeometry/brontide/main/assets/atlas.gif)](https://numberingeometry.github.io/brontide/)
 
-Find a field, follow its history, and explore the smaller ideas within it.
+Follow the currents of research, then step into the landscape.
 
 **[Open the atlas](https://numberingeometry.github.io/brontide/)** ·
-[Field guide](https://github.com/numberingeometry/brontide/blob/main/docs/EXPLORER.md) · [Methods & results](https://github.com/numberingeometry/brontide/blob/main/docs/FORECASTING.md)
+[Field guide](https://github.com/numberingeometry/brontide/blob/main/docs/EXPLORER.md) · [Data & methods](https://github.com/numberingeometry/brontide/blob/main/docs/DATA.md)
 
 ## Run locally
 
@@ -22,4 +22,4 @@ The map shows 149,994 sampled papers from January 2007–June 2026. Counts and h
 use the full aggregate data; density describes the display sample. Forecasts are archived
 experimental outputs. [Data and limitations](https://github.com/numberingeometry/brontide/blob/main/docs/EXPLORER.md).
 
-[Python pipeline](https://github.com/numberingeometry/brontide/blob/main/data/README.md) · [Prior work](https://github.com/numberingeometry/brontide/blob/main/RELATED-WORK.md) · [MIT license](https://github.com/numberingeometry/brontide/blob/main/LICENSE)
+[Rebuild the data](https://github.com/numberingeometry/brontide/blob/main/data/README.md) · [MIT license](https://github.com/numberingeometry/brontide/blob/main/LICENSE)
