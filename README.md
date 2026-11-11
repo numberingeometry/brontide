@@ -4,7 +4,7 @@ A visual atlas of 2.7 million arXiv papers.
 
 [![Explore research through space and time](assets/atlas.gif)](https://numberingeometry.github.io/brontide/)
 
-Follow the currents of research, then step into the landscape.
+Follow the currents of research, feel its pulse, then step into the landscape.
 
 **[Open the atlas](https://numberingeometry.github.io/brontide/)** ·
 [Field guide](docs/EXPLORER.md) · [Data & methods](docs/DATA.md)

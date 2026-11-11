@@ -192,6 +192,50 @@ def check_currents(page, browser, url: str, data: dict, errors: list[str]) -> No
     fallback.close()
 
 
+def check_pulse(page, url: str, errors: list[str]) -> None:
+    pulse = json.loads((ROOT / "artifacts/explorer/pulse.json").read_text())
+    regions = {r["id"]: r for r in json.loads((ROOT / "artifacts/explorer/regions.json").read_text())["regions"]}
+    months = pulse["months"]
+    page.goto(url.split("#", 1)[0], wait_until="networkidle")
+    page.wait_for_function("Boolean(window.__BRONTIDE__)")
+    page.locator('[data-view="pulse"]').click()
+    page.wait_for_function("window.__BRONTIDE__.getPulse() !== null")
+    assert page.evaluate("window.__BRONTIDE__.getState().mode") == "pulse"
+    assert page.locator("#pulse-chart path").count() >= 5
+    state = page.evaluate("window.__BRONTIDE__.getPulse()")
+    assert state["month"] == months[-1] and not state["pinned"]
+    legend = page.locator("#pulse-chart").text_content()
+    assert f"{pulse['territories']['angle_deg'][-1]:.1f}°" in legend
+    assert f"{pulse['microregions']['angle_deg'][-1]:.1f}°" in legend
+    # Movers match the published leaders, in order, with their real names.
+    names = page.locator("#pulse-movers .pulse-name").all_inner_texts()
+    assert names == [regions[k]["name"] for k, _, _ in pulse["territories"]["leaders"][-1][:5]]
+    # The dock year moves the cursor to the last observed month of that year.
+    slider(page, "year-to", 2013 - 2007)
+    assert page.evaluate("window.__BRONTIDE__.getPulse().month") == "2013-12"
+    # Keyboard: Home pins the first comparison and records it in the URL.
+    page.locator("#pulse-chart").focus()
+    page.keyboard.press("Home")
+    assert page.evaluate("window.__BRONTIDE__.getPulse()")["index"] == 0
+    page.keyboard.press("PageDown")
+    assert page.evaluate("window.__BRONTIDE__.getPulse().month") == months[12]
+    page.wait_for_function(f"location.hash.includes('at={months[12]}')")
+    # Shared links restore the pinned comparison.
+    page.goto(url.split("#", 1)[0] + "#view=pulse&at=2017-09", wait_until="networkidle")
+    page.wait_for_function("window.__BRONTIDE__.getPulse() !== null")
+    assert page.evaluate("window.__BRONTIDE__.getPulse().month") == "2017-09"
+    i = months.index("2017-09")
+    lead = pulse["territories"]["leaders"][i][0][0]
+    page.locator("#pulse-movers button").first.click()
+    assert page.evaluate("window.__BRONTIDE__.getState().selected") == lead
+    # Each theme redraws the chart with its own paper color in exports.
+    for theme in ("night", "paper"):
+        page.locator("#theme-menu summary").click()
+        page.locator(f'button[data-theme="{theme}"]').click()
+        assert page.evaluate("document.documentElement.dataset.theme") == theme
+    assert not errors, errors
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--url", required=True, help="URL serving the repository root")
@@ -334,12 +378,14 @@ def main() -> int:
                               if year0 + recovered["from"] <= year <= year0 + recovered["to"])
         assert_count(page, recovered_count)
         check_currents(page, browser, args.url, data, errors)
+        check_pulse(page, args.url, errors)
         assert not errors, errors
         browser.close()
     print("PASS: exact window counts and shares, annual sample filtering, comparison math, "
           "microregion statistics, representative links, shared-view restoration, "
           "malformed-URL recovery, exact trailing-year composition, raw hover values, "
-          "keyboard/touch access, theme persistence, themed PNG export, and 2D fallback")
+          "keyboard/touch access, theme persistence, themed PNG export, 2D fallback, and pulse "
+          "readouts, movers, keyboard, dock and shared-link restoration")
     return 0
 
 

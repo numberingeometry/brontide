@@ -1,4 +1,5 @@
 /* brontide atlas. Static, first-party WebGL; no network services or runtime dependencies. */
+import { PulseView } from './pulse.js';
 const $ = (id) => document.getElementById(id);
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const esc = (v) => String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -9,7 +10,7 @@ const compact = new Intl.NumberFormat('en-US', { notation: 'compact', maximumFra
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const base = new URL('../artifacts/explorer/', import.meta.url);
 const state = { mode: 'currents', from: 0, to: 19, compare: false, selected: null, micro: null, observation: null, playing: false, tour: -1 };
-let data, manifest, regions, byId, pointYears, pointClusters, positions, colors, renderer, currents, microData, microPromise;
+let data, manifest, regions, byId, pointYears, pointClusters, positions, colors, renderer, currents, pulse, microData, microPromise;
 let year0 = 2007, yearMax = 19, timer, toastTimer, urlTimer, chartSeries = null;
 const camera = { yaw: -.32, pitch: .46, zoom: 1, panX: 0, panY: 0 };
 const targetCamera = { ...camera };
@@ -40,13 +41,14 @@ function applyTheme(id,persist=true){
   document.querySelector('meta[name="theme-color"]').content=theme.paper;
   document.querySelectorAll('button[data-theme]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.theme===id)));
   $('theme-menu').open=false;
-  if(colors){for(let i=0;i<pointYears.length;i++)colors.set(regionColor(pointClusters[i]),i*3);renderer.updateDensity();updateControls();updateTopicList();updateDetails();renderer.request();currents?.request();}
+  if(colors){for(let i=0;i<pointYears.length;i++)colors.set(regionColor(pointClusters[i]),i*3);renderer.updateDensity();updateControls();updateTopicList();updateDetails();renderer.request();currents?.request();pulse?.request();}
 }
 function readURL() {
   clearTimeout(urlTimer);
   const previousParent = state.selected;
   const p = new URLSearchParams(location.hash.slice(1));
-  if (['currents', 'space', 'terrain', 'map'].includes(p.get('view'))) state.mode = p.get('view');
+  if (['currents', 'pulse', 'space', 'terrain', 'map'].includes(p.get('view'))) state.mode = p.get('view');
+  state.pulseAt = state.mode === 'pulse' && /^\d{4}-\d{2}$/.test(p.get('at') || '') ? p.get('at') : null;
   const yearParam = (name, fallback) => { const n = Number(p.get(name)); return p.has(name) && Number.isFinite(n) ? Math.round(n) : fallback; };
   state.from = clamp(yearParam('from',year0) - year0, 0, yearMax);
   state.to = clamp(yearParam('to',year0+yearMax) - year0, state.from, yearMax);
@@ -72,6 +74,7 @@ function writeURL(immediate = false) {
     if (state.selected !== null) p.set('region', state.selected);
     if (state.micro !== null) p.set('micro', state.micro);
     if(state.mode==='currents'&&state.selected!==null&&state.observation!==null)p.set('at',data.months[state.observation]);
+    if(state.mode==='pulse'&&state.pulseAt)p.set('at',state.pulseAt);
     if (state.compare) p.set('compare', '1');
     for (const [param, key] of [['yaw','yaw'],['pitch','pitch'],['zoom','zoom'],['px','panX'],['py','panY']]) p.set(param, targetCamera[key].toFixed(3));
     history.replaceState(null, '', `${location.pathname}${location.search}#${p}`);
@@ -91,7 +94,12 @@ function yearShare(r, year) { return mean(data.months.flatMap((m, i) => Number(m
 function observedChange(r) { return yearShare(r, year0 + state.to) - yearShare(r, year0 + state.from); }
 function setView(mode) {
   if (renderer?.fallback && ['space','terrain'].includes(mode)) { notify('This device is using the accessible 2D renderer. All topic and time controls remain available.'); return; }
-  state.mode = mode; resetCamera(); updateControls(); updateDetails(); renderer?.request(); writeURL();
+  state.mode = mode; if (mode !== 'pulse') state.pulseAt = null; resetCamera(); updateControls(); updateDetails(); renderer?.request(); writeURL();
+  if (mode === 'pulse') showPulse();
+}
+async function showPulse(){
+  try{await pulse.load();if(state.pulseAt)pulse.setMonth(state.pulseAt);pulse.request();}
+  catch(error){console.error(error);notify('The pulse data could not load. The other views remain available.');}
 }
 function selectRegion(id, { announce = true, month = null } = {}) {
   if(state.mode==='currents'&&currents)currents.month=month??currents.endMonth();
@@ -102,21 +110,21 @@ function selectRegion(id, { announce = true, month = null } = {}) {
   if (announce) (state.selected !== null ? $('detail-name') : state.mode==='currents'?currents.nodes[0]:$('atlas-canvas')).focus({preventScroll:true});
 }
 function updateControls() {
-  const temporal=state.mode==='currents';document.querySelector('.atlas').classList.toggle('currents-active',temporal);
-  $('atlas-canvas').hidden=temporal;$('currents-canvas').hidden=!temporal;$('currents-interaction').toggleAttribute('hidden',!temporal);
-  $('map-labels').hidden=temporal;$('axis-labels').hidden=temporal;document.querySelector('.scene-tools').hidden=temporal;
+  const temporal=state.mode==='currents',pulsing=state.mode==='pulse',chart=temporal||pulsing;document.querySelector('.atlas').classList.toggle('currents-active',temporal);document.querySelector('.atlas').classList.toggle('pulse-active',pulsing);
+  $('atlas-canvas').hidden=chart;$('currents-canvas').hidden=!temporal;$('currents-interaction').toggleAttribute('hidden',!temporal);$('pulse-view').hidden=!pulsing;
+  $('map-labels').hidden=chart;$('axis-labels').hidden=chart;document.querySelector('.scene-tools').hidden=chart;
   $('map-tooltip').hidden=true;
-  $('time-resolution').textContent=temporal?'Trailing-year shares · monthly samples':'Points: annual · statistics: monthly';
+  $('time-resolution').textContent=temporal?'Trailing-year shares · monthly samples':pulsing?'Year-over-year angles · monthly steps':'Points: annual · statistics: monthly';
   document.querySelectorAll('[data-view]').forEach((b) => { const active = b.dataset.view === state.mode; b.classList.toggle('active', active); b.setAttribute('aria-pressed', String(active)); });
   $('year-from').value = state.from; $('year-to').value = state.to;
   $('year-from-label').textContent = year0 + state.from; $('year-to-label').textContent = year0 + state.to;
   $('year-from').setAttribute('aria-valuetext', String(year0 + state.from)); $('year-to').setAttribute('aria-valuetext', String(year0 + state.to));
   $('window-label').textContent = `${year0 + state.from} — ${year0 + state.to}`;
   $('compare-toggle').checked = state.compare;
-  $('view-caption').textContent = temporal ? 'THICKNESS = TRAILING-YEAR SHARE · TOTAL 100%' : state.mode === 'space' ? 'HEIGHT · PUBLICATION YEAR' : state.mode === 'terrain' ? 'HEIGHT · SAMPLE DENSITY' : 'SEMANTIC MAP · 2D';
-  $('gesture-caption').textContent = temporal ? 'Hover a ribbon · select to explore' : state.mode === 'map' ? 'Hover to discover · drag to pan' : 'Hover to discover · drag to orbit';
+  $('view-caption').textContent = temporal ? 'THICKNESS = TRAILING-YEAR SHARE · TOTAL 100%' : pulsing ? 'ANGLE = HOW FAR THE SHARES OF FIELDS CHANGED' : state.mode === 'space' ? 'HEIGHT · PUBLICATION YEAR' : state.mode === 'terrain' ? 'HEIGHT · SAMPLE DENSITY' : 'SEMANTIC MAP · 2D';
+  $('gesture-caption').textContent = temporal ? 'Hover a ribbon · select to explore' : pulsing ? 'Hover or tap a month · select a mover' : state.mode === 'map' ? 'Hover to discover · drag to pan' : 'Hover to discover · drag to orbit';
   const visible = pointYears.reduce((n, y) => n + (y <= state.to && (state.compare || y >= state.from) ? 1 : 0), 0);
-  $('visible-points').textContent = temporal ? `${data.months.length} observed months` : `${compact.format(visible)} sampled dots`;
+  $('visible-points').textContent = temporal ? `${data.months.length} observed months` : pulsing ? `${Math.max(0, data.months.length - 23)} yearly comparisons` : `${compact.format(visible)} sampled dots`;
   const totalByYear = Array.from({ length: yearMax + 1 }, () => 0);
   data.months.forEach((m, i) => totalByYear[Number(m.slice(0, 4)) - year0] += data.monthly_totals[i]);
   const max = Math.max(...totalByYear);
@@ -296,7 +304,7 @@ class AtlasRenderer {
   uniforms(program){const gl=this.gl;gl.uniform2f(gl.getUniformLocation(program,'u_angles'),camera.yaw,camera.pitch);gl.uniform1f(gl.getUniformLocation(program,'u_scale'),this.scale*camera.zoom);gl.uniform1f(gl.getUniformLocation(program,'u_aspect'),this.aspect);gl.uniform2f(gl.getUniformLocation(program,'u_pan'),camera.panX,camera.panY);}
   flat(array,mode){const gl=this.gl,p=this.flatProgram;gl.useProgram(p);gl.bindBuffer(gl.ARRAY_BUFFER,this.flatBuffer);gl.bufferData(gl.ARRAY_BUFFER,array,gl.DYNAMIC_DRAW);const pos=gl.getAttribLocation(p,'a_pos'),color=gl.getAttribLocation(p,'a_color');gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,3,gl.FLOAT,false,28,0);gl.enableVertexAttribArray(color);gl.vertexAttribPointer(color,4,gl.FLOAT,false,28,12);this.uniforms(p);gl.drawArrays(mode,0,array.length/7);gl.disableVertexAttribArray(pos);gl.disableVertexAttribArray(color);}
   render(){
-    this.pending=false;if(state.mode==='currents'){currents?.request();return;}this.scale=Math.min(state.mode==='space'?.70:.88,this.aspect*.65);let moving=false;const now=performance.now(),ease=reducedMotion.matches?1:1-Math.exp(-Math.max(16,now-this.lastFrame)/85);this.lastFrame=now;
+    this.pending=false;if(state.mode==='currents'){currents?.request();return;}if(state.mode==='pulse'){pulse?.request();return;}this.scale=Math.min(state.mode==='space'?.70:.88,this.aspect*.65);let moving=false;const now=performance.now(),ease=reducedMotion.matches?1:1-Math.exp(-Math.max(16,now-this.lastFrame)/85);this.lastFrame=now;
     for(const key of Object.keys(camera)){const delta=targetCamera[key]-camera[key];if(Math.abs(delta)>.0001){camera[key]+=delta*ease;moving=true;}else camera[key]=targetCamera[key];}
     if(this.fallback)this.render2D();else{
       const gl=this.gl;gl.viewport(0,0,this.canvas.width,this.canvas.height);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);const v=this.viewport;gl.viewport(Math.round(v.x*this.dpr),Math.round((this.height-v.y-v.height)*this.dpr),Math.round(v.width*this.dpr),Math.round(v.height*this.dpr));
@@ -468,23 +476,25 @@ function togglePlayback(){
   if(state.playing){stopPlayback();return;}state.playing=true;$('play-icon').classList.add('paused');$('play').setAttribute('aria-label','Pause publication timeline');if(state.to>=yearMax)state.to=state.from;
   updateWindow();timer=setInterval(()=>{if(state.to<yearMax){state.to++;updateWindow();}else stopPlayback();},Number($('playback-speed').value));
 }
-function updateWindow(){if(currents){currents.month=currents.endMonth();state.observation=state.selected!==null?currents.month:null;currents.request();}updateControls();updateDetails();if($('topic-sort').value==='change')updateTopicList();renderer.updateDensity();renderer.request();writeURL();}
+function updateWindow(){if(pulse){state.pulseAt=null;pulse.clearPin();}if(currents){currents.month=currents.endMonth();state.observation=state.selected!==null?currents.month:null;currents.request();}updateControls();updateDetails();if($('topic-sort').value==='change')updateTopicList();renderer.updateDensity();renderer.request();writeURL();}
 function story(step){
-  if(step>3){closeStory();return;}state.tour=clamp(step,0,3);stopPlayback();$('story-card').hidden=false;collapseBrowser(true);
+  if(step>4){closeStory();return;}state.tour=clamp(step,0,4);stopPlayback();$('story-card').hidden=false;collapseBrowser(true);
   const largest=[...regions].sort((a,b)=>b.n_papers-a.n_papers)[0];const growing=[...regions].sort((a,b)=>(yearShare(b,year0+yearMax)-yearShare(b,year0+11))-(yearShare(a,year0+yearMax)-yearShare(a,year0+11)))[0];
   const steps=[
     ['Follow a changing balance.','Each ribbon follows one field through time. Its thickness is the field’s share of papers over the trailing year. Hover or tap a ribbon to explore.','currents',null,0,yearMax,false],
     ['Find a neighborhood.','Hover over a paper, or search for a field. Select a neighborhood to open its history and smaller research areas.','map',largest.id,0,yearMax,false],
+    ['Feel the pulse.','How far did the mix of fields turn each year? The largest peaks are led by deep-learning fields around 2017 and by language-model fields since 2023. Hover a month to see what moved.','pulse',null,0,yearMax,false],
     ['Look for a changing footprint.','Move through the years. Compare keeps earlier papers as a quiet backdrop; the timeline follows the selected window.','terrain',growing.id,11,yearMax,true],
     ['Follow evidence into the future.','The solid line follows observed activity. Dashes mark an experimental forecast. Open the guide for its methods and limits.','space',growing.id,0,yearMax,false]
   ];
   const[title,description,mode,id,from,to,compare]=steps[state.tour];state.mode=renderer.fallback&&['space','terrain'].includes(mode)?'map':mode;state.selected=id;state.micro=null;state.from=from;state.to=to;state.compare=compare;$('subarea-content').hidden=true;$('subarea-toggle').setAttribute('aria-expanded','false');$('microregion-select').replaceChildren();resetCamera();updateTopicList();updateWindow();
-  $('story-step').textContent=`0${state.tour+1} / 04`;$('story-title').textContent=title;$('story-description').textContent=description;$('story-previous').disabled=state.tour===0;$('story-next').innerHTML=(state.tour===3?'Explore on your own':'Next chapter')+' <svg class="inline-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h12m-5-5 5 5-5 5"/></svg>';
+  $('story-step').textContent=`0${state.tour+1} / 05`;if(state.mode==='pulse')showPulse();$('story-title').textContent=title;$('story-description').textContent=description;$('story-previous').disabled=state.tour===0;$('story-next').innerHTML=(state.tour===4?'Explore on your own':'Next chapter')+' <svg class="inline-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h12m-5-5 5 5-5 5"/></svg>';
 }
 function closeStory(){state.tour=-1;$('story-card').hidden=true;}
 function wrapText(ctx,text,x,y,maxWidth,lineHeight){let line='';for(const word of text.split(' ')){const next=line?`${line} ${word}`:word;if(ctx.measureText(next).width>maxWidth&&line){ctx.fillText(line,x,y);line=word;y+=lineHeight;}else line=next;}if(line)ctx.fillText(line,x,y);return y;}
 async function exportImage(){
   await document.fonts.ready;
+  if(state.mode==='pulse'){await exportPulse();return;}
   Object.assign(camera,targetCamera);renderer.render();if(state.mode==='currents')currents.render();
   const temporal=state.mode==='currents',source=temporal?currents:renderer;
   const original=source.viewport,v=temporal?{...original,y:original.y-40,height:original.height+80}:original,W=Math.round(Math.max(1000,Math.min(1800,v.width*1.5))),scale=W/v.width,plotH=Math.round(v.height*scale),H=plotH+190;
@@ -500,6 +510,20 @@ async function exportImage(){
   ctx.fillStyle=theme.muted;ctx.font='11px monospace';wrapText(ctx,temporal?`234 observed months · Jan 2007–Jun 2026 · thickness: trailing-year count share · early months use available history · 64 fields sum to 100% · no forecasts`:`${integer.format(visible)} visible sampled dots · corpus through ${manifest.frozen_result.corpus_end} · fixed full-corpus UMAP · ${state.mode==='space'?'height: publication year':state.mode==='terrain'?'height: relative sample density':'2D display projection'}`,30,plotH+138,W-60,16);
   ctx.fillStyle=theme.quiet;ctx.font='10px monospace';ctx.fillText(`numberingeometry.github.io/brontide · ${manifest.build_id}`,30,H-20);
   out.toBlob((blob)=>{if(!blob){notify('Image export could not complete.');return;}const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`brontide-${state.mode}-${year0+state.from}-${year0+state.to}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);notify('Saved your view as a PNG with data provenance.');},'image/png');
+}
+async function exportPulse(){
+  const svgImage=(el)=>new Promise((resolve,reject)=>{const clone=el.cloneNode(true);clone.setAttribute('xmlns','http://www.w3.org/2000/svg');clone.setAttribute('font-family','Nunito, sans-serif');const box=el.getBoundingClientRect();clone.setAttribute('width',box.width);clone.setAttribute('height',box.height);const url=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(clone)],{type:'image/svg+xml'}));const img=new Image();img.onload=()=>{URL.revokeObjectURL(url);resolve({img,box});};img.onerror=reject;img.src=url;});
+  try{
+    pulse.render();const chart=await svgImage($('pulse-chart')),compassBox=$('pulse-compass').getBoundingClientRect(),compass=compassBox.width>40?await svgImage($('pulse-compass')):null;
+    const W=1600,gap=40,cw=compass?Math.round((W-60-gap)*.63):W-60,scale=cw/chart.box.width,ch=Math.round(chart.box.height*scale),H=ch+190;
+    const out=document.createElement('canvas');out.width=W;out.height=H;const ctx=out.getContext('2d');ctx.fillStyle=theme.paper;ctx.fillRect(0,0,W,H);
+    ctx.drawImage(chart.img,30,78,cw,ch);if(compass){const s=Math.min((W-60-gap-cw)/compass.box.width,ch/compass.box.height);ctx.drawImage(compass.img,30+cw+gap,78,compass.box.width*s,compass.box.height*s);}
+    ctx.fillStyle=theme.ink;ctx.font='700 25px Comfortaa,sans-serif';ctx.fillText('brontide.  The research atlas',30,38);
+    ctx.font='12px monospace';ctx.textAlign='right';ctx.fillText(`Pulse · ${pulse.data.months[pulse.current()]}`,W-30,35);ctx.textAlign='left';
+    ctx.fillStyle=theme.muted;ctx.font='11px monospace';wrapText(ctx,'Bhattacharyya angle between square-root field shares of a trailing year and the year before · 64 territories and 1,024 microregions · first-order finite-count bias correction · describes arXiv composition, not progress',30,ch+120,W-60,16);
+    ctx.fillStyle=theme.quiet;ctx.font='10px monospace';ctx.fillText(`numberingeometry.github.io/brontide · ${manifest.build_id}`,30,H-20);
+    out.toBlob((blob)=>{if(!blob){notify('Image export could not complete.');return;}const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`brontide-pulse-${pulse.data.months[pulse.current()]}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);notify('Saved the pulse as a PNG with data provenance.');},'image/png');
+  }catch(error){console.error(error);notify('Image export could not complete.');}
 }
 function bindUI(){
   document.querySelectorAll('button[data-theme]').forEach(b=>b.addEventListener('click',()=>applyTheme(b.dataset.theme)));
@@ -522,7 +546,7 @@ function bindUI(){
   $('history-chart').addEventListener('pointermove',(e)=>{if(!chartSeries)return;const b=e.currentTarget.getBoundingClientRect(),x=(e.clientX-b.left)/b.width*500,s=chartSeries,i=clamp(Math.round((x-s.L)/s.width*(s.values.length-1)),0,s.values.length-1),g=$('chart-hover');if(!g)return;g.style.display='';const px=s.X(i),py=s.Y(s.values[i]),label=`${s.months[i]}: ${s.values[i].toFixed(s.unit==='%'?3:0)}${s.unit}${i>=s.observed?' (forecast)':''}`,boxWidth=label.length*7.2+12,tx=clamp(px-boxWidth/2,5,495-boxWidth);g.querySelector('line').setAttribute('x1',px);g.querySelector('line').setAttribute('x2',px);g.querySelector('circle').setAttribute('cx',px);g.querySelector('circle').setAttribute('cy',py);const rect=g.querySelector('rect');rect.setAttribute('x',tx);rect.setAttribute('width',boxWidth);const text=g.querySelector('text');text.setAttribute('x',tx+6);text.textContent=label;});$('history-chart').addEventListener('pointerleave',()=>{const g=$('chart-hover');if(g)g.style.display='none';});
   document.addEventListener('keydown',(e)=>{if(e.key==='/'&&!['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)&&!$('method-dialog').open){e.preventDefault();collapseBrowser(false);$('topic-search').focus();}if(e.key==='Escape'&&!$('method-dialog').open){$('theme-menu').open=false;closeStory();collapseBrowser(true);selectRegion(null);}});
   document.addEventListener('pointerdown',(e)=>{if(!$('topic-browser').contains(e.target))collapseBrowser(true);if(!$('theme-menu').contains(e.target))$('theme-menu').open=false;});
-  window.addEventListener('hashchange',async()=>{stopPlayback();readURL();updateControls();updateTopicList();updateDetails();renderer.updateDensity();renderer.request();if(state.micro!==null)await openMicroregions(true);});
+  window.addEventListener('hashchange',async()=>{stopPlayback();readURL();updateControls();updateTopicList();updateDetails();renderer.updateDensity();renderer.request();if(state.mode==='pulse')await showPulse();if(state.micro!==null)await openMicroregions(true);});
   document.addEventListener('visibilitychange',()=>{if(document.hidden)stopPlayback();});
 }
 function collapseBrowser(collapsed){$('topic-browser').classList.toggle('collapsed',collapsed);$('browser-toggle').setAttribute('aria-expanded',String(!collapsed));}
@@ -537,15 +561,17 @@ async function init(){
     for(let i=0;i<pointYears.length;i++){positions[i*2]=xy.getInt16(i*4,true)/offset*aspect;positions[i*2+1]=xy.getInt16(i*4+2,true)/offset;colors.set(regionColor(pointClusters[i]),i*3);const c=centers.get(pointClusters[i]);if(c){c[0]+=positions[i*2];c[1]+=positions[i*2+1];c[2]++;}}
     for(const r of regions){const c=centers.get(r.id);r._center=c[2]?[c[0]/c[2],c[1]/c[2]]:[0,0];}
     readURL();for(const id of['year-from','year-to'])$(id).max=yearMax;
-    renderer=new AtlasRenderer($('atlas-canvas'));currents=new CurrentsRenderer($('currents-canvas'),$('currents-interaction'));document.fonts.ready.then(()=>currents.request());bindUI();collapseBrowser(true);applyTheme(themeId,false);
+    renderer=new AtlasRenderer($('atlas-canvas'));currents=new CurrentsRenderer($('currents-canvas'),$('currents-interaction'));
+    pulse=new PulseView($('pulse-view'),{load:()=>getFile(manifest.files.pulse),theme:()=>theme,name:(id)=>byId.get(id)?.name??`Territory ${id}`,color:(id)=>cssColor(id),esc,active:()=>state.mode==='pulse',select:(id)=>selectRegion(id),lastYear:()=>year0+state.to,firstYear:()=>year0+state.from,onPin:(m)=>{state.pulseAt=m;writeURL();}});document.fonts.ready.then(()=>currents.request());bindUI();collapseBrowser(true);applyTheme(themeId,false);
     $('corpus-size').textContent=compact.format(manifest.frozen_result.n_papers);$('territory-count').textContent=regions.length;
     const date=new Date(`${manifest.frozen_result.corpus_end}-01T00:00:00Z`).toLocaleDateString('en-US',{year:'numeric',month:'long',timeZone:'UTC'});$('footer-date').textContent=date;
     $('method-sample').textContent=`${integer.format(manifest.sample.n_points)} dots form a stratified display sample of ${integer.format(manifest.frozen_result.n_papers)} indexed papers, through ${date}. Monthly aggregates cover ${integer.format(manifest.monthly_series.n_papers)} records; the source artifacts do not identify ${integer.format(manifest.monthly_series.corpus_records_outside_series)} corpus records outside the monthly table. Window statistics use that table, not dot counts.`;
     $('build-note').textContent=`Build ${manifest.build_id} · ${manifest.geometry.embedding} · PCA ${manifest.geometry.pca_dimensions}D → ${manifest.geometry.display_projection} · frozen observations ${manifest.frozen_result.corpus_start}–${manifest.frozen_result.corpus_end}. No live API calls or per-paper identifiers in this map.`;
     updateControls();updateTopicList();updateDetails();renderer.request();$('loading').hidden=true;
+    if(state.mode==='pulse')await showPulse();
     if(state.micro!==null)await openMicroregions(true);
     if(renderer.fallback)notify('WebGL is unavailable. The 2D atlas preserves search, time controls, and all statistics.');
-    window.__BRONTIDE__=Object.freeze({getState:()=>({...state,theme:themeId,camera:{...targetCamera},webgl:!renderer.fallback}),getData:()=>({manifest,regions:data.regions,months:data.months,monthly_totals:data.monthly_totals,microregions:microData?.regions}),getCurrents:()=>currents.snapshot(),getVisiblePointCount:()=>pointYears.reduce((n,y)=>n+(y<=state.to&&(state.compare||y>=state.from)?1:0),0)});
+    window.__BRONTIDE__=Object.freeze({getState:()=>({...state,theme:themeId,camera:{...targetCamera},webgl:!renderer.fallback}),getData:()=>({manifest,regions:data.regions,months:data.months,monthly_totals:data.monthly_totals,microregions:microData?.regions}),getCurrents:()=>currents.snapshot(),getPulse:()=>pulse.data?{months:pulse.data.months,index:pulse.current(),month:pulse.data.months[pulse.current()],pinned:pulse.month!==null}:null,getVisiblePointCount:()=>pointYears.reduce((n,y)=>n+(y<=state.to&&(state.compare||y>=state.from)?1:0),0)});
   }catch(error){console.error('Atlas initialization failed:',error);$('loading').classList.add('error');$('loading').innerHTML=`<span class="eyebrow">THE ATLAS COULD NOT OPEN</span><p>${esc(error.message)} Check your connection and retry, or explore the static map and reproducible source.</p><div><button id="retry-load">Try again</button><a href="figures/frontier-map.png">Static map ↗</a></div>`;$('retry-load').addEventListener('click',()=>location.reload());}
 }
 init();

@@ -10,6 +10,9 @@ Brontide is a visual exploration tool built from a frozen arXiv snapshot.
   windows are retrospective; proximity and gaps are not calibrated measures.
 - **Currents:** ribbon thickness is a trailing-year publication share. The layout
   does not depict citation links, transfers or influence between fields.
+- **Pulse:** angles measure change in arXiv's field mix after a first-order
+  correction for counting noise. They also move when communities adopt or leave
+  arXiv, and they do not measure progress, quality or influence.
 - **Forecasts:** the archived experiment begins in June 2026. Its independent
   regional forecasts are not jointly normalized and have no displayed calibrated
   intervals. The selection pipeline beat its comparator at **0 of 3** cutoffs;

@@ -16,6 +16,8 @@ from urllib.parse import urlencode
 import numpy as np
 import pyarrow.parquet as pq
 
+from brontide.pulse import build_pulse
+
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACTS = ROOT / "artifacts"
 OUTPUT = ARTIFACTS / "explorer"
@@ -216,11 +218,20 @@ def build_bundle() -> dict[str, bytes]:
         "regions": microregions,
         "hierarchy": {"root_id": 2 * k - 2, "nodes": nodes, "superregion_roots": super_roots},
     }
+    territory_counts = np.stack([np.asarray(r["raw_counts"], dtype=np.int64) for r in regions])
+    pulse_years = sorted({int(m[:4]) for m in months if months.count(f"{m[:4]}-12")})
+    pulse_payload = {
+        "schema_version": 1, "build_id": build_id,
+        "measure": "Bhattacharyya angle between square-root trailing-year compositions, degrees",
+        "correction": "exact first-order bootstrap bias correction from binomial marginals",
+        **build_pulse(territory_counts, counts, months, pulse_years),
+    }
     files = {"points": "points.bin", "cluster": "cluster.bin", "year": "year.bin",
-             "regions": "regions.json", "microregions": "microregions.json"}
+             "regions": "regions.json", "microregions": "microregions.json", "pulse": "pulse.json"}
     bundle = {
         "points.bin": points, "cluster.bin": clusters, "year.bin": years,
         "regions.json": encode_json(regions_payload), "microregions.json": encode_json(micro_payload),
+        "pulse.json": encode_json(pulse_payload),
     }
     corpus_n = int(build["frozen_result"]["n_papers"])
     if sum(r["n_papers"] for r in regions) != corpus_n:
@@ -255,7 +266,7 @@ def build_bundle() -> dict[str, bytes]:
         "payloads": {name: {"bytes": len(data), "sha256": hashlib.sha256(data).hexdigest()}
                      for name, data in bundle.items()},
         "initial_payload_bytes": sum(len(data) for name, data in bundle.items()
-                                     if name != "microregions.json"),
+                                     if name not in ("microregions.json", "pulse.json")),
         "sources": {name: {"sha256": digest} for name, digest in source_hashes.items()},
         "notes": [
             "Dots are a display sample; all reported monthly statistics use the published aggregate tables.",
@@ -266,10 +277,11 @@ def build_bundle() -> dict[str, bytes]:
             "Microregion statistics and Ward ancestry are available. Per-dot microregion assignments and per-paper identifiers are not in the public map export.",
             "The later append described by BUILD.json is not included in this frozen explorer snapshot.",
             "Forecast curves are historical model projections, not calibrated probabilities or guaranteed future growth.",
+            "Pulse angles compare non-overlapping trailing years of the same aggregate counts. They describe arXiv's composition, which also changes when communities begin or stop posting there; they are not a measure of scientific progress.",
         ],
     }
     bundle["manifest.json"] = encode_json(manifest)
-    if sum(len(v) for key, v in bundle.items() if key != "microregions.json") >= 5_000_000:
+    if sum(len(v) for key, v in bundle.items() if key not in ("microregions.json", "pulse.json")) >= 5_000_000:
         raise ValueError("Initial atlas payload exceeds the 5 MB budget")
     return bundle
 
@@ -289,9 +301,10 @@ def main() -> int:
         OUTPUT.mkdir(exist_ok=True)
         for name, value in bundle.items():
             (OUTPUT / name).write_bytes(value)
-        initial = sum(len(v) for key, v in bundle.items() if key != "microregions.json")
+        initial = sum(len(v) for key, v in bundle.items() if key not in ("microregions.json", "pulse.json"))
         print(f"Built {len(bundle)} explorer files; {initial:,} initial bytes, "
-              f"{len(bundle['microregions.json']):,} lazy microregion bytes")
+              f"{len(bundle['microregions.json']):,} lazy microregion bytes, "
+              f"{len(bundle['pulse.json']):,} lazy pulse bytes")
     return 0
 
 

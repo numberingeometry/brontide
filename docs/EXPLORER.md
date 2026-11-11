@@ -23,6 +23,15 @@ monthly observation. The year controls highlight a window while retaining the
 surrounding history. Arrow keys move between fields and months; Enter opens details.
 The ribbons describe publication composition, not movement or citation links.
 
+**Pulse** asks how far the mix of fields turned between each trailing year and the
+year before. The dark line uses the 64 territories, the light line the 1,024
+microregions; the gap is turnover inside territories. Hover or tap a month to see
+what moved, select a mover to open its territory, and use ←/→ (months) or
+Page Up/Page Down (years) on the chart. The year controls move the cursor; a pinned
+month is kept in shared links. The small trajectory shows the yearly mix from 2007 to
+2025 as a flat view of a curved path. Angles describe arXiv's composition, which
+also shifts when communities start or stop posting there.
+
 | View | Horizontal position | Height |
 |---|---|---|
 | Space-time | Fixed semantic projection | Publication year |

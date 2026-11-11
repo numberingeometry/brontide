@@ -21,3 +21,5 @@ jobs:
         run: python scripts/verify_results.py
       - name: Explorer data reproduces from the frozen artifacts
         run: python scripts/build_explorer.py --check
+      - name: Pulse arithmetic matches direct recomputation
+        run: python scripts/test_pulse.py
