@@ -29,22 +29,35 @@ by square roots, and the displayed angle is $\arccos\sum_k\sqrt{p_kq_k}$, the
 Bhattacharyya angle (half the Fisher–Rao distance). It depends only on relative
 growth: if every field grew by the same factor, the angle is zero however many
 papers were posted. It equals $1-\cos\theta=\tfrac12\sum_k(\sqrt{q_k}-\sqrt{p_k})^2$,
-so it splits into nonnegative field terms; “What moved” lists the largest of
-these as shares of the territory-level turn.
+so before correction it splits into nonnegative field terms. “What moved” lists
+the largest bias-corrected terms as shares of the corrected territory-level
+$1-\cos\theta$, not of the angle in degrees. Corrected terms can be slightly
+negative (as low as −0.8% of the total), so the listed shares need not add to 100%.
 
 Counts are finite, so two samples from an unchanged mix still differ, most
 visibly across 1,024 small microregions. Each window is treated as a multinomial
 draw from its observed shares; the expectation of each field term under that
 model needs only binomial moments of $\sqrt{X/n}$, computed exactly. Subtracting
-the implied bias is a deterministic first-order correction. In simulations from
-the real 2014→2015 microregion counts it removes about 98% of the bias. The
-dotted line shows the expected angle under no change, for scale. Raw angles are
+the implied bias is a deterministic first-order correction under that multinomial
+model. In simulations from the real 2014→2015 microregion counts it removes about
+98% of the bias. Real monthly counts are more dispersed than a multinomial, so
+the correction may leave some noise in. The dotted line is the expected raw angle
+under no change: the turn that counting alone would show. It is drawn for scale,
+and corrected angles can sit below it. Raw angles are
 kept in [`pulse.json`](../artifacts/explorer/pulse.json).
 
 The darker series uses the 64 territories and the lighter one the 1,024
-microregions; the difference is turnover inside territories. The long-turn panel
+microregions. The nesting is exact on the $1-\cos\theta$ scale:
+$1-\cos\theta_{\mathrm{micro}}=(1-\cos\theta_{\mathrm{terr}})+\sum_J\sqrt{P_JQ_J}\,(1-\cos\theta_J)$,
+where $\theta_J$ is the turn among the microregions of territory $J$. The angles
+themselves combine roughly in quadrature, so the vertical gap between the lines
+understates turnover inside territories. `within.angle_deg` reports it directly,
+as $\arccos$ of one minus the last sum (both totals corrected), and the readout
+shows it as “turned inside fields”. The long-turn panel
 projects the calendar-year compositions for 2007–2025 onto their two principal
-directions; it shortens distances and is for orientation. Peak labels name the
+directions; it shortens distances and is for orientation. Its path length adds
+the yearly steps (straightness 0.71 at yearly steps), and a bend in the flat view
+need not be a reversal. Peak labels name the
 largest contributor at prominent local maxima (prominence at least 1°).
 
 Pulse measures arXiv's composition. It also moves when communities begin or stop

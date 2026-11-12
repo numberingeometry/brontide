@@ -94,12 +94,12 @@ function yearShare(r, year) { return mean(data.months.flatMap((m, i) => Number(m
 function observedChange(r) { return yearShare(r, year0 + state.to) - yearShare(r, year0 + state.from); }
 function setView(mode) {
   if (renderer?.fallback && ['space','terrain'].includes(mode)) { notify('This device is using the accessible 2D renderer. All topic and time controls remain available.'); return; }
-  state.mode = mode; if (mode !== 'pulse') state.pulseAt = null; resetCamera(); updateControls(); updateDetails(); renderer?.request(); writeURL();
+  state.mode = mode; if (mode !== 'pulse') { state.pulseAt = null; pulse?.clearPin(); } resetCamera(); updateControls(); updateDetails(); renderer?.request(); writeURL();
   if (mode === 'pulse') showPulse();
 }
 async function showPulse(){
-  try{await pulse.load();if(state.pulseAt)pulse.setMonth(state.pulseAt);pulse.request();}
-  catch(error){console.error(error);notify('The pulse data could not load. The other views remain available.');}
+  try{await pulse.load();if(!pulse.setMonth(state.pulseAt)&&state.pulseAt){state.pulseAt=null;writeURL();}}
+  catch(error){console.error(error);pulse.fail();notify('The pulse data could not load. The other views remain available.');}
 }
 function selectRegion(id, { announce = true, month = null } = {}) {
   if(state.mode==='currents'&&currents)currents.month=month??currents.endMonth();
@@ -512,17 +512,19 @@ async function exportImage(){
   out.toBlob((blob)=>{if(!blob){notify('Image export could not complete.');return;}const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`brontide-${state.mode}-${year0+state.from}-${year0+state.to}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);notify('Saved your view as a PNG with data provenance.');},'image/png');
 }
 async function exportPulse(){
-  const svgImage=(el)=>new Promise((resolve,reject)=>{const clone=el.cloneNode(true);clone.setAttribute('xmlns','http://www.w3.org/2000/svg');clone.setAttribute('font-family','Nunito, sans-serif');const box=el.getBoundingClientRect();clone.setAttribute('width',box.width);clone.setAttribute('height',box.height);const url=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(clone)],{type:'image/svg+xml'}));const img=new Image();img.onload=()=>{URL.revokeObjectURL(url);resolve({img,box});};img.onerror=reject;img.src=url;});
+  // Draw from a fixed desktop layout, so a phone export matches a desktop one.
+  const svgImage=(inner,w,h)=>new Promise((resolve,reject)=>{const url=URL.createObjectURL(new Blob([`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" font-family="Nunito, sans-serif">${inner}</svg>`],{type:'image/svg+xml'}));const img=new Image();img.onload=()=>{URL.revokeObjectURL(url);resolve(img);};img.onerror=(e)=>{URL.revokeObjectURL(url);reject(e);};img.src=url;});
   try{
-    pulse.render();const chart=await svgImage($('pulse-chart')),compassBox=$('pulse-compass').getBoundingClientRect(),compass=compassBox.width>40?await svgImage($('pulse-compass')):null;
-    const W=1600,gap=40,cw=compass?Math.round((W-60-gap)*.63):W-60,scale=cw/chart.box.width,ch=Math.round(chart.box.height*scale),H=ch+190;
+    await pulse.load();const i=pulse.current(),month=pulse.data.months[i],CW=760,CH=420,KW=420,S=1.25;
+    const chart=await svgImage(pulse.chartMarkup(theme,i,CW,CH).svg,CW,CH),compass=await svgImage(pulse.compassMarkup(theme,i,KW,CH),KW,CH);
+    const W=Math.round(60+(CW+40+KW)*S),ch=Math.round(CH*S),H=ch+190;
     const out=document.createElement('canvas');out.width=W;out.height=H;const ctx=out.getContext('2d');ctx.fillStyle=theme.paper;ctx.fillRect(0,0,W,H);
-    ctx.drawImage(chart.img,30,78,cw,ch);if(compass){const s=Math.min((W-60-gap-cw)/compass.box.width,ch/compass.box.height);ctx.drawImage(compass.img,30+cw+gap,78,compass.box.width*s,compass.box.height*s);}
+    ctx.drawImage(chart,30,78,CW*S,ch);ctx.drawImage(compass,30+(CW+40)*S,78,KW*S,ch);
     ctx.fillStyle=theme.ink;ctx.font='700 25px Comfortaa,sans-serif';ctx.fillText('brontide.  The research atlas',30,38);
-    ctx.font='12px monospace';ctx.textAlign='right';ctx.fillText(`Pulse · ${pulse.data.months[pulse.current()]}`,W-30,35);ctx.textAlign='left';
-    ctx.fillStyle=theme.muted;ctx.font='11px monospace';wrapText(ctx,'Bhattacharyya angle between square-root field shares of a trailing year and the year before · 64 territories and 1,024 microregions · first-order finite-count bias correction · describes arXiv composition, not progress',30,ch+120,W-60,16);
+    ctx.font='12px monospace';ctx.textAlign='right';ctx.fillText(`Pulse · ${month}`,W-30,35);ctx.textAlign='left';
+    ctx.fillStyle=theme.muted;ctx.font='11px monospace';wrapText(ctx,'Bhattacharyya angle between square-root field shares of a trailing year and the year before · 64 territories and 1,024 microregions · first-order finite-count bias correction under a multinomial model · describes arXiv composition, not progress',30,ch+120,W-60,16);
     ctx.fillStyle=theme.quiet;ctx.font='10px monospace';ctx.fillText(`numberingeometry.github.io/brontide · ${manifest.build_id}`,30,H-20);
-    out.toBlob((blob)=>{if(!blob){notify('Image export could not complete.');return;}const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`brontide-pulse-${pulse.data.months[pulse.current()]}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);notify('Saved the pulse as a PNG with data provenance.');},'image/png');
+    out.toBlob((blob)=>{if(!blob){notify('Image export could not complete.');return;}const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`brontide-pulse-${month}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);notify('Saved the pulse as a PNG with data provenance.');},'image/png');
   }catch(error){console.error(error);notify('Image export could not complete.');}
 }
 function bindUI(){

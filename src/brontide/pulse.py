@@ -14,7 +14,12 @@ The squared Hellinger distance 1 - cos(theta) = sum_k c_k splits exactly into
 nonnegative field terms c_k = (sqrt(q_k) - sqrt(p_k))^2 / 2. Counts add sampling
 noise that inflates every c_k. Each window is treated as a multinomial draw from
 its observed composition, and the exact bootstrap expectation of c_k (it needs
-only binomial marginals) gives a deterministic first-order bias correction.
+only binomial marginals) gives a deterministic first-order bias correction. The
+corrected terms still sum to the corrected total, but small ones can be negative.
+
+Nested partitions split exactly on the 1 - cos scale, not in degrees:
+1 - cos(theta_micro) = (1 - cos(theta_territory)) + sum_J sqrt(P_J Q_J) (1 - cos(theta_J)).
+The within-territory angle reported here is arccos of one minus that last sum.
 """
 from __future__ import annotations
 
@@ -91,15 +96,15 @@ def build_pulse(territory_counts: np.ndarray, micro_counts: np.ndarray, months: 
     window = 12
     t_trail, m_trail = trailing_sums(tc, window), trailing_sums(mc, window)
     ends = list(range(2 * window - 1, len(months)))
-    out_months, between, total, between_raw, total_raw, between_floor, total_floor, leaders = (
-        [], [], [], [], [], [], [], [])
+    out_months, between, total, within, between_raw, total_raw, between_floor, total_floor, leaders = (
+        [], [], [], [], [], [], [], [], [])
     for t in ends:
         s = t - window
         tt = corrected_terms(t_trail[:, s], t_trail[:, t])
         mt = corrected_terms(m_trail[:, s], m_trail[:, t])
         hb, hm = float(tt["corrected"].sum()), float(mt["corrected"].sum())
         out_months.append(months[t])
-        between.append(angle_deg(hb)); total.append(angle_deg(hm))
+        between.append(angle_deg(hb)); total.append(angle_deg(hm)); within.append(angle_deg(hm - hb))
         between_raw.append(angle_deg(float(tt["raw"].sum())))
         total_raw.append(angle_deg(float(mt["raw"].sum())))
         between_floor.append(angle_deg(tt["floor"])); total_floor.append(angle_deg(mt["floor"]))
@@ -142,6 +147,8 @@ def build_pulse(territory_counts: np.ndarray, micro_counts: np.ndarray, months: 
                         "floor_angle_deg": r(between_floor), "leaders": leaders},
         "microregions": {"angle_deg": r(total), "raw_angle_deg": r(total_raw),
                          "floor_angle_deg": r(total_floor)},
+        "within": {"angle_deg": r(within),
+                   "definition": "arccos(1 - [(1 - cos microregion angle) - (1 - cos territory angle)]), both corrected"},
         "trajectory": {"years": list(years), "x": r(coords[:, 0]), "y": r(coords[:, 1]),
                        "explained": r(explained), "axes": axis_ends,
                        "step_angle_deg": r(steps), "path_angle_deg": round(float(sum(steps)), 3),

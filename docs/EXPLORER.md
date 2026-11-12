@@ -25,7 +25,8 @@ The ribbons describe publication composition, not movement or citation links.
 
 **Pulse** asks how far the mix of fields turned between each trailing year and the
 year before. The dark line uses the 64 territories, the light line the 1,024
-microregions; the gap is turnover inside territories. Hover or tap a month to see
+microregions; the readout's "turned inside fields" measures the turnover inside
+territories, which the gap between the lines understates. Hover or tap a month to see
 what moved, select a mover to open its territory, and use ←/→ (months) or
 Page Up/Page Down (years) on the chart. The year controls move the cursor; a pinned
 month is kept in shared links. The small trajectory shows the yearly mix from 2007 to
